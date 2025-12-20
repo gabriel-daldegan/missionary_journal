@@ -396,6 +396,251 @@ class SubscriptionServiceTest extends FeatureTest
         $this->assertEquals($product2->id, $products[1]->id);
     }
 
+    public function test_is_user_subscribed_returns_false_for_null_user()
+    {
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertFalse($service->isUserSubscribed(null));
+    }
+
+    public function test_is_user_subscribed_returns_false_when_user_has_no_subscriptions()
+    {
+        $user = $this->createUser();
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertFalse($service->isUserSubscribed($user));
+    }
+
+    public function test_is_user_subscribed_returns_true_when_user_has_active_subscription()
+    {
+        $user = $this->createUser();
+        $plan = Plan::factory()->create(['is_active' => true]);
+
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+        ]);
+
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertTrue($service->isUserSubscribed($user));
+    }
+
+    public function test_is_user_subscribed_returns_false_when_subscription_has_expired()
+    {
+        $user = $this->createUser();
+        $plan = Plan::factory()->create(['is_active' => true]);
+
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->subDays(1),
+        ]);
+
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertFalse($service->isUserSubscribed($user));
+    }
+
+    public function test_is_user_subscribed_returns_false_when_subscription_is_not_active()
+    {
+        $user = $this->createUser();
+        $plan = Plan::factory()->create(['is_active' => true]);
+
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::CANCELED->value,
+            'ends_at' => now()->addDays(30),
+        ]);
+
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertFalse($service->isUserSubscribed($user));
+    }
+
+    public function test_is_user_subscribed_returns_true_when_product_slug_matches()
+    {
+        $user = $this->createUser();
+        $productSlug = Str::random();
+        $product = Product::factory()->create(['slug' => $productSlug]);
+        $plan = Plan::factory()->create([
+            'is_active' => true,
+            'product_id' => $product->id,
+        ]);
+
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+        ]);
+
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertTrue($service->isUserSubscribed($user, $productSlug));
+    }
+
+    public function test_is_user_subscribed_returns_false_when_product_slug_does_not_match()
+    {
+        $user = $this->createUser();
+        $productSlug = Str::random();
+        $product = Product::factory()->create(['slug' => $productSlug]);
+        $plan = Plan::factory()->create([
+            'is_active' => true,
+            'product_id' => $product->id,
+        ]);
+
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+        ]);
+
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertFalse($service->isUserSubscribed($user, Str::random()));
+    }
+
+    public function test_is_user_subscribed_returns_true_when_product_slug_in_array()
+    {
+        $user = $this->createUser();
+        $productSlug = Str::random();
+        $product = Product::factory()->create(['slug' => $productSlug]);
+        $plan = Plan::factory()->create([
+            'is_active' => true,
+            'product_id' => $product->id,
+        ]);
+
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+        ]);
+
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertTrue($service->isUserSubscribed($user, [$productSlug, Str::random()]));
+    }
+
+    public function test_is_user_subscribed_returns_false_when_product_slug_not_in_array()
+    {
+        $user = $this->createUser();
+        $productSlug = Str::random();
+        $product = Product::factory()->create(['slug' => $productSlug]);
+        $plan = Plan::factory()->create([
+            'is_active' => true,
+            'product_id' => $product->id,
+        ]);
+
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+        ]);
+
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertFalse($service->isUserSubscribed($user, [Str::random(), Str::random()]));
+    }
+
+    public function test_is_user_subscribed_returns_true_with_multiple_active_subscriptions()
+    {
+        config()->set('app.multiple_subscriptions_enabled', true);
+
+        $user = $this->createUser();
+        $product1Slug = Str::random();
+        $product2Slug = Str::random();
+        $product3Slug = Str::random();
+
+        $product1 = Product::factory()->create(['slug' => $product1Slug]);
+        $product2 = Product::factory()->create(['slug' => $product2Slug]);
+
+        $plan1 = Plan::factory()->create([
+            'is_active' => true,
+            'product_id' => $product1->id,
+        ]);
+
+        $plan2 = Plan::factory()->create([
+            'is_active' => true,
+            'product_id' => $product2->id,
+        ]);
+
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan1->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+        ]);
+
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan2->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+        ]);
+
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertTrue($service->isUserSubscribed($user));
+        $this->assertTrue($service->isUserSubscribed($user, $product1Slug));
+        $this->assertTrue($service->isUserSubscribed($user, $product2Slug));
+        $this->assertFalse($service->isUserSubscribed($user, $product3Slug));
+    }
+
+    public function test_is_user_subscribed_with_mixed_subscription_statuses()
+    {
+        $user = $this->createUser();
+        $product1Slug = Str::random();
+        $product2Slug = Str::random();
+        $product3Slug = Str::random();
+
+        $product1 = Product::factory()->create(['slug' => $product1Slug]);
+        $product2 = Product::factory()->create(['slug' => $product2Slug]);
+        $product3 = Product::factory()->create(['slug' => $product3Slug]);
+
+        $plan1 = Plan::factory()->create(['is_active' => true, 'product_id' => $product1->id]);
+        $plan2 = Plan::factory()->create(['is_active' => true, 'product_id' => $product2->id]);
+        $plan3 = Plan::factory()->create(['is_active' => true, 'product_id' => $product3->id]);
+
+        // Active subscription
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan1->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+        ]);
+
+        // Expired subscription
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan2->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->subDays(1),
+        ]);
+
+        // Canceled subscription
+        Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan3->id,
+            'status' => SubscriptionStatus::CANCELED->value,
+            'ends_at' => now()->addDays(30),
+        ]);
+
+        $service = app()->make(SubscriptionService::class);
+
+        $this->assertTrue($service->isUserSubscribed($user));
+        $this->assertTrue($service->isUserSubscribed($user, $product1Slug));
+        $this->assertFalse($service->isUserSubscribed($user, $product2Slug));
+        $this->assertFalse($service->isUserSubscribed($user, $product3Slug));
+    }
+
     public static function nonDeadSubscriptionProvider()
     {
         return [
