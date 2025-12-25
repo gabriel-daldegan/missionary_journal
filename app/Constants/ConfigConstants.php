@@ -158,5 +158,6 @@ class ConfigConstants
         'services.twilio.token',
         'services.twilio.from',
         'app.verification.default_provider',
+        'app.anonymization_enabled',
     ];
 }

@@ -34,4 +34,20 @@ class UserService
     {
         return User::where('email', strtolower($email))->first();
     }
+
+    public function anonymize(User $user): void
+    {
+        $id = $user->id;
+
+        $user->name = "Anonymized User $id";
+        $user->email = "anonymized_$id@example.com";
+        $user->public_name = "Anonymized User $id";
+        $user->phone_number = null;
+        $user->email_verified_at = null;
+        $user->phone_number_verified_at = null;
+        $user->password = Hash::make(Str::random(40));
+        $user->save();
+
+        $user->address()?->delete();
+    }
 }
