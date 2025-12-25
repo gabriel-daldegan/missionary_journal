@@ -78,8 +78,8 @@ class GeneralSettings extends Component implements HasForms
             'trial_without_payment_sms_verification_enabled' => $this->configService->get('app.trial_without_payment.sms_verification_enabled'),
             'trial_second_reminder_days' => $this->configService->get('app.trial_without_payment.second_reminder_days'),
             'limit_user_trials_enabled' => $this->configService->get('app.limit_user_trials.enabled'),
-            'limit_user_trials_max_count' => $this->configService->get('app.limit_user_trials.max_count'),
             'default_verification_provider' => $this->configService->get('app.verification.default_provider'),
+            'anonymization_enabled' => $this->configService->get('app.anonymization_enabled', false),
         ]);
     }
 
@@ -311,6 +311,13 @@ class GeneralSettings extends Component implements HasForms
                                     TextInput::make('recaptcha_api_secret_key')
                                         ->label(__('Recaptcha Secret Key')),
                                 ]),
+                            Section::make()
+                                ->schema([
+                                    Toggle::make('anonymization_enabled')
+                                        ->label(__('Anonymization Enabled'))
+                                        ->helperText(__('If enabled, you will be able to anonymize user data from the user edit page.'))
+                                        ->required(),
+                                ]),
                         ]),
                     Tab::make(__('Social Links'))
                         ->icon('heroicon-o-heart')
@@ -378,6 +385,7 @@ class GeneralSettings extends Component implements HasForms
         $this->configService->set('app.limit_user_trials.enabled', $data['limit_user_trials_enabled']);
         $this->configService->set('app.limit_user_trials.max_count', $data['limit_user_trials_max_count'] ?? 1);
         $this->configService->set('app.verification.default_provider', $data['default_verification_provider']);
+        $this->configService->set('app.anonymization_enabled', $data['anonymization_enabled']);
 
         Notification::make()
             ->title(__('Settings Saved'))
