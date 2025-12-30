@@ -843,7 +843,9 @@ JSON;
 
     public function test_transaction_vat_refunded_webhook_for_order(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+
         $currency = Currency::where('code', 'USD')->firstOrFail();
         $orderUUID = (string) Str::uuid();
         $order = Order::create([
@@ -852,6 +854,7 @@ JSON;
             'status' => OrderStatus::SUCCESS->value,
             'currency_id' => $currency->id,
             'total_amount' => 100,
+            'tenant_id' => $tenant->id,
         ]);
 
         $txnId = Str::random();
@@ -867,6 +870,7 @@ JSON;
             'payment_provider_id' => PaymentProvider::where('slug', 'paddle')->firstOrFail()->id,
             'payment_provider_status' => 'open',
             'payment_provider_transaction_id' => $txnId,
+            'tenant_id' => $tenant->id,
         ]);
 
         $payload = $this->getPaddleVatRefundForOrder('approved', 'adjustment.updated', 'refund', $txnId);
