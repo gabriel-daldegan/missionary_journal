@@ -841,6 +841,129 @@ JSON;
         return json_decode($json, true);
     }
 
+    public function test_transaction_vat_refunded_webhook_for_order(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+
+        $currency = Currency::where('code', 'USD')->firstOrFail();
+        $orderUUID = (string) Str::uuid();
+        $order = Order::create([
+            'user_id' => $user->id,
+            'uuid' => $orderUUID,
+            'status' => OrderStatus::SUCCESS->value,
+            'currency_id' => $currency->id,
+            'total_amount' => 100,
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $txnId = Str::random();
+
+        $transaction = $order->transactions()->create([
+            'uuid' => (string) Str::uuid(),
+            'user_id' => $order->user_id,
+            'currency_id' => $order->currency_id,
+            'amount' => $order->total_amount,
+            'total_tax' => 20,
+            'status' => TransactionStatus::SUCCESS->value,
+            'order_id' => $order->id,
+            'payment_provider_id' => PaymentProvider::where('slug', 'paddle')->firstOrFail()->id,
+            'payment_provider_status' => 'open',
+            'payment_provider_transaction_id' => $txnId,
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $payload = $this->getPaddleVatRefundForOrder('approved', 'adjustment.updated', 'refund', $txnId);
+
+        $signature = $this->generateSignature(json_encode($payload));
+
+        $response = $this->postJson(route('payments-providers.paddle.webhook'), $payload, [
+            'Paddle-Signature' => $signature,
+            'Content-Type' => 'application/json',
+        ]);
+
+        $response->assertStatus(200);
+
+        // Transaction status should still be SUCCESS
+        $this->assertDatabaseHas('transactions', [
+            'order_id' => $order->id,
+            'status' => TransactionStatus::SUCCESS->value,
+            'payment_provider_transaction_id' => $txnId,
+            'payment_provider_status' => 'approved',
+            'total_tax' => 0, // Tax should be updated to 0
+        ]);
+
+        // Order status should still be SUCCESS
+        $this->assertDatabaseHas('orders', [
+            'uuid' => $orderUUID,
+            'status' => OrderStatus::SUCCESS->value,
+        ]);
+    }
+
+    private function getPaddleVatRefundForOrder(
+        string $paddleTransactionStatus,
+        string $type,
+        string $action,
+        string $transactionId,
+    ) {
+        $json = <<<JSON
+          {
+            "event_id": "evt_01kbfmntqed3frqzct45dw29vq",
+            "event_type": "$type",
+            "occurred_at": "2025-12-02T13:40:20.334546Z",
+            "notification_id": "ntf_01kbfmntzn5tr7m0ne6n8gdxak",
+            "data": {
+                "id": "adj_01kbfmjd50zaxetr5q37qxgwjt",
+                "type": "partial",
+                "items": [
+                {
+                    "id": "adjitm_01kbfmjd50zaxetr5q3a7k7707",
+                    "type": "tax",
+                    "amount": "5606",
+                    "totals": {
+                    "tax": "5606",
+                    "total": "5606",
+                    "subtotal": "0"
+                    },
+                    "item_id": "txnitm_01kaeqyp0snjmprsbwnht6nyte",
+                    "proration": null
+                }
+                ],
+                "action": "$action",
+                "reason": "transaction_revised",
+                "status": "$paddleTransactionStatus",
+                "totals": {
+                "fee": "290",
+                "tax": "0",
+                "total": "5606",
+                "earnings": "-290",
+                "subtotal": "0",
+                "retained_fee": "0",
+                "currency_code": "USD"
+                },
+                "created_at": "2025-12-02T13:38:28.147978Z",
+                "updated_at": "2025-12-02T13:40:20.322673Z",
+                "customer_id": "ctm_01k9pywss2h7gt9t1nyfkmkdkn",
+                "currency_code": "USD",
+                "payout_totals": {
+                "fee": "290",
+                "tax": "5606",
+                "total": "5606",
+                "earnings": "-290",
+                "subtotal": "0",
+                "retained_fee": "0",
+                "currency_code": "USD"
+                },
+                "transaction_id": "$transactionId",
+                "subscription_id": null,
+                "credit_applied_to_balance": null
+            }
+          }
+        JSON;
+
+        return json_decode($json, true);
+    }
+
     private function getPaddleAdjustmentForOrder(
         string $paddleTransactionStatus,
         string $type,

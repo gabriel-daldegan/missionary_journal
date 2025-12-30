@@ -141,8 +141,10 @@ class PaddleWebhookHandler
                 $currentStatus = OrderStatus::tryFrom($order->status);
                 $newStatus = $this->mapPaddleTransactionStatusToOrderStatus($paddleTransactionStatus);
 
-                if (! in_array($currentStatus, OrderStatusConstants::FINAL_STATUSES) ||
-                    (in_array($currentStatus, OrderStatusConstants::FINAL_STATUSES) && in_array($newStatus, OrderStatusConstants::FINAL_STATUSES))) {
+                if (
+                    ! in_array($currentStatus, OrderStatusConstants::FINAL_STATUSES) ||
+                    (in_array($currentStatus, OrderStatusConstants::FINAL_STATUSES) && in_array($newStatus, OrderStatusConstants::FINAL_STATUSES))
+                ) {
                     // we only update the order status if it's not in a final state or if it's in a final state and the new status is also a final state
                     // this is to prevent updating the order status from a final state to a non-final state due to a webhook event coming in late
                     $this->orderService->updateOrder($order, [
@@ -192,19 +194,40 @@ class PaddleWebhookHandler
             // update transaction
 
             if ($action == 'refund' && $paddleTransactionStatus == 'approved') {
-                $this->transactionService->updateTransactionByPaymentProviderTxId(
-                    $paddleTransactionId,
-                    'refunded',
-                    TransactionStatus::REFUNDED,
-                );
+                $items = $eventData['items'] ?? [];
+                $isVatRefund = false;
+                $newTax = null;
 
-                $transaction = $this->transactionService->getTransactionByPaymentProviderTxId($paddleTransactionId);
-                $order = $transaction->order;
+                foreach ($items as $item) {
+                    if (($item['type'] ?? '') === 'tax') {
+                        $isVatRefund = true;
+                        $newTax = 0;
+                        break;
+                    }
+                }
 
-                if ($order) {
-                    $this->orderService->updateOrder($order, [
-                        'status' => OrderStatus::REFUNDED,
-                    ]);
+                if ($isVatRefund) {
+                    $this->transactionService->updateTransactionByPaymentProviderTxId(
+                        $paddleTransactionId,
+                        $paddleTransactionStatus,
+                        // We keep the current status of the transaction as it is just a VAT refund
+                        newTax: $newTax
+                    );
+                } else { // refunded
+                    $this->transactionService->updateTransactionByPaymentProviderTxId(
+                        $paddleTransactionId,
+                        'refunded',
+                        TransactionStatus::REFUNDED,
+                    );
+
+                    $transaction = $this->transactionService->getTransactionByPaymentProviderTxId($paddleTransactionId);
+                    $order = $transaction->order;
+
+                    if ($order) {
+                        $this->orderService->updateOrder($order, [
+                            'status' => OrderStatus::REFUNDED,
+                        ]);
+                    }
                 }
             } elseif ($action == 'chargeback') {
                 $this->transactionService->updateTransactionByPaymentProviderTxId(
@@ -331,7 +354,8 @@ class PaddleWebhookHandler
             return TransactionStatus::FAILED;
         }
 
-        if ($paddleStatus == 'ready' ||
+        if (
+            $paddleStatus == 'ready' ||
             $paddleStatus == 'billed' ||
             $paddleStatus == 'past_due' ||
             $paddleStatus == 'paid'
@@ -356,7 +380,8 @@ class PaddleWebhookHandler
             return OrderStatus::FAILED;
         }
 
-        if ($paddleStatus == 'ready' ||
+        if (
+            $paddleStatus == 'ready' ||
             $paddleStatus == 'billed' ||
             $paddleStatus == 'past_due' ||
             $paddleStatus == 'paid'
