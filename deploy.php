@@ -8,7 +8,7 @@ require 'contrib/crontab.php';
 // Configs  (You need to configure these)
 
 $remoteUser = 'deployer';   // the user that will be used to connect to remote server and deploy the app
-$sudoPassword = '';  // the sudo password of the remote user
+$sudoPassword = '';  // the sudo password of the remote user (leave empty if using ssh key)
 
 $deployPath = '~/app';      // the path where the app will be deployed on the remote server
 

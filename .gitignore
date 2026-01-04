@@ -4,6 +4,7 @@
 /public/hot
 /public/storage
 /public/sitemap.xml
+/public/fonts/filament
 /storage/*.key
 /vendor
 .env
