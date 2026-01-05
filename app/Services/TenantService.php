@@ -31,7 +31,7 @@ class TenantService
             return false;
         }
 
-        if ($this->doTenantSubscriptionsAllowAddingUser($invitation->tenant) === false) {
+        if ($this->doTenantSubscriptionsAllowAddingUsers($invitation->tenant) === false) {
             return false;
         }
 
@@ -44,7 +44,8 @@ class TenantService
         try {
             if ($lock->block(30)) {  // use a lock to avoid race conditions
                 foreach ($tenantSubscriptions as $subscription) {
-                    if ($subscription->plan->type === PlanType::SEAT_BASED->value &&
+                    if (
+                        $subscription->plan->type === PlanType::SEAT_BASED->value &&
                         $subscription->quantity < $tenantUserCount + 1
                     ) {
                         $result = $this->tenantSubscriptionService->updateSubscriptionQuantity($subscription, $tenantUserCount + 1);
@@ -103,7 +104,7 @@ class TenantService
 
     public function addUserToTenant(Tenant $tenant, User $user, ?string $roleName = null): bool
     {
-        if ($this->doTenantSubscriptionsAllowAddingUser($tenant) === false) {
+        if ($this->doTenantSubscriptionsAllowAddingUsers($tenant) === false) {
             return false;
         }
 
@@ -116,7 +117,8 @@ class TenantService
         try {
             if ($lock->block(30)) {  // use a lock to avoid race conditions
                 foreach ($tenantSubscriptions as $subscription) {
-                    if ($subscription->plan->type === PlanType::SEAT_BASED->value &&
+                    if (
+                        $subscription->plan->type === PlanType::SEAT_BASED->value &&
                         $subscription->quantity < $tenantUserCount + 1
                     ) {
                         $result = $this->tenantSubscriptionService->updateSubscriptionQuantity($subscription, $tenantUserCount + 1);
@@ -168,7 +170,8 @@ class TenantService
         try {
             if ($lock->block(30)) {  // use
 
-                if ($subscription->plan->type === PlanType::SEAT_BASED->value &&
+                if (
+                    $subscription->plan->type === PlanType::SEAT_BASED->value &&
                     $subscription->quantity != $tenantUserCount
                 ) {
                     return $this->tenantSubscriptionService->updateSubscriptionQuantity($subscription, $tenantUserCount);
@@ -249,7 +252,8 @@ class TenantService
             if ($lock->block(30)) {  // use a lock to avoid race conditions
 
                 foreach ($tenantSubscriptions as $subscription) {
-                    if ($subscription->plan->type === PlanType::SEAT_BASED->value &&
+                    if (
+                        $subscription->plan->type === PlanType::SEAT_BASED->value &&
                         $subscription->quantity != $tenantUserCount - 1
                     ) {
                         $result = $this->tenantSubscriptionService->updateSubscriptionQuantity($subscription, $tenantUserCount - 1);
@@ -278,9 +282,9 @@ class TenantService
         return true;
     }
 
-    public function canInviteUser(Tenant $tenant, User $user): bool
+    public function canInviteUsers(Tenant $tenant, User $user, int $count = 1): bool
     {
-        return config('app.allow_tenant_invitations', false) && $this->doTenantSubscriptionsAllowAddingUser($tenant);
+        return config('app.allow_tenant_invitations', false) && $this->doTenantSubscriptionsAllowAddingUsers($tenant, $count);
     }
 
     public function getTenantByUuid(string $uuid): Tenant
@@ -295,14 +299,16 @@ class TenantService
         ]);
     }
 
-    private function doTenantSubscriptionsAllowAddingUser(Tenant $tenant): bool
+    private function doTenantSubscriptionsAllowAddingUsers(Tenant $tenant, int $count = 1): bool
     {
         $tenantSubscriptions = $tenant->subscriptions()->with('plan')->get();
         $tenantUserCount = $tenant->users->count();
 
         foreach ($tenantSubscriptions as $subscription) {
-            if ($subscription->plan->max_users_per_tenant !== 0 &&
-                $tenantUserCount >= $subscription->plan->max_users_per_tenant) {
+            if (
+                $subscription->plan->max_users_per_tenant !== 0 &&
+                ($tenantUserCount + ($count - 1)) >= $subscription->plan->max_users_per_tenant
+            ) {
                 return false;
             }
         }

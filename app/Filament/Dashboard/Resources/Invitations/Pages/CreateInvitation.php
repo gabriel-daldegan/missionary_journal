@@ -12,21 +12,29 @@ class CreateInvitation extends CreateRecord
 {
     protected static string $resource = InvitationResource::class;
 
-    protected function mutateFormDataBeforeCreate(array $data): array
+    protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
     {
-        $data['token'] = Str::random(60);
-        $data['tenant_id'] = Filament::getTenant()->id;
-        $data['uuid'] = Str::uuid();
-        $data['expires_at'] = now()->addDays(7);
-        $data['user_id'] = auth()->id();
+        $emails = preg_split('/[\s,]+/', $data['email'], -1, PREG_SPLIT_NO_EMPTY);
+        $lastInvitation = null;
 
-        return $data;
-    }
+        foreach ($emails as $email) {
+            $individualData = $data;
+            $individualData['email'] = trim($email);
+            $individualData['token'] = Str::random(60);
+            $individualData['uuid'] = (string) Str::uuid();
+            $individualData['expires_at'] = now()->addDays(7);
+            $individualData['user_id'] = auth()->id();
+            $individualData['tenant_id'] = Filament::getTenant()->id;
 
-    protected function afterCreate(): void
-    {
-        /** @var TenantService $tenantService */
-        $tenantService = app(TenantService::class);
-        $tenantService->handleAfterInvitationCreated($this->getRecord());
+            $invitation = static::getModel()::create($individualData);
+
+            /** @var TenantService $tenantService */
+            $tenantService = app(TenantService::class);
+            $tenantService->handleAfterInvitationCreated($invitation);
+
+            $lastInvitation = $invitation;
+        }
+
+        return $lastInvitation;
     }
 }

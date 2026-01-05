@@ -18,7 +18,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -43,36 +43,53 @@ class InvitationResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('email')
-                    ->label(__('Email'))
-                    ->email()
+                Textarea::make('email')
+                    ->label(__('Emails'))
+                    ->placeholder(__('email1@example.com, email2@example.com'))
                     ->required()
-                    ->helperText(__('Enter the email address of the person you want to invite.'))
+                    ->helperText(__('Enter email addresses separated by commas or new lines.'))
                     ->rules([
                         fn (): Closure => function (string $attribute, $value, Closure $fail) {
-                            // if there is a user with this email address in the tenant and status is pending and expires_at is greater than now, fail
-                            if (Filament::getTenant()->invitations()
-                                ->where('email', $value)
-                                ->where('status', InvitationStatus::PENDING->value)
-                                ->where('expires_at', '>', now())
-                                ->exists()
-                            ) {
-                                $fail(__('This email address has already been invited.'));
+                            $emails = preg_split('/[\s,]+/', $value, -1, PREG_SPLIT_NO_EMPTY);
+
+                            if (empty($emails)) {
+                                $fail(__('Please enter at least one email address.'));
+
+                                return;
                             }
 
-                            if (Filament::getTenant()->users()->where('email', $value)->exists()) {
-                                $fail(__('This user is already in the team.'));
+                            foreach ($emails as $email) {
+                                $email = trim($email);
+                                if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                                    $fail(__('The email :email is invalid.', ['email' => $email]));
+
+                                    continue;
+                                }
+
+                                // if there is a user with this email address in the tenant and status is pending and expires_at is greater than now, fail
+                                if (
+                                    Filament::getTenant()->invitations()
+                                        ->where('email', $email)
+                                        ->where('status', InvitationStatus::PENDING->value)
+                                        ->where('expires_at', '>', now())
+                                        ->exists()
+                                ) {
+                                    $fail(__('The email :email has already been invited.', ['email' => $email]));
+                                }
+
+                                if (Filament::getTenant()->users()->where('email', $email)->exists()) {
+                                    $fail(__('The user with email :email is already in the team.', ['email' => $email]));
+                                }
                             }
 
                             /** @var TenantService $tenantService */
                             $tenantService = app(TenantService::class);
 
-                            if (! $tenantService->canInviteUser(Filament::getTenant(), auth()->user())) {
+                            if (! $tenantService->canInviteUsers(Filament::getTenant(), auth()->user(), count($emails))) {
                                 $fail(__('You have reached the maximum number of users allowed for your subscription.'));
                             }
                         },
-                    ])
-                    ->maxLength(255),
+                    ]),
                 Select::make('role')
                     ->options(function (TenantPermissionService $tenantPermissionService) {
                         return $tenantPermissionService->getAllAvailableTenantRolesForDisplay(Filament::getTenant());
