@@ -135,6 +135,7 @@ class ConfigConstants
         'app.tenant_multiple_subscriptions_enabled',
         'app.can_add_tenant_specific_roles_from_tenant_dashboard',
         'app.create_tenant_on_user_registration',
+        'app.allow_user_to_create_tenants_from_dashboard',
 
         // Cookie Consent
         'cookie-consent.enabled',

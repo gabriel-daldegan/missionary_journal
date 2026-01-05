@@ -200,6 +200,8 @@ return [
 
     'create_tenant_on_user_registration' => env('CREATE_TENANT_ON_USER_REGISTRATION', false),
 
+    'allow_user_to_create_tenants_from_dashboard' => env('ALLOW_USER_TO_CREATE_TENANTS_FROM_DASHBOARD', false),
+
     'trial_without_payment' => [
         'enabled' => env('TRIAL_WITHOUT_PAYMENT_ENABLED', false),
         'first_reminder_enabled' => env('TRIAL_WITHOUT_PAYMENT_FIRST_REMINDER_ENABLED', true),

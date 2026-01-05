@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Constants\AnnouncementPlacement;
 use App\Constants\TenancyPermissionConstants;
+use App\Filament\Dashboard\Pages\CreateWorkspace;
 use App\Filament\Dashboard\Pages\TenantSettings;
 use App\Filament\Dashboard\Pages\TwoFactorAuth\TwoFactorAuth;
 use App\Http\Middleware\UpdateUserLastSeenAt;
@@ -77,6 +78,7 @@ class DashboardPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Dashboard/Pages'), for: 'App\\Filament\\Dashboard\\Pages')
             ->pages([
                 Dashboard::class,
+                CreateWorkspace::class,
             ])
             ->viteTheme('resources/css/filament/dashboard/theme.css')
             ->discoverWidgets(in: app_path('Filament/Dashboard/Widgets'), for: 'App\\Filament\\Dashboard\\Widgets')
@@ -104,7 +106,8 @@ class DashboardPanelProvider extends PanelProvider
                     ->icon('heroicon-s-users')
                     ->collapsed(),
             ])
-            ->renderHook(PanelsRenderHook::BODY_START,
+            ->renderHook(
+                PanelsRenderHook::BODY_START,
                 fn (): string => Blade::render("@livewire('announcement.view', ['placement' => '".AnnouncementPlacement::USER_DASHBOARD->value."'])")
             )
             ->authMiddleware([
@@ -120,6 +123,13 @@ class DashboardPanelProvider extends PanelProvider
                     ->myProfileComponents([
                         AddressForm::class,
                     ]),
+            ])
+            ->tenantMenuItems([
+                Action::make('create')
+                    ->label(__('New Workspace'))
+                    ->url(fn () => CreateWorkspace::getUrl())
+                    ->icon('heroicon-o-plus-circle')
+                    ->visible(fn () => config('app.allow_user_to_create_tenants_from_dashboard', false)),
             ])
             ->tenantMenu()
             ->tenant(Tenant::class, 'uuid');

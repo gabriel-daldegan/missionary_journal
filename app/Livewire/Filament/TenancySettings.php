@@ -37,6 +37,7 @@ class TenancySettings extends Component implements HasForms
             'tenant_multiple_subscriptions_enabled' => $this->configService->get('app.tenant_multiple_subscriptions_enabled', false),
             'can_add_tenant_specific_roles_from_tenant_dashboard' => $this->configService->get('app.can_add_tenant_specific_roles_from_tenant_dashboard', false),
             'create_tenant_on_user_registration' => $this->configService->get('app.create_tenant_on_user_registration', false),
+            'allow_user_to_create_tenants_from_dashboard' => $this->configService->get('app.allow_user_to_create_tenants_from_dashboard', false),
         ]);
     }
 
@@ -66,6 +67,10 @@ class TenancySettings extends Component implements HasForms
                             ->label(__('Auto Create Tenant on User Registration'))
                             ->helperText(__('If enabled, a tenant will be automatically created when a new user registers. This is useful for SaaS applications where you want to allow users to use their dashboard without needing to purchase a product (as normally a tenant is created only when a user purchases).'))
                             ->required(),
+                        Toggle::make('allow_user_to_create_tenants_from_dashboard')
+                            ->label(__('Allow users to create workspaces'))
+                            ->helperText(__('If enabled, users will be able to create new workspaces (tenants) from their dashboard.'))
+                            ->required(),
                     ]),
 
             ])
@@ -81,6 +86,7 @@ class TenancySettings extends Component implements HasForms
         $this->configService->set('app.tenant_multiple_subscriptions_enabled', $data['tenant_multiple_subscriptions_enabled']);
         $this->configService->set('app.can_add_tenant_specific_roles_from_tenant_dashboard', $data['can_add_tenant_specific_roles_from_tenant_dashboard']);
         $this->configService->set('app.create_tenant_on_user_registration', $data['create_tenant_on_user_registration']);
+        $this->configService->set('app.allow_user_to_create_tenants_from_dashboard', $data['allow_user_to_create_tenants_from_dashboard']);
 
         Notification::make()
             ->title(__('Settings Saved'))

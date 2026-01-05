@@ -101,7 +101,7 @@ class TenantCreationService
         )->first();
     }
 
-    public function createTenant(User $user): Tenant
+    public function createTenant(User $user, ?string $tenantName = null): Tenant
     {
         // add an enumeration to the name to avoid name conflicts
 
@@ -116,14 +116,16 @@ class TenantCreationService
             }
         }
 
-        $name = $user->name.' '.TenantConstants::getAlias();
-
-        $name .= ' #'.$number;
+        $name = $tenantName;
+        if ($name === null) {
+            $name = $user->name.' '.TenantConstants::getAlias();
+            $name .= ' #'.$number;
+        }
 
         $tenant = Tenant::create([
             'name' => $name,
             'uuid' => (string) Str::uuid(),
-            'is_name_auto_generated' => true,
+            'is_name_auto_generated' => $tenantName === null,
             'created_by' => $user->id,
         ]);
 
