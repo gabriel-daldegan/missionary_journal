@@ -5,6 +5,7 @@
 /public/storage
 /public/sitemap.xml
 /public/fonts/filament
+/public/robots.txt
 /storage/*.key
 /vendor
 .env
