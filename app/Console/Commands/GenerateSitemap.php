@@ -81,11 +81,12 @@ class GenerateSitemap extends Command implements Isolatable
         $sitemap->writeToFile(public_path('sitemap.xml'));
 
         // add the sitemap to robots.txt
-        $robots = file_get_contents(public_path('robots.txt'));
+        $robots = $this->getDefaultRobotsTxtContent().'Sitemap: '.url('sitemap.xml');
+        file_put_contents(public_path('robots.txt'), $robots);
+    }
 
-        if (! str_contains($robots, 'Sitemap:')) {
-            $robots .= "\n\nSitemap: ".url('sitemap.xml');
-            file_put_contents(public_path('robots.txt'), $robots);
-        }
+    private function getDefaultRobotsTxtContent()
+    {
+        return "User-agent: *\nDisallow:\n\n";
     }
 }
