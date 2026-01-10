@@ -282,7 +282,7 @@ class TenantService
         return true;
     }
 
-    public function canInviteUsers(Tenant $tenant, User $user, int $count = 1): bool
+    public function canInviteUsers(Tenant $tenant, int $count = 1): bool
     {
         return config('app.allow_tenant_invitations', false) && $this->doTenantSubscriptionsAllowAddingUsers($tenant, $count);
     }

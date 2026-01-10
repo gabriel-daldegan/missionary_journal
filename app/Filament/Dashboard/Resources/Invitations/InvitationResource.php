@@ -85,7 +85,7 @@ class InvitationResource extends Resource
                             /** @var TenantService $tenantService */
                             $tenantService = app(TenantService::class);
 
-                            if (! $tenantService->canInviteUsers(Filament::getTenant(), auth()->user(), count($emails))) {
+                            if (! $tenantService->canInviteUsers(Filament::getTenant(), count($emails))) {
                                 $fail(__('You have reached the maximum number of users allowed for your subscription.'));
                             }
                         },
