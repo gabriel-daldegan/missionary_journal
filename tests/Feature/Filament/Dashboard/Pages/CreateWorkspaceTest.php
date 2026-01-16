@@ -1,6 +1,6 @@
 <?php
 
-namespace Feature\Filament\Dashboard\Pages;
+namespace Tests\Feature\Filament\Dashboard\Pages;
 
 use App\Filament\Dashboard\Pages\CreateWorkspace;
 use App\Livewire\Filament\Dashboard\CreateWorkspace as CreateWorkspaceLivewire;
