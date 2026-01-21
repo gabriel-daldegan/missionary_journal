@@ -6,9 +6,11 @@ use App\Constants\ReferralConstants;
 use App\Events\Referral\ReferralSucceeded;
 use App\Models\Discount;
 use App\Models\DiscountCode;
+use App\Models\Order;
 use App\Models\Referral;
 use App\Models\ReferralCode;
 use App\Models\ReferralReward;
+use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -119,12 +121,38 @@ class ReferralService
         $this->processReward($referral);
     }
 
-    public function processFirstPayment(User $paidUser): void
+    public function processReferralOnFirstOrderPayment(Order $order): void
+    {
+        $hasPaidTransaction = $order->transactions()
+            ->where('amount', '>', 0)
+            ->exists();
+
+        if (! $hasPaidTransaction) {
+            return;
+        }
+
+        $this->processFirstPayment($order->user);
+    }
+
+    public function processReferralOnFirstSubscriptionPayment(Subscription $subscription): void
     {
         if (! $this->isEnabled()) {
             return;
         }
 
+        $hasPaidTransaction = $subscription->transactions()
+            ->where('amount', '>', 0)
+            ->exists();
+
+        if (! $hasPaidTransaction) {
+            return;
+        }
+
+        $this->processFirstPayment($subscription->user);
+    }
+
+    private function processFirstPayment(User $paidUser): void
+    {
         $trigger = $this->configService->get('app.referral.trigger');
 
         if ($trigger !== ReferralConstants::TRIGGER_FIRST_PAYMENT) {
