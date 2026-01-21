@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a090b52588a45264d2635a4a7e9f1d95",
+    "content-hash": "9e375c8000a97d8f4fb63fa58b23c891",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -3201,6 +3201,81 @@
                 "source": "https://github.com/JayBizzle/Crawler-Detect/tree/v1.3.6"
             },
             "time": "2025-09-30T16:22:43+00:00"
+        },
+        {
+            "name": "jeffgreco13/filament-breezy",
+            "version": "v3.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Jacobtims/filament-breezy.git",
+                "reference": "6c6e32dcafcee9a0d77fcd0ab8a54469961c4124"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Jacobtims/filament-breezy/zipball/6c6e32dcafcee9a0d77fcd0ab8a54469961c4124",
+                "reference": "6c6e32dcafcee9a0d77fcd0ab8a54469961c4124",
+                "shasum": ""
+            },
+            "require": {
+                "bacon/bacon-qr-code": "^3.0",
+                "filament/filament": "^4.0|^5.0",
+                "illuminate/contracts": "^11.0|^12.0",
+                "jenssegers/agent": "^2.6",
+                "php": "^8.2|^8.3|^8.4",
+                "pragmarx/google2fa": "^7.0|^8.0|^9.0",
+                "spatie/laravel-package-tools": "^1.14.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.0",
+                "laravel/sanctum": "^4.0",
+                "orchestra/testbench": "^9.0|^10.0",
+                "pestphp/pest": "^3.7",
+                "pestphp/pest-plugin-arch": "^v3.0.0",
+                "pestphp/pest-plugin-laravel": "^v3.1.0",
+                "pestphp/pest-plugin-livewire": "^v3.0.0",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "FilamentBreezy": "Jeffgreco13\\FilamentBreezy\\Facades\\FilamentBreezy"
+                    },
+                    "providers": [
+                        "Jeffgreco13\\FilamentBreezy\\FilamentBreezyServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Jeffgreco13\\FilamentBreezy\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jeff Greco",
+                    "email": "jeff@jeffpgreco.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A custom package for Filament with login flow, profile and teams support.",
+            "homepage": "https://github.com/jeffgreco13/filament-breezy",
+            "keywords": [
+                "filament-breezy",
+                "jeffgreco13",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/Jacobtims/filament-breezy/issues",
+                "source": "https://github.com/Jacobtims/filament-breezy/tree/v3.1.0"
+            },
+            "time": "2026-01-19T06:52:41+00:00"
         },
         {
             "name": "jenssegers/agent",
@@ -7743,89 +7818,21 @@
             "time": "2025-02-25T09:09:36+00:00"
         },
         {
-            "name": "saasykit/filament-breezy",
-            "version": "2.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/saasykit/filament-breezy.git",
-                "reference": "88fe028981fc8f4e696ac77a8e08f457f585258b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/saasykit/filament-breezy/zipball/88fe028981fc8f4e696ac77a8e08f457f585258b",
-                "reference": "88fe028981fc8f4e696ac77a8e08f457f585258b",
-                "shasum": ""
-            },
-            "require": {
-                "bacon/bacon-qr-code": "^3.0",
-                "filament/filament": "^3.0.9|^4.0",
-                "illuminate/contracts": "^10.0|^11.0|^12.0",
-                "jenssegers/agent": "^2.6",
-                "php": "^8.1|^8.2|^8.3|^8.4",
-                "pragmarx/google2fa": "^7.0|^8.0",
-                "spatie/laravel-package-tools": "^1.14.0"
-            },
-            "require-dev": {
-                "pestphp/pest": "^2.20|^3.7",
-                "pestphp/pest-plugin-arch": "^2.0|^v3.0.0",
-                "pestphp/pest-plugin-laravel": "^2.0|^v3.1.0",
-                "pestphp/pest-plugin-livewire": "^2.1|^v3.0.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "FilamentBreezy": "Jeffgreco13\\FilamentBreezy\\Facades\\FilamentBreezy"
-                    },
-                    "providers": [
-                        "Jeffgreco13\\FilamentBreezy\\FilamentBreezyServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Jeffgreco13\\FilamentBreezy\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jeff Greco",
-                    "email": "jeff@jeffpgreco.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "A custom package for Filament with login flow, profile and teams support.",
-            "homepage": "https://github.com/jeffgreco13/filament-breezy",
-            "keywords": [
-                "filament-breezy",
-                "jeffgreco13",
-                "laravel"
-            ],
-            "support": {
-                "source": "https://github.com/saasykit/filament-breezy/tree/2.1.1"
-            },
-            "time": "2025-08-17T14:52:26+00:00"
-        },
-        {
             "name": "saasykit/filament-country-field",
-            "version": "1.0.5",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/saasykit/filament-country-field.git",
-                "reference": "2ed02affb95a5fcdf8ab7b3276548a2a66be238c"
+                "reference": "7a1e2e9f6c45d6407a6b4fc03857c4f36c7dd73c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/saasykit/filament-country-field/zipball/2ed02affb95a5fcdf8ab7b3276548a2a66be238c",
-                "reference": "2ed02affb95a5fcdf8ab7b3276548a2a66be238c",
+                "url": "https://api.github.com/repos/saasykit/filament-country-field/zipball/7a1e2e9f6c45d6407a6b4fc03857c4f36c7dd73c",
+                "reference": "7a1e2e9f6c45d6407a6b4fc03857c4f36c7dd73c",
                 "shasum": ""
             },
             "require": {
-                "filament/filament": "^3.0|^4.0",
+                "filament/filament": "^3.0|^4.0|^5.0",
                 "illuminate/contracts": "^10.0|^11.0|^12.0",
                 "php": "^8.1 || ^8.2 || ^8.3 || ^8.4",
                 "spatie/laravel-package-tools": "^1.15.0"
@@ -7886,7 +7893,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-08-17T15:08:02+00:00"
+            "time": "2026-01-21T19:34:44+00:00"
         },
         {
             "name": "saasykit/laravel-invoices",
@@ -9371,21 +9378,26 @@
         },
         {
             "name": "stechstudio/filament-impersonate",
-            "version": "4.0.2",
+            "version": "4.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stechstudio/filament-impersonate.git",
-                "reference": "5596d85d358c0f4660c64de86746af9cdfc780f9"
+                "reference": "629962b871ba86b7fd20ae2507d1c0882d9ff3b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stechstudio/filament-impersonate/zipball/5596d85d358c0f4660c64de86746af9cdfc780f9",
-                "reference": "5596d85d358c0f4660c64de86746af9cdfc780f9",
+                "url": "https://api.github.com/repos/stechstudio/filament-impersonate/zipball/629962b871ba86b7fd20ae2507d1c0882d9ff3b1",
+                "reference": "629962b871ba86b7fd20ae2507d1c0882d9ff3b1",
                 "shasum": ""
             },
             "require": {
-                "filament/filament": "^4.0",
+                "filament/filament": "^4.0|^5.0",
                 "lab404/laravel-impersonate": "^1.7"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^10.0",
+                "pestphp/pest": "^3.0",
+                "pestphp/pest-plugin-laravel": "^3.0"
             },
             "type": "library",
             "extra": {
@@ -9407,9 +9419,9 @@
             "description": "A Filament package to impersonate your users.",
             "support": {
                 "issues": "https://github.com/stechstudio/filament-impersonate/issues",
-                "source": "https://github.com/stechstudio/filament-impersonate/tree/4.0.2"
+                "source": "https://github.com/stechstudio/filament-impersonate/tree/4.1.3"
             },
-            "time": "2025-12-29T15:39:47+00:00"
+            "time": "2026-01-20T00:57:04+00:00"
         },
         {
             "name": "stripe/stripe-php",
@@ -13431,6 +13443,46 @@
             "time": "2024-11-21T13:46:39+00:00"
         },
         {
+            "name": "filament/upgrade",
+            "version": "v5.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/filamentphp/upgrade.git",
+                "reference": "ea24c2bfcb46175d4a22b31c96123b1aec9082d0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/filamentphp/upgrade/zipball/ea24c2bfcb46175d4a22b31c96123b1aec9082d0",
+                "reference": "ea24c2bfcb46175d4a22b31c96123b1aec9082d0",
+                "shasum": ""
+            },
+            "require": {
+                "nunomaduro/termwind": "^2.0",
+                "php": "^8.2",
+                "rector/rector": "^2.0"
+            },
+            "bin": [
+                "bin/filament-v5"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Filament\\Upgrade\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Upgrade Filament v4 code to Filament v5.",
+            "homepage": "https://github.com/filamentphp/filament",
+            "support": {
+                "issues": "https://github.com/filamentphp/filament/issues",
+                "source": "https://github.com/filamentphp/filament"
+            },
+            "time": "2026-01-16T09:55:11+00:00"
+        },
+        {
             "name": "filp/whoops",
             "version": "2.18.4",
             "source": {
@@ -14382,11 +14434,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.33",
+            "version": "2.1.36",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9e800e6bee7d5bd02784d4c6069b48032d16224f",
-                "reference": "9e800e6bee7d5bd02784d4c6069b48032d16224f",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/2132e5e2361d11d40af4c17faa16f043269a4cf3",
+                "reference": "2132e5e2361d11d40af4c17faa16f043269a4cf3",
                 "shasum": ""
             },
             "require": {
@@ -14431,7 +14483,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-05T10:24:31+00:00"
+            "time": "2026-01-21T13:58:26+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -14925,6 +14977,66 @@
                 "source": "https://github.com/php-fig/cache/tree/3.0.0"
             },
             "time": "2021-02-03T23:26:27+00:00"
+        },
+        {
+            "name": "rector/rector",
+            "version": "2.3.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rectorphp/rector.git",
+                "reference": "9227d7a24b0f23ae941057509364f948d5da9ab2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/9227d7a24b0f23ae941057509364f948d5da9ab2",
+                "reference": "9227d7a24b0f23ae941057509364f948d5da9ab2",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4|^8.0",
+                "phpstan/phpstan": "^2.1.36"
+            },
+            "conflict": {
+                "rector/rector-doctrine": "*",
+                "rector/rector-downgrade-php": "*",
+                "rector/rector-phpunit": "*",
+                "rector/rector-symfony": "*"
+            },
+            "suggest": {
+                "ext-dom": "To manipulate phpunit.xml via the custom-rule command"
+            },
+            "bin": [
+                "bin/rector"
+            ],
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Instant Upgrade and Automated Refactoring of any PHP code",
+            "homepage": "https://getrector.com/",
+            "keywords": [
+                "automation",
+                "dev",
+                "migration",
+                "refactoring"
+            ],
+            "support": {
+                "issues": "https://github.com/rectorphp/rector/issues",
+                "source": "https://github.com/rectorphp/rector/tree/2.3.4"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/tomasvotruba",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-01-21T14:49:03+00:00"
         },
         {
             "name": "sebastian/cli-parser",
