@@ -14,6 +14,12 @@ class DiscountCode extends Model
     protected $fillable = [
         'discount_id',
         'code',
+        'referral_reward_id',
+        'is_referral_reward',
+    ];
+
+    protected $casts = [
+        'is_referral_reward' => 'boolean',
     ];
 
     public function discount(): BelongsTo
@@ -24,5 +30,10 @@ class DiscountCode extends Model
     public function redemptions(): HasMany
     {
         return $this->hasMany(DiscountCodeRedemption::class);
+    }
+
+    public function referralReward(): BelongsTo
+    {
+        return $this->belongsTo(ReferralReward::class);
     }
 }

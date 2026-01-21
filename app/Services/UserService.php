@@ -9,6 +9,10 @@ use Illuminate\Support\Str;
 
 class UserService
 {
+    public function __construct(
+        private ReferralService $referralService
+    ) {}
+
     public function createUser(array $data, bool $dispatchRegisterEvent = false): User
     {
         $user = User::create([
@@ -16,6 +20,11 @@ class UserService
             'email' => strtolower($data['email']),
             'password' => isset($data['password']) ? Hash::make($data['password']) : Hash::make(Str::random(32)),
         ]);
+
+        if (session()->has('referral_code')) {
+            $this->referralService->trackReferral($user, session('referral_code'));
+            session()->forget('referral_code');
+        }
 
         if ($dispatchRegisterEvent) {
             event(new Registered($user));
