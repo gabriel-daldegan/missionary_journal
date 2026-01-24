@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Referrals;
 
 use App\Constants\ReferralConstants;
 use App\Filament\Admin\Resources\Referrals\Pages\ListReferrals;
+use App\Filament\Admin\Resources\Users\UserResource;
 use App\Models\Referral;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -53,12 +54,20 @@ class ReferralResource extends Resource
                     ->label(__('Referrer'))
                     ->description(fn (Referral $record): string => $record->referrer?->email ?? '')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn (Referral $record): ?string => $record->referrer
+                        ? UserResource::getUrl('edit', ['record' => $record->referrer])
+                        : null
+                    ),
                 TextColumn::make('referredUser.name')
                     ->label(__('Referred User'))
                     ->description(fn (Referral $record): string => $record->referredUser?->email ?? '')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->url(fn (Referral $record): ?string => $record->referredUser
+                        ? UserResource::getUrl('edit', ['record' => $record->referredUser])
+                        : null
+                    ),
                 TextColumn::make('referral_code')
                     ->label(__('Code Used'))
                     ->searchable()
