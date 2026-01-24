@@ -38,27 +38,36 @@ class ReferralRewardResource extends Resource
                 TextColumn::make('discountCode.code')
                     ->label(__('Coupon Code'))
                     ->copyable()
+                    ->copyMessage(__('Coupon code copied to clipboard!'))
                     ->placeholder(__('N/A'))
-                    ->visible(fn ($record) => $record && $record->reward_type === ReferralConstants::REWARD_TYPE_COUPON),
-                TextColumn::make('metadata')
+                    ->formatStateUsing(function ($state, $record) {
+                        if (! $record || $record->reward_type !== ReferralConstants::REWARD_TYPE_COUPON) {
+                            return __('N/A');
+                        }
+
+                        return $state;
+                    }),
+                TextColumn::make('discountCode.discount.name')
                     ->label(__('Details'))
                     ->formatStateUsing(function ($state, $record) {
                         if (! $record || $record->reward_type !== ReferralConstants::REWARD_TYPE_COUPON) {
-                            return __('Custom Event Triggered');
+                            return __('N/A');
                         }
 
-                        if (is_array($state) && isset($state['discount_name'])) {
-                            $details = $state['discount_name'].' - ';
-                            if ($state['discount_type'] === 'percentage') {
-                                $details .= $state['discount_amount'].'%';
-                            } else {
-                                $details .= money($state['discount_amount'], config('app.default_currency'));
-                            }
+                        $discount = $record->discountCode?->discount;
 
-                            return $details;
+                        if (! $discount) {
+                            return __('N/A');
                         }
 
-                        return __('N/A');
+                        $details = __('Discount of ');
+                        if ($discount->type === 'percentage') {
+                            $details .= $discount->amount.'%';
+                        } else {
+                            $details .= money($discount->amount, config('app.default_currency'));
+                        }
+
+                        return $details;
                     }),
                 TextColumn::make('created_at')
                     ->label(__('Earned On'))

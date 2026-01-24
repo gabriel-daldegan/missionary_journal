@@ -4,6 +4,8 @@ namespace App\Constants;
 
 class ReferralConstants
 {
+    public const HTTP_PARAM_REFERRAL_CODE = 'referralCode';
+
     public const TRIGGER_VERIFIED_REGISTRATION = 'verified_registration';
 
     public const TRIGGER_FIRST_PAYMENT = 'first_payment';
@@ -39,5 +41,5 @@ class ReferralConstants
 
     public const CODE_LENGTH = 12;
 
-    public const CODE_PREFIX = '';
+    public const CODE_PREFIX = 'REF-';
 }

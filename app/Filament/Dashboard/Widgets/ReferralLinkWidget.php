@@ -11,6 +11,8 @@ class ReferralLinkWidget extends Widget
 
     protected int|string|array $columnSpan = 'full';
 
+    protected ?string $pollingInterval = null;
+
     public function getReferralLink(): string
     {
         $referralService = app(ReferralService::class);

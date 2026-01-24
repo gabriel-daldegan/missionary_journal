@@ -15,11 +15,6 @@ class ReferralReward extends Model
         'referrer_user_id',
         'reward_type',
         'discount_code_id',
-        'metadata',
-    ];
-
-    protected $casts = [
-        'metadata' => 'array',
     ];
 
     public function referral(): BelongsTo

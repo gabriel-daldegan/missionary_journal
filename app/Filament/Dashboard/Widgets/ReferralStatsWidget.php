@@ -8,6 +8,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ReferralStatsWidget extends BaseWidget
 {
+    protected ?string $pollingInterval = null;
+
     protected function getStats(): array
     {
         $referralService = app(ReferralService::class);

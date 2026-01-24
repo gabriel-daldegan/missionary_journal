@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Constants\ReferralConstants;
 use App\Events\Referral\ReferralSucceeded;
+use App\Mail\Referral\ReferralRewardEarned;
 use App\Models\Discount;
 use App\Models\DiscountCode;
 use App\Models\Order;
@@ -24,6 +25,14 @@ class ReferralService
     public function isEnabled(): bool
     {
         return (bool) $this->configService->get('app.referral.enabled', false);
+    }
+
+    public function isDiscountUsedAsReward(Discount $discount): bool
+    {
+        $rewardType = $this->configService->get('app.referral.reward_type');
+
+        return $rewardType === ReferralConstants::REWARD_TYPE_COUPON &&
+               $this->configService->get('app.referral.discount_id') == $discount->id;
     }
 
     public function getOrCreateReferralCode(User $user): ReferralCode
@@ -220,17 +229,12 @@ class ReferralService
             'referrer_user_id' => $referral->referrer_user_id,
             'reward_type' => ReferralConstants::REWARD_TYPE_COUPON,
             'discount_code_id' => $discountCode->id,
-            'metadata' => [
-                'discount_name' => $discount->name,
-                'discount_type' => $discount->type,
-                'discount_amount' => $discount->amount,
-            ],
         ]);
 
         $discountCode->update(['referral_reward_id' => $reward->id]);
 
         Mail::to($referral->referrer->email)
-            ->send(new \App\Mail\Referral\ReferralRewardEarned($referral, $discountCode));
+            ->send(new ReferralRewardEarned($referral, $discountCode));
     }
 
     private function processCustomEventReward(Referral $referral): void
@@ -248,9 +252,6 @@ class ReferralService
     {
         return [
             'total_referrals' => $user->referrals()->count(),
-            'pending_referrals' => $user->referrals()->where('status', ReferralConstants::STATUS_PENDING)->count(),
-            'verified_referrals' => $user->referrals()->where('status', ReferralConstants::STATUS_VERIFIED)->count(),
-            'paid_referrals' => $user->referrals()->where('status', ReferralConstants::STATUS_PAID)->count(),
             'rewarded_referrals' => $user->referrals()->where('status', ReferralConstants::STATUS_REWARDED)->count(),
             'total_rewards' => $user->referralRewards()->count(),
         ];
@@ -260,6 +261,6 @@ class ReferralService
     {
         $referralCode = $this->getOrCreateReferralCode($user);
 
-        return url('/?referralCode='.$referralCode->code);
+        return url()->query('/', [ReferralConstants::HTTP_PARAM_REFERRAL_CODE => $referralCode->code]);
     }
 }

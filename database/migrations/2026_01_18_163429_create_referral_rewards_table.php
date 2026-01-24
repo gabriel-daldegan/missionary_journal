@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('referrer_user_id')->constrained('users')->onDelete('cascade');
             $table->string('reward_type');
             $table->foreignId('discount_code_id')->nullable()->constrained()->onDelete('set null');
-            $table->text('metadata')->nullable();
             $table->timestamps();
 
             $table->index(['referrer_user_id', 'created_at']);
