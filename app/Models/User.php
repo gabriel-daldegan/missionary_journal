@@ -189,4 +189,24 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
     {
         return $this->tenants()->whereKey($tenant)->exists();
     }
+
+    public function referralCode(): HasOne
+    {
+        return $this->hasOne(ReferralCode::class);
+    }
+
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(Referral::class, 'referrer_user_id');
+    }
+
+    public function referredBy(): HasOne
+    {
+        return $this->hasOne(Referral::class, 'referred_user_id');
+    }
+
+    public function referralRewards(): HasMany
+    {
+        return $this->hasMany(ReferralReward::class, 'referrer_user_id');
+    }
 }

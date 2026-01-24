@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Constants\SessionConstants;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
@@ -9,6 +10,10 @@ use Illuminate\Support\Str;
 
 class UserService
 {
+    public function __construct(
+        private ReferralService $referralService
+    ) {}
+
     public function createUser(array $data, bool $dispatchRegisterEvent = false): User
     {
         $user = User::create([
@@ -16,6 +21,11 @@ class UserService
             'email' => strtolower($data['email']),
             'password' => isset($data['password']) ? Hash::make($data['password']) : Hash::make(Str::random(32)),
         ]);
+
+        if (session()->has(SessionConstants::REFERRAL_CODE)) {
+            $this->referralService->trackReferral($user, session(SessionConstants::REFERRAL_CODE));
+            session()->forget(SessionConstants::REFERRAL_CODE);
+        }
 
         if ($dispatchRegisterEvent) {
             event(new Registered($user));

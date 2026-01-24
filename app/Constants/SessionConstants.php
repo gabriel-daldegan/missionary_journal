@@ -15,4 +15,6 @@ class SessionConstants
     public const SMS_VERIFICATION_DTO = 'smsVerificationDto';
 
     public const DISMISSED_ANNOUNCEMENTS = 'dismissedAnnouncements';
+
+    public const REFERRAL_CODE = 'referralCode';
 }

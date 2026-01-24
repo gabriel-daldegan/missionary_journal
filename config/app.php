@@ -1,5 +1,6 @@
 <?php
 
+use App\Constants\ReferralConstants;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -225,6 +226,13 @@ return [
     ],
 
     'anonymization_enabled' => env('ANONYMIZATION_ENABLED', false),
+
+    'referral' => [
+        'enabled' => env('REFERRAL_ENABLED', false),
+        'trigger' => env('REFERRAL_TRIGGER', ReferralConstants::TRIGGER_FIRST_PAYMENT),
+        'reward_type' => env('REFERRAL_REWARD_TYPE', ReferralConstants::REWARD_TYPE_COUPON),
+        'discount_id' => env('REFERRAL_DISCOUNT_ID'),
+    ],
 
     /*
     |--------------------------------------------------------------------------
