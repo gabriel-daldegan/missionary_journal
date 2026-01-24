@@ -10,6 +10,7 @@ use App\Models\Referral;
 use App\Models\ReferralCode;
 use App\Models\ReferralReward;
 use App\Models\Subscription;
+use App\Models\Tenant;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\ReferralService;
@@ -263,13 +264,16 @@ class ReferralServiceTest extends FeatureTest
             'status' => ReferralConstants::STATUS_PENDING,
         ]);
 
+        $tenant = Tenant::factory()->create();
         $subscription = Subscription::factory()->create([
             'user_id' => $referredUser->id,
+            'tenant_id' => $tenant->id,
         ]);
 
         Transaction::create([
             'uuid' => Str::uuid(),
             'user_id' => $referredUser->id,
+            'tenant_id' => $tenant->id,
             'subscription_id' => $subscription->id,
             'amount' => 1000,
             'status' => 'success',
@@ -305,13 +309,16 @@ class ReferralServiceTest extends FeatureTest
             'status' => ReferralConstants::STATUS_PENDING,
         ]);
 
+        $tenant = Tenant::factory()->create();
         $subscription = Subscription::factory()->create([
             'user_id' => $referredUser->id,
+            'tenant_id' => $tenant->id,
         ]);
 
         Transaction::create([
             'uuid' => Str::uuid(),
             'user_id' => $referredUser->id,
+            'tenant_id' => $tenant->id,
             'subscription_id' => $subscription->id,
             'amount' => 0,
             'status' => 'success',

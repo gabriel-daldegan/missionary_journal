@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ReferralResource extends Resource
 {
+    protected static bool $isScopedToTenant = false;
+
     protected static ?string $model = Referral::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-group';

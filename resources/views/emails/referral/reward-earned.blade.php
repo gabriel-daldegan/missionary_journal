@@ -22,7 +22,7 @@
         <p>{{ __('Keep referring friends to earn more rewards!') }}</p>
 
         <p>
-            <a href="{{ route('filament.dashboard.pages.dashboard') }}" style="margin-top: 24px; margin-bottom: 24px; display: inline-block; border-radius: 16px; background-color: {{config('app.email_color_tint')}}; padding: 8px 24px; font-size: 20px; color: #fff; text-decoration-line: none">
+            <a href="{{ route('dashboard') }}" style="margin-top: 24px; margin-bottom: 24px; display: inline-block; border-radius: 16px; background-color: {{config('app.email_color_tint')}}; padding: 8px 24px; font-size: 20px; color: #fff; text-decoration-line: none">
                 {{ __('View Dashboard') }}
             </a>
         </p>
