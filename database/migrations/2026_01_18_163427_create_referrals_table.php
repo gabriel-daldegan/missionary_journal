@@ -1,5 +1,6 @@
 <?php
 
+use App\Constants\ReferralConstants;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +17,7 @@ return new class extends Migration
             $table->foreignId('referrer_user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('referred_user_id')->constrained('users')->onDelete('cascade');
             $table->string('referral_code')->index();
-            $table->enum('status', ['pending', 'verified', 'paid', 'rewarded'])->default('pending');
+            $table->string('status')->default(ReferralConstants::STATUS_PENDING);
             $table->timestamp('verified_at')->nullable();
             $table->timestamp('paid_at')->nullable();
             $table->timestamp('rewarded_at')->nullable();

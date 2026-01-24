@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('referral_codes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('code', 20)->unique();
+            $table->string('code', 50)->unique();
             $table->unsignedInteger('uses_count')->default(0);
             $table->timestamps();
 
