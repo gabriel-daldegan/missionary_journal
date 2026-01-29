@@ -28,10 +28,8 @@ class ReferralStatsWidget extends BaseWidget
         ];
     }
 
-    public static function isDiscovered(): bool
+    public static function canView(): bool
     {
-        $referralService = app(ReferralService::class);
-
-        return $referralService->isEnabled();
+        return app(ReferralService::class)->isEnabled();
     }
 }
