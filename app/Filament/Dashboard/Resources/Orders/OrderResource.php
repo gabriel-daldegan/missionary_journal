@@ -7,7 +7,6 @@ use App\Filament\Dashboard\Resources\Orders\Pages\ListOrders;
 use App\Filament\Dashboard\Resources\Orders\Pages\ViewOrder;
 use App\Mapper\OrderStatusMapper;
 use App\Models\Order;
-use App\Services\ConfigService;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
@@ -206,7 +205,7 @@ class OrderResource extends Resource
 
     public static function isDiscovered(): bool
     {
-        return app()->make(ConfigService::class)->get('app.customer_dashboard.show_orders', true);
+        return config('app.customer_dashboard.show_orders', true);
     }
 
     public static function getNavigationLabel(): string

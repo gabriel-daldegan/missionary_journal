@@ -17,7 +17,6 @@ use App\Filament\Dashboard\Resources\Subscriptions\Pages\ViewSubscription;
 use App\Filament\Dashboard\Resources\Subscriptions\RelationManagers\UsagesRelationManager;
 use App\Mapper\SubscriptionStatusMapper;
 use App\Models\Subscription;
-use App\Services\ConfigService;
 use App\Services\SubscriptionService;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -284,7 +283,7 @@ class SubscriptionResource extends Resource
 
     public static function isDiscovered(): bool
     {
-        return app()->make(ConfigService::class)->get('app.customer_dashboard.show_subscriptions', true);
+        return config('app.customer_dashboard.show_subscriptions', true);
     }
 
     public static function getNavigationLabel(): string

@@ -12,6 +12,9 @@ use App\Services\VerificationProviders\TwilioProvider;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\ServiceProvider;
+use Jeffgreco13\FilamentBreezy\Livewire\PersonalInfo;
+use Jeffgreco13\FilamentBreezy\Livewire\UpdatePassword;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -55,5 +58,9 @@ class AppServiceProvider extends ServiceProvider
         FilamentAsset::register([
             Js::make('components-script', __DIR__.'/../../resources/js/components.js'),
         ]);
+
+        // temporarily fix until this is fixed in filament breezy: https://github.com/Jacobtims/filament-breezy/issues/496
+        Livewire::component('personal_info', PersonalInfo::class);
+        Livewire::component('update_password', UpdatePassword::class);
     }
 }

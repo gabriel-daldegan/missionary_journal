@@ -9,7 +9,6 @@ use App\Filament\Dashboard\Resources\Transactions\Pages\ListTransactions;
 use App\Mapper\TransactionStatusMapper;
 use App\Models\Transaction;
 use App\Services\AddressService;
-use App\Services\ConfigService;
 use App\Services\InvoiceService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -162,6 +161,6 @@ class TransactionResource extends Resource
 
     public static function isDiscovered(): bool
     {
-        return app()->make(ConfigService::class)->get('app.customer_dashboard.show_transactions', true);
+        return config('app.customer_dashboard.show_transactions', true);
     }
 }
