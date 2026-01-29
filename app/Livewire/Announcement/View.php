@@ -37,7 +37,7 @@ class View extends Component
 
     public function render(AnnouncementService $announcementService)
     {
-        $placement = AnnouncementPlacement::tryFrom($this->placement) ?? AnnouncementPlacement::FRONTEND;
+        $placement = $this->placement ? AnnouncementPlacement::tryFrom($this->placement) : AnnouncementPlacement::FRONTEND;
 
         return view(
             'livewire.announcement.view', [

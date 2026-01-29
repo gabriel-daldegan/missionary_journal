@@ -5,7 +5,6 @@ namespace App\Filament\Dashboard\Resources\Referrals;
 use App\Constants\ReferralConstants;
 use App\Filament\Dashboard\Resources\Referrals\Pages\ListReferrals;
 use App\Models\Referral;
-use App\Services\ConfigService;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -74,11 +73,14 @@ class ReferralResource extends Resource
         return false;
     }
 
-    public static function isDiscovered(): bool
+    public static function shouldRegisterNavigation(): bool
     {
-        $configService = app()->make(ConfigService::class);
+        return config('app.referral.enabled', false);
+    }
 
-        return (bool) $configService->get('app.referral.enabled', false);
+    public static function canAccess(): bool
+    {
+        return config('app.referral.enabled', false);
     }
 
     public static function getNavigationLabel(): string

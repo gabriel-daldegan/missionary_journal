@@ -18,21 +18,17 @@ use Illuminate\Support\Str;
 
 class ReferralService
 {
-    public function __construct(
-        private ConfigService $configService
-    ) {}
-
     public function isEnabled(): bool
     {
-        return (bool) $this->configService->get('app.referral.enabled', false);
+        return (bool) config('app.referral.enabled', false);
     }
 
     public function isDiscountUsedAsReward(Discount $discount): bool
     {
-        $rewardType = $this->configService->get('app.referral.reward_type');
+        $rewardType = config('app.referral.reward_type');
 
         return $rewardType === ReferralConstants::REWARD_TYPE_COUPON &&
-               $this->configService->get('app.referral.discount_id') == $discount->id;
+               config('app.referral.discount_id') == $discount->id;
     }
 
     public function getOrCreateReferralCode(User $user): ReferralCode
@@ -108,7 +104,7 @@ class ReferralService
             return;
         }
 
-        $trigger = $this->configService->get('app.referral.trigger');
+        $trigger = config('app.referral.trigger');
 
         if ($trigger !== ReferralConstants::TRIGGER_VERIFIED_REGISTRATION) {
             return;
@@ -162,7 +158,7 @@ class ReferralService
 
     private function processFirstPayment(User $paidUser): void
     {
-        $trigger = $this->configService->get('app.referral.trigger');
+        $trigger = config('app.referral.trigger');
 
         if ($trigger !== ReferralConstants::TRIGGER_FIRST_PAYMENT) {
             return;
@@ -186,7 +182,7 @@ class ReferralService
 
     private function processReward(Referral $referral): void
     {
-        $rewardType = $this->configService->get('app.referral.reward_type');
+        $rewardType = config('app.referral.reward_type');
 
         if ($rewardType === ReferralConstants::REWARD_TYPE_COUPON) {
             $this->processCouponReward($referral);
@@ -202,7 +198,7 @@ class ReferralService
 
     private function processCouponReward(Referral $referral): void
     {
-        $discountId = $this->configService->get('app.referral.discount_id');
+        $discountId = config('app.referral.discount_id');
 
         if (! $discountId) {
             return;
