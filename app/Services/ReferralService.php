@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Constants\ReferralConstants;
+use App\Constants\TransactionStatus;
 use App\Events\Referral\ReferralSucceeded;
 use App\Mail\Referral\ReferralRewardEarned;
 use App\Models\Discount;
@@ -130,6 +131,7 @@ class ReferralService
     {
         $hasPaidTransaction = $order->transactions()
             ->where('amount', '>', 0)
+            ->where('status', TransactionStatus::SUCCESS->value)
             ->exists();
 
         if (! $hasPaidTransaction) {
@@ -147,6 +149,7 @@ class ReferralService
 
         $hasPaidTransaction = $subscription->transactions()
             ->where('amount', '>', 0)
+            ->where('status', TransactionStatus::SUCCESS->value)
             ->exists();
 
         if (! $hasPaidTransaction) {
