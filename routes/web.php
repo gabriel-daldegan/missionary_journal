@@ -5,6 +5,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentProviders\PaddleController;
 use App\Http\Controllers\RoadmapController;
+use App\Services\PlanService;
 use App\Services\SessionService;
 use App\Services\TenantCreationService;
 use App\Services\UserDashboardService;
@@ -37,12 +38,15 @@ Auth::routes();
 
 Route::get('/plan/start', function (
     TenantCreationService $tenantCreationService,
-    SessionService $sessionService
+    SessionService $sessionService,
+    PlanService $planService,
 ) {
-    if (! auth()->check()) {
-        $sessionService->setCreateTenantForFreePlanUser(true);
-    } else {
-        $tenantCreationService->createTenantForFreePlanUser(auth()->user());
+    if ($planService->getDefaultProduct() !== null) {
+        if (! auth()->check()) {
+            $sessionService->setCreateTenantForFreePlanUser(true);
+        } else {
+            $tenantCreationService->createTenantForFreePlanUser(auth()->user());
+        }
     }
 
     return redirect()->route('register');
