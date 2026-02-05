@@ -57,6 +57,7 @@ class DashboardPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            ->favicon(asset('images/favicon.ico'))
             ->viteTheme('resources/css/filament/dashboard/theme.css')
             ->discoverWidgets(in: app_path('Filament/Dashboard/Widgets'), for: 'App\\Filament\\Dashboard\\Widgets')
             ->widgets([
