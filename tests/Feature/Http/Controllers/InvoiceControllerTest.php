@@ -18,6 +18,10 @@ class InvoiceControllerTest extends FeatureTest
     {
         config(['invoices.enabled' => true]);
 
+        $user = $this->createUser();
+
+        $this->actingAs($user);
+
         $product = OneTimeProduct::factory()->create([
             'slug' => 'product-slug-'.Str::random(20),
             'is_active' => true,
@@ -25,7 +29,7 @@ class InvoiceControllerTest extends FeatureTest
 
         $order = Order::create([
             'uuid' => (string) Str::uuid(),
-            'user_id' => 1,
+            'user_id' => $user->id,
             'total_amount' => 10,
             'currency_id' => 1,
             'status' => OrderStatus::SUCCESS->value,
@@ -37,8 +41,6 @@ class InvoiceControllerTest extends FeatureTest
             'price_per_unit' => 10,
             'currency_id' => Currency::where('code', 'USD')->first()->id,
         ]);
-
-        $user = $this->createUser();
 
         $transaction = Transaction::create([
             'uuid' => (string) Str::uuid(),
