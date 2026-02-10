@@ -204,11 +204,6 @@ class OrderResource extends Resource
         return false;
     }
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return config('app.customer_dashboard.show_orders', false);
-    }
-
     public static function canAccess(): bool
     {
         return config('app.customer_dashboard.show_orders', false);

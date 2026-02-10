@@ -75,11 +75,6 @@ class ReferralResource extends Resource
         return false;
     }
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return config('app.referral.enabled', false);
-    }
-
     public static function canAccess(): bool
     {
         return config('app.referral.enabled', false);

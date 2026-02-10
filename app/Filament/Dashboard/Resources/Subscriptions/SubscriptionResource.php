@@ -276,11 +276,6 @@ class SubscriptionResource extends Resource
             ]);
     }
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return config('app.customer_dashboard.show_subscriptions', false);
-    }
-
     public static function canAccess(): bool
     {
         return config('app.customer_dashboard.show_subscriptions', false);

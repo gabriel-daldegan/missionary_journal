@@ -155,11 +155,6 @@ class TransactionResource extends Resource
         return __('Payments');
     }
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return config('app.customer_dashboard.show_transactions', false);
-    }
-
     public static function canAccess(): bool
     {
         return config('app.customer_dashboard.show_transactions', false);
