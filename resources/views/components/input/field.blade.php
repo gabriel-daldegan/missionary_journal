@@ -26,5 +26,5 @@
     @if($label)
         <legend class="fieldset-legend font-medium">{{ $label }}</legend>
     @endif
-    <input type="{{$type}}" class="input w-full" placeholder="{{$placeholder}}" name="{{$name}}" {{$required}} {{$autofocus}} {!! $value !!} {!! $autocomplete !!} {{$disabled}}  id="{{$id}}" />
+    <input type="{{$type}}" class="input w-full" placeholder="{{$placeholder}}" name="{{$name}}" {{$required}} {{$autofocus}} {!! $value !!} {!! $autocomplete !!} {{$disabled}}  id="{{$id}}" {{ $attributes }}/>
 </fieldset>
