@@ -20,6 +20,7 @@ class InvoiceControllerTest extends FeatureTest
 
         $tenant = $this->createTenant();
         $user = $this->createUser($tenant);
+        $this->actingAs($user);
 
         $product = OneTimeProduct::factory()->create([
             'slug' => 'product-slug-'.Str::random(20),
@@ -28,7 +29,7 @@ class InvoiceControllerTest extends FeatureTest
 
         $order = Order::create([
             'uuid' => (string) Str::uuid(),
-            'user_id' => 1,
+            'user_id' => $user->id,
             'tenant_id' => $tenant->id,
             'total_amount' => 10,
             'currency_id' => 1,

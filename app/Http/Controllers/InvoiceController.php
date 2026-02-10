@@ -18,7 +18,15 @@ class InvoiceController extends Controller
 
     public function generate(string $transactionUuid)
     {
-        $transaction = Transaction::where('uuid', $transactionUuid)->firstOrFail();
+        $user = auth()->user();
+
+        if (! $user) {
+            abort(404);
+        }
+
+        $transaction = Transaction::where('uuid', $transactionUuid)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
 
         $forceRegenerate = request()->boolean('regenerate', false) && auth()->user()->isAdmin();
 

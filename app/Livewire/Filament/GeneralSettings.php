@@ -264,14 +264,17 @@ class GeneralSettings extends Component implements HasForms
                         ->schema([
                             Toggle::make('show_subscriptions')
                                 ->label(__('Show Subscriptions'))
+                                ->default(false)
                                 ->helperText(__('If enabled, customers will be able to see their subscriptions on the dashboard.'))
                                 ->required(),
                             Toggle::make('show_orders')
                                 ->label(__('Show Orders'))
+                                ->default(false)
                                 ->helperText(__('If enabled, customers will be able to see their orders on the dashboard.'))
                                 ->required(),
                             Toggle::make('show_transactions')
                                 ->label(__('Show Transactions'))
+                                ->default(false)
                                 ->helperText(__('If enabled, customers will be able to see their transactions on the dashboard.'))
                                 ->required(),
                         ]),
