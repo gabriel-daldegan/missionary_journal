@@ -351,7 +351,7 @@ class LemonSqueezyProvider implements PaymentProviderInterface
 
         if ($discount->duration_in_months !== null) {
             $duration = 'repeating';
-            $durationInMonths = $discount->duration_in_months;
+            $durationInMonths = (int) $discount->duration_in_months;
         } elseif ($discount->is_recurring) {
             $duration = 'forever';
         }
