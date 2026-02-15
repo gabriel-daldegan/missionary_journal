@@ -92,7 +92,7 @@ class LemonSqueezyClient
         string $amountType,
         ?int $maxRedemptions = null,
         string $duration = 'forever',
-        ?string $durationInMonths = null,
+        ?int $durationInMonths = null,
         ?Carbon $expiresAt = null,
     ) {
         $attributes = [
