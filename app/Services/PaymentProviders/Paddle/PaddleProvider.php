@@ -6,6 +6,7 @@ use App\Client\PaddleClient;
 use App\Constants\DiscountConstants;
 use App\Constants\PaddleConstants;
 use App\Constants\PaymentProviderConstants;
+use App\Constants\PaymentProviderPlanPriceType;
 use App\Constants\PlanType;
 use App\Filament\Dashboard\Resources\Subscriptions\Pages\PaymentProviders\Paddle\PaddleUpdatePaymentDetails;
 use App\Models\Currency;
@@ -66,6 +67,16 @@ class PaddleProvider implements PaymentProviderInterface
                 ],
             ],
         ];
+
+        if (($planPrice->setup_fee ?? 0) > 0) {
+            $setupFeePriceId = $this->findOrCreateSetupFeePrice($planPrice, $paddleProductId, $currency, $paymentProvider);
+
+            $results['productDetails'][] = [
+                'paddleProductId' => $paddleProductId,
+                'paddlePriceId' => $setupFeePriceId,
+                'quantity' => 1,
+            ];
+        }
 
         if ($discount !== null) {
             // discounts should not crash the checkout even if they fail to create
@@ -386,6 +397,39 @@ class PaddleProvider implements PaymentProviderInterface
         $this->planService->addPaymentProviderPriceId($planPrice, $paymentProvider, $paddlePrice);
 
         return $paddlePrice;
+    }
+
+    private function findOrCreateSetupFeePrice(
+        PlanPrice $planPrice,
+        string $paddleProductId,
+        Currency $currency,
+        PaymentProvider $paymentProvider,
+    ): string {
+        $existingPrices = $this->planService->getPaymentProviderPrices($planPrice, $paymentProvider);
+
+        foreach ($existingPrices as $existingPrice) {
+            if ($existingPrice->type === PaymentProviderPlanPriceType::SETUP_FEE_PRICE->value) {
+                return $existingPrice->payment_provider_price_id;
+            }
+        }
+
+        $response = $this->paddleClient->createPriceForOneTimeProduct(
+            $paddleProductId,
+            $planPrice->setup_fee,
+            $currency->code,
+            'Setup fee',
+            1,
+        );
+
+        if ($response->failed()) {
+            throw new Exception('Failed to create paddle setup fee price: '.$response->body());
+        }
+
+        $paddleSetupFeePrice = $response->json()['data']['id'];
+
+        $this->planService->addPaymentProviderPriceId($planPrice, $paymentProvider, $paddleSetupFeePrice, PaymentProviderPlanPriceType::SETUP_FEE_PRICE);
+
+        return $paddleSetupFeePrice;
     }
 
     private function createPaddlePriceForOneTimeProduct(

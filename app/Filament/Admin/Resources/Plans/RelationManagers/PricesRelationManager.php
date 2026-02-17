@@ -101,6 +101,15 @@ class PricesRelationManager extends RelationManager
                                 }
                             }
                         ),
+                    TextInput::make('setup_fee')
+                        ->type('number')
+                        ->gte(0)
+                        ->label(__('Setup Fee'))
+                        ->helperText(
+                            new HtmlString(
+                                __('One-time fee charged on first subscription only. Enter in lowest denomination (cents). E.g. 500 = $5.00. Leave empty for no setup fee.')
+                            )
+                        ),
                     TextInput::make('price_per_unit')
                         ->required()
                         ->type('number')
@@ -213,8 +222,16 @@ class PricesRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('price')
                     ->label(__('Price'))
-                    // divide by 100 to get price in dollars
                     ->formatStateUsing(function (string $state, $record) {
+                        return money($state, $record->currency->code);
+                    }),
+                TextColumn::make('setup_fee')
+                    ->label(__('Setup Fee'))
+                    ->formatStateUsing(function (?string $state, $record) {
+                        if (! $state || $state == 0) {
+                            return '-';
+                        }
+
                         return money($state, $record->currency->code);
                     }),
                 TextColumn::make('currency.name')
