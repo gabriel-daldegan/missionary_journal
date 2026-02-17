@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Constants\InvoiceStatus;
 use App\Constants\TransactionStatus;
 use App\Models\Invoice as InvoiceEntity;
+use App\Models\PlanPrice;
 use App\Models\Transaction;
 use App\Models\User;
 use Exception;
@@ -73,6 +74,25 @@ class InvoiceService
                 ->formattedPricePerUnit(
                     money($subscription->price, $subscription->currency->code)
                 );
+
+            $planPrice = PlanPrice::where('plan_id', $subscription->plan_id)
+                ->where('currency_id', $subscription->currency_id)
+                ->first();
+
+            if ($planPrice && ($planPrice->setup_fee ?? 0) > 0) {
+                $isFirstTransaction = ! $subscription->transactions()
+                    ->where('id', '<', $transaction->id)
+                    ->where('status', TransactionStatus::SUCCESS->value)
+                    ->exists();
+
+                if ($isFirstTransaction) {
+                    $orderItems[] = InvoiceItem::make(__('Setup Fee'))
+                        ->quantity(1)
+                        ->formattedPricePerUnit(
+                            money($planPrice->setup_fee, $subscription->currency->code)
+                        );
+                }
+            }
         }
 
         $customFields = $this->addAddressInfo($transaction->user, $customFields);
