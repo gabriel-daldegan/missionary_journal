@@ -188,7 +188,7 @@ class StripeProvider implements PaymentProviderInterface
 
             $stripeProductId = $this->findOrCreateStripeSubscriptionProduct($newPlan, $paymentProvider);
             $stripePrices = $this->findOrCreateStripeSubscriptionProductPrices($newPlan, $paymentProvider, $stripeProductId);
-            $lineItems = $this->buildLineItems($stripePrices, $newPlan);
+            $lineItems = $this->buildLineItems($stripePrices, $newPlan, false);
 
             $stripe = $this->getClient();
 
@@ -614,7 +614,7 @@ class StripeProvider implements PaymentProviderInterface
         return $results;
     }
 
-    private function buildLineItems(array $stripePrices, Plan $plan): array
+    private function buildLineItems(array $stripePrices, Plan $plan, bool $includeSetupFee = true): array
     {
         $lineItems = [];
         if ($plan->type === PlanType::FLAT_RATE->value) {
@@ -640,7 +640,7 @@ class StripeProvider implements PaymentProviderInterface
 
         }
 
-        if (isset($stripePrices[PaymentProviderPlanPriceType::SETUP_FEE_PRICE->value])) {
+        if ($includeSetupFee && isset($stripePrices[PaymentProviderPlanPriceType::SETUP_FEE_PRICE->value])) {
             $lineItems[] = [
                 'price' => $stripePrices[PaymentProviderPlanPriceType::SETUP_FEE_PRICE->value],
                 'quantity' => 1,

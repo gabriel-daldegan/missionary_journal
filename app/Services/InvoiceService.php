@@ -61,38 +61,7 @@ class InvoiceService
         } elseif ($subscriptionNumber) {
             $customFields[__('subscription')] = $subscriptionNumber;
 
-            $subscription = $transaction->subscription;
-
-            $itemName = $subscription->plan->name;
-
-            if ($subscription->plan->has_trial) {
-                $itemName .= ' - '.$subscription->plan->trial_interval_count.' '.$subscription->plan->trialInterval()->firstOrFail()->name.' '.__('free trial included');
-            }
-
-            $orderItems[] = InvoiceItem::make($itemName)
-                ->quantity(1)
-                ->formattedPricePerUnit(
-                    money($subscription->price, $subscription->currency->code)
-                );
-
-            $planPrice = PlanPrice::where('plan_id', $subscription->plan_id)
-                ->where('currency_id', $subscription->currency_id)
-                ->first();
-
-            if ($planPrice && ($planPrice->setup_fee ?? 0) > 0) {
-                $isFirstTransaction = ! $subscription->transactions()
-                    ->where('id', '<', $transaction->id)
-                    ->where('status', TransactionStatus::SUCCESS->value)
-                    ->exists();
-
-                if ($isFirstTransaction) {
-                    $orderItems[] = InvoiceItem::make(__('Setup Fee'))
-                        ->quantity(1)
-                        ->formattedPricePerUnit(
-                            money($planPrice->setup_fee, $subscription->currency->code)
-                        );
-                }
-            }
+            $orderItems = $this->buildSubscriptionInvoiceItems($transaction);
         }
 
         $customFields = $this->addAddressInfo($transaction->user, $customFields);
@@ -140,6 +109,45 @@ class InvoiceService
         ]);
 
         return $invoice->stream();
+    }
+
+    public function buildSubscriptionInvoiceItems(Transaction $transaction): array
+    {
+        $subscription = $transaction->subscription;
+        $items = [];
+
+        $itemName = $subscription->plan->name;
+
+        if ($subscription->plan->has_trial) {
+            $itemName .= ' - '.$subscription->plan->trial_interval_count.' '.$subscription->plan->trialInterval()->firstOrFail()->name.' '.__('free trial included');
+        }
+
+        $items[] = InvoiceItem::make($itemName)
+            ->quantity(1)
+            ->formattedPricePerUnit(
+                money($subscription->price, $subscription->currency->code)
+            );
+
+        $planPrice = PlanPrice::where('plan_id', $subscription->plan_id)
+            ->where('currency_id', $subscription->currency_id)
+            ->first();
+
+        if ($planPrice && ($planPrice->setup_fee ?? 0) > 0) {
+            $isFirstTransaction = ! $subscription->transactions()
+                ->where('id', '<', $transaction->id)
+                ->where('status', TransactionStatus::SUCCESS->value)
+                ->exists();
+
+            if ($isFirstTransaction) {
+                $items[] = InvoiceItem::make(__('Setup Fee'))
+                    ->quantity(1)
+                    ->formattedPricePerUnit(
+                        money($planPrice->setup_fee, $subscription->currency->code)
+                    );
+            }
+        }
+
+        return $items;
     }
 
     private function addAddressInfo(User $user, array $customFields): array
