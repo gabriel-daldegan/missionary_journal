@@ -39,6 +39,8 @@ class SubscriptionTotals extends Component
 
     public ?array $tiers = null;
 
+    public int $setupFee = 0;
+
     public bool $canAddDiscount = true;
 
     private DiscountService $discountService;
@@ -61,6 +63,7 @@ class SubscriptionTotals extends Component
         $this->planHasTrial = $plan->has_trial;
         $this->isTrailSkipped = $isTrailSkipped;
         $this->subtotal = $totals->subtotal;
+        $this->setupFee = $totals->setupFee;
         $this->discountAmount = $totals->discountAmount;
         $this->amountDue = $totals->amountDue;
         $this->currencyCode = $totals->currencyCode;
@@ -132,6 +135,7 @@ class SubscriptionTotals extends Component
         );
 
         $this->subtotal = $totals->subtotal;
+        $this->setupFee = $totals->setupFee;
         $this->discountAmount = $totals->discountAmount;
         $this->amountDue = $totals->amountDue;
         $this->currencyCode = $totals->currencyCode;

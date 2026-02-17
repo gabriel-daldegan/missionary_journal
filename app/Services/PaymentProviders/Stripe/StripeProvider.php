@@ -368,11 +368,17 @@ class StripeProvider implements PaymentProviderInterface
 
         $stripe = $this->getClient();
 
-        $stripeProductId = $stripe->products->create([
+        $productFields = [
             'id' => $plan->slug.'-'.Str::random(),
             'name' => $plan->name,
-            'description' => ! empty($plan->description) ? strip_tags($plan->description) : $plan->name,
-        ])->id;
+        ];
+
+        $productDescription = strip_tags($plan->description);
+        if (! empty($productDescription)) {
+            $productFields['description'] = $productDescription;
+        }
+
+        $stripeProductId = $stripe->products->create($productFields)->id;
 
         $this->planService->addPaymentProviderProductId($plan, $paymentProvider, $stripeProductId);
 
@@ -593,6 +599,18 @@ class StripeProvider implements PaymentProviderInterface
             }
         }
 
+        if (($planPrice->setup_fee ?? 0) > 0) {
+            $setupFeePriceId = $stripe->prices->create([
+                'product' => $stripeProductId,
+                'unit_amount' => $planPrice->setup_fee,
+                'currency' => $currencyCode,
+            ])->id;
+
+            $this->planService->addPaymentProviderPriceId($planPrice, $paymentProvider, $setupFeePriceId, PaymentProviderPlanPriceType::SETUP_FEE_PRICE);
+
+            $results[PaymentProviderPlanPriceType::SETUP_FEE_PRICE->value] = $setupFeePriceId;
+        }
+
         return $results;
     }
 
@@ -620,6 +638,13 @@ class StripeProvider implements PaymentProviderInterface
                 'price' => $stripePrices[PaymentProviderPlanPriceType::USAGE_BASED_PRICE->value],
             ];
 
+        }
+
+        if (isset($stripePrices[PaymentProviderPlanPriceType::SETUP_FEE_PRICE->value])) {
+            $lineItems[] = [
+                'price' => $stripePrices[PaymentProviderPlanPriceType::SETUP_FEE_PRICE->value],
+                'quantity' => 1,
+            ];
         }
 
         return $lineItems;

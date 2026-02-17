@@ -65,6 +65,17 @@
         </div>
     @endif
 
+    @if ($setupFee > 0)
+        <div class="flex flex-row justify-between mt-2">
+            <div class="text-primary-900">
+                {{ __('Setup fee') }} <span class="text-xs text-neutral-400">({{ __('one-time') }})</span>
+            </div>
+            <div class="text-primary-900">
+                @money($setupFee, $currencyCode)
+            </div>
+        </div>
+    @endif
+
     @if ($planPriceType === \App\Constants\PlanPriceType::USAGE_BASED_PER_UNIT->value)
         <div class="flex flex-row justify-between mt-2">
             <div class="text-primary-900">
@@ -135,7 +146,7 @@
         </div>
         <div class="text-primary-500 text-xl font-bold">
             @if ($planHasTrial && !$isTrailSkipped)
-                @money(0, $currencyCode)
+                @money($setupFee, $currencyCode)
             @else
                 @money($amountDue, $currencyCode)
             @endif
