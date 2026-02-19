@@ -26,7 +26,8 @@ class InvoiceServiceTest extends FeatureTest
 
     public function test_subscription_invoice_includes_setup_fee_on_first_transaction(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $currency = Currency::where('code', 'USD')->firstOrFail();
 
         $plan = Plan::factory()->create();
@@ -43,6 +44,7 @@ class InvoiceServiceTest extends FeatureTest
             'plan_id' => $plan->id,
             'currency_id' => $currency->id,
             'price' => 1000,
+            'tenant_id' => $tenant->id,
         ]);
 
         $transaction = Transaction::create([
@@ -58,6 +60,7 @@ class InvoiceServiceTest extends FeatureTest
             'payment_provider_id' => PaymentProvider::firstOrFail()->id,
             'payment_provider_status' => 'success',
             'payment_provider_transaction_id' => 'tx_setup_fee_'.Str::random(10),
+            'tenant_id' => $tenant->id,
         ]);
 
         $items = $this->invoiceService->buildSubscriptionInvoiceItems($transaction);
@@ -69,7 +72,8 @@ class InvoiceServiceTest extends FeatureTest
 
     public function test_subscription_invoice_does_not_include_setup_fee_on_subsequent_transactions(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $currency = Currency::where('code', 'USD')->firstOrFail();
 
         $plan = Plan::factory()->create();
@@ -86,6 +90,7 @@ class InvoiceServiceTest extends FeatureTest
             'plan_id' => $plan->id,
             'currency_id' => $currency->id,
             'price' => 1000,
+            'tenant_id' => $tenant->id,
         ]);
 
         // First transaction (setup fee was charged here)
@@ -102,6 +107,7 @@ class InvoiceServiceTest extends FeatureTest
             'payment_provider_id' => PaymentProvider::firstOrFail()->id,
             'payment_provider_status' => 'success',
             'payment_provider_transaction_id' => 'tx_first_'.Str::random(10),
+            'tenant_id' => $tenant->id,
         ]);
 
         // Second transaction (renewal, no setup fee)
@@ -118,6 +124,7 @@ class InvoiceServiceTest extends FeatureTest
             'payment_provider_id' => PaymentProvider::firstOrFail()->id,
             'payment_provider_status' => 'success',
             'payment_provider_transaction_id' => 'tx_second_'.Str::random(10),
+            'tenant_id' => $tenant->id,
         ]);
 
         $items = $this->invoiceService->buildSubscriptionInvoiceItems($secondTransaction);
@@ -128,7 +135,8 @@ class InvoiceServiceTest extends FeatureTest
 
     public function test_subscription_invoice_without_setup_fee(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $currency = Currency::where('code', 'USD')->firstOrFail();
 
         $plan = Plan::factory()->create();
@@ -145,6 +153,7 @@ class InvoiceServiceTest extends FeatureTest
             'plan_id' => $plan->id,
             'currency_id' => $currency->id,
             'price' => 1000,
+            'tenant_id' => $tenant->id,
         ]);
 
         $transaction = Transaction::create([
@@ -160,6 +169,7 @@ class InvoiceServiceTest extends FeatureTest
             'payment_provider_id' => PaymentProvider::firstOrFail()->id,
             'payment_provider_status' => 'success',
             'payment_provider_transaction_id' => 'tx_no_fee_'.Str::random(10),
+            'tenant_id' => $tenant->id,
         ]);
 
         $items = $this->invoiceService->buildSubscriptionInvoiceItems($transaction);
@@ -170,7 +180,8 @@ class InvoiceServiceTest extends FeatureTest
 
     public function test_subscription_invoice_with_zero_setup_fee(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $currency = Currency::where('code', 'USD')->firstOrFail();
 
         $plan = Plan::factory()->create();
@@ -187,6 +198,7 @@ class InvoiceServiceTest extends FeatureTest
             'plan_id' => $plan->id,
             'currency_id' => $currency->id,
             'price' => 1000,
+            'tenant_id' => $tenant->id,
         ]);
 
         $transaction = Transaction::create([
@@ -202,6 +214,7 @@ class InvoiceServiceTest extends FeatureTest
             'payment_provider_id' => PaymentProvider::firstOrFail()->id,
             'payment_provider_status' => 'success',
             'payment_provider_transaction_id' => 'tx_zero_fee_'.Str::random(10),
+            'tenant_id' => $tenant->id,
         ]);
 
         $items = $this->invoiceService->buildSubscriptionInvoiceItems($transaction);
@@ -212,7 +225,8 @@ class InvoiceServiceTest extends FeatureTest
 
     public function test_setup_fee_not_included_when_first_transaction_failed(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $currency = Currency::where('code', 'USD')->firstOrFail();
 
         $plan = Plan::factory()->create();
@@ -229,6 +243,7 @@ class InvoiceServiceTest extends FeatureTest
             'plan_id' => $plan->id,
             'currency_id' => $currency->id,
             'price' => 1000,
+            'tenant_id' => $tenant->id,
         ]);
 
         // First transaction failed
@@ -245,6 +260,7 @@ class InvoiceServiceTest extends FeatureTest
             'payment_provider_id' => PaymentProvider::firstOrFail()->id,
             'payment_provider_status' => 'failed',
             'payment_provider_transaction_id' => 'tx_failed_'.Str::random(10),
+            'tenant_id' => $tenant->id,
         ]);
 
         // Second transaction succeeded (this is effectively the first successful one)
@@ -261,6 +277,7 @@ class InvoiceServiceTest extends FeatureTest
             'payment_provider_id' => PaymentProvider::firstOrFail()->id,
             'payment_provider_status' => 'success',
             'payment_provider_transaction_id' => 'tx_retry_'.Str::random(10),
+            'tenant_id' => $tenant->id,
         ]);
 
         $items = $this->invoiceService->buildSubscriptionInvoiceItems($secondTransaction);

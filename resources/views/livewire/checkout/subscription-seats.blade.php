@@ -5,7 +5,7 @@
                 <legend class="fieldset-legend">{{ __('Number of seats:') }}</legend>
                 <input type="number" min="1"
                        {{ $maxQuantity > 0 ? 'max=' . $maxQuantity : '' }}
-                       wire:model.blur="quantity"
+                       wire:model.live.debounce.300ms="quantity"
                        class="input input-bordered md:w-2/3 max-w-xs">
             </fieldset>
 

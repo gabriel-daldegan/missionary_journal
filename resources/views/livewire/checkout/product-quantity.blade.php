@@ -5,7 +5,7 @@
             <span class="font-medium text-sm">{{ __('Quantity') }}</span>
             <fieldset class="fieldset">
                 <input type="number" min="1" class="input input-md" {{ $maxQuantity > 0 ? 'max=' . $maxQuantity : '' }}
-                wire:model.blur="quantity" />
+                wire:model.live.debounce.300ms="quantity" />
             </fieldset>
         </div>
 
