@@ -14,6 +14,7 @@ class PlanPrice extends Model
     protected $fillable = [
         'plan_id',
         'price',
+        'setup_fee',
         'currency_id',
         'price_per_unit',
         'type',
@@ -29,6 +30,7 @@ class PlanPrice extends Model
         static::updating(function (PlanPrice $planPrice) {
             // delete plan_price_payment_provider_data when plan price is updated to recreate provider prices when plan price is updated
             if ($planPrice->getOriginal('price') !== $planPrice->price ||
+                $planPrice->getOriginal('setup_fee') !== $planPrice->setup_fee ||
                 $planPrice->getOriginal('price_per_unit') !== $planPrice->price_per_unit ||
                 $planPrice->getOriginal('type') !== $planPrice->type ||
                 $planPrice->getOriginal('tiers') !== $planPrice->tiers

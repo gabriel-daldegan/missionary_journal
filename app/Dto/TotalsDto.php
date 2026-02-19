@@ -11,6 +11,8 @@ class TotalsDto
 
     public int $discountAmount = 0;
 
+    public int $setupFee = 0;
+
     /**
      * @var int total prices of products in cart (with tax) + shipping cost + fees + tax on fees - discount
      */

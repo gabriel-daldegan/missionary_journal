@@ -61,13 +61,14 @@ class CalculationService
         $totalsDto->currencyCode = $currencyCode;
 
         $totalsDto->subtotal = $planPrice->price;
+        $totalsDto->setupFee = $planPrice->setup_fee ?? 0;
 
         $totalsDto->discountAmount = 0;
         if ($discountCode !== null) {
             $totalsDto->discountAmount = $this->discountService->getDiscountAmount($discountCode, $totalsDto->subtotal);
         }
 
-        $totalsDto->amountDue = max(0, $totalsDto->subtotal - $totalsDto->discountAmount);
+        $totalsDto->amountDue = max(0, $totalsDto->subtotal - $totalsDto->discountAmount) + $totalsDto->setupFee;
 
         $totalsDto->planPriceType = $planPrice->type;
         $totalsDto->pricePerUnit = $planPrice->price_per_unit;
