@@ -28,6 +28,11 @@
                 @endif
                 / {{$plan->interval_count > 1 ? $plan->interval_count : '' }} {{ __($plan->interval->name) }}
             </div>
+            @if(($price->setup_fee ?? 0) > 0)
+                <div class="text-sm text-neutral-500 mt-1">
+                    + @money($price->setup_fee, $price->currency->code) {{ __('setup fee') }}
+                </div>
+            @endif
         @endif
 
         @if($price->type === \App\Constants\PlanPriceType::USAGE_BASED_PER_UNIT->value)

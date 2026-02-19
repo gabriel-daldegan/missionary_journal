@@ -63,6 +63,7 @@ class CalculationService
 
         $totalsDto->currencyCode = $currencyCode;
 
+        $totalsDto->setupFee = $planPrice->setup_fee ?? 0;
         if ($plan->type === PlanType::SEAT_BASED->value) {
             $totalsDto->subtotal = $planPrice->price * $quantity;
         } else {
@@ -74,7 +75,7 @@ class CalculationService
             $totalsDto->discountAmount = $this->discountService->getDiscountAmount($discountCode, $totalsDto->subtotal);
         }
 
-        $totalsDto->amountDue = max(0, $totalsDto->subtotal - $totalsDto->discountAmount);
+        $totalsDto->amountDue = max(0, $totalsDto->subtotal - $totalsDto->discountAmount) + $totalsDto->setupFee;
 
         $totalsDto->planPriceType = $planPrice->type;
         $totalsDto->pricePerUnit = $planPrice->price_per_unit;
