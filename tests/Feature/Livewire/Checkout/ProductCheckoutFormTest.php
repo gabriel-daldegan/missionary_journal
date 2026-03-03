@@ -56,6 +56,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
 
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         // get number of orders before checkout
@@ -115,6 +117,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
 
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         // get number of orders before checkout
@@ -192,6 +196,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
 
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         // get number of orders before checkout
@@ -278,6 +284,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
 
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         // get number of orders before checkout
@@ -375,6 +383,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
 
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         // get number of orders before checkout
@@ -436,6 +446,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
 
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         // get number of orders before checkout
@@ -502,6 +514,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $cartDto->items = [$cartItem];
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         $mockUserService = Mockery::mock(UserService::class);
@@ -560,6 +574,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $cartDto->items = [$cartItem];
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         $newUser = User::factory()->make(['email' => $email, 'name' => $name]);
@@ -624,6 +640,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $cartDto->items = [$cartItem];
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         $mockUserService = Mockery::mock(UserService::class);
@@ -684,6 +702,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $cartDto->items = [$cartItem];
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         // Test when not showing OTP form
@@ -730,6 +750,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $cartDto->items = [$cartItem];
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         $mockUserService = Mockery::mock(UserService::class);
@@ -792,6 +814,8 @@ class ProductCheckoutFormTest extends FeatureTest
             $cartDto->items = [$cartItem];
             $mock->shouldReceive('getCartDto')->andReturn($cartDto);
             $mock->shouldReceive('saveCartDto');
+            $mock->shouldReceive('getCouponCode')->andReturn(null);
+            $mock->shouldReceive('clearCouponCode');
         }));
 
         $mockUserService = Mockery::mock(UserService::class);

@@ -75,6 +75,33 @@ class SubscriptionTotals extends Component
         $this->pricePerUnit = $totals->pricePerUnit;
         $this->tiers = $totals->tiers;
         $this->canAddDiscount = $canAddDiscount;
+
+        $this->applyCouponFromSession($plan);
+    }
+
+    private function applyCouponFromSession(Plan $plan): void
+    {
+        $couponCode = $this->sessionService->getCouponCode();
+
+        if ($couponCode === null) {
+            return;
+        }
+
+        if (! $this->discountService->isCodeRedeemableForPlan($couponCode, auth()->user(), $plan)) {
+            return;
+        }
+
+        $this->sessionService->clearCouponCode();
+
+        /** @var SubscriptionCheckoutDto $subscriptionCheckoutDto */
+        $subscriptionCheckoutDto = $this->sessionService->getSubscriptionCheckoutDto();
+
+        $subscriptionCheckoutDto->discountCode = $couponCode;
+        $subscriptionCheckoutDto->planSlug = $this->planSlug;
+
+        $this->sessionService->saveSubscriptionCheckoutDto($subscriptionCheckoutDto);
+
+        $this->updateTotals();
     }
 
     public function getCodeFromSession(): ?string

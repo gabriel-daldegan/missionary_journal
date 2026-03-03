@@ -19,4 +19,6 @@ class DiscountConstants
         self::ACTION_TYPE_RENEWAL,
         self::ACTION_TYPE_UPGRADE,
     ];
+
+    public const COUPON_QUERY_PARAMETER = 'coupon';
 }

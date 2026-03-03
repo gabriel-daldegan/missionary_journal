@@ -17,4 +17,6 @@ class SessionConstants
     public const DISMISSED_ANNOUNCEMENTS = 'dismissedAnnouncements';
 
     public const REFERRAL_CODE = 'referralCode';
+
+    public const COUPON_CODE = 'couponCode';
 }
