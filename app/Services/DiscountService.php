@@ -192,6 +192,10 @@ class DiscountService
         $discountCode = DiscountCode::with('discount')
             ->where('code', $code)
             ->whereRelation('discount', 'is_active', true)
+            ->whereRelation('discount', function ($query) {
+                $query->whereNull('valid_until')
+                    ->orWhere('valid_until', '>=', now());
+            })
             ->first();
 
         return $discountCode?->discount;

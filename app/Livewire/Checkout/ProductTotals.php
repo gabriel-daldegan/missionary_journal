@@ -48,6 +48,29 @@ class ProductTotals extends Component
         $this->discountAmount = $totals->discountAmount;
         $this->amountDue = $totals->amountDue;
         $this->currencyCode = $totals->currencyCode;
+
+        $this->applyCouponFromSession($product);
+    }
+
+    private function applyCouponFromSession(OneTimeProduct $product): void
+    {
+        $couponCode = $this->sessionService->getCouponCode();
+
+        if ($couponCode === null) {
+            return;
+        }
+
+        if (! $this->discountService->isCodeRedeemableForOneTimeProduct($couponCode, auth()->user(), $product)) {
+            return;
+        }
+
+        $this->sessionService->clearCouponCode();
+
+        $cartDto = $this->getCartDto();
+        $cartDto->discountCode = $couponCode;
+        $this->saveCartDto($cartDto);
+
+        $this->updateTotals();
     }
 
     private function getCartDto(): ?CartDto

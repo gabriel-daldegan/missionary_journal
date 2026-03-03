@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,13 +12,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('subscription_versions', function (Blueprint $table) {
-            $table->unsignedBigInteger('versionable_id')->change();
-        });
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE subscription_versions ALTER COLUMN versionable_id TYPE bigint USING versionable_id::bigint');
+            DB::statement('ALTER TABLE transaction_versions ALTER COLUMN versionable_id TYPE bigint USING versionable_id::bigint');
+        } else {
+            Schema::table('subscription_versions', function (Blueprint $table) {
+                $table->unsignedBigInteger('versionable_id')->change();
+            });
 
-        Schema::table('transaction_versions', function (Blueprint $table) {
-            $table->unsignedBigInteger('versionable_id')->change();
-        });
+            Schema::table('transaction_versions', function (Blueprint $table) {
+                $table->unsignedBigInteger('versionable_id')->change();
+            });
+        }
     }
 
     /**
@@ -25,12 +31,17 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('subscription_versions', function (Blueprint $table) {
-            $table->string('versionable_id')->change();
-        });
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE subscription_versions ALTER COLUMN versionable_id TYPE varchar(255)');
+            DB::statement('ALTER TABLE transaction_versions ALTER COLUMN versionable_id TYPE varchar(255)');
+        } else {
+            Schema::table('subscription_versions', function (Blueprint $table) {
+                $table->string('versionable_id')->change();
+            });
 
-        Schema::table('transaction_versions', function (Blueprint $table) {
-            $table->string('versionable_id')->change();
-        });
+            Schema::table('transaction_versions', function (Blueprint $table) {
+                $table->string('versionable_id')->change();
+            });
+        }
     }
 };
