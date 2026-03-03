@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Discounts\RelationManagers;
 
+use App\Constants\DiscountConstants;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -40,7 +41,11 @@ class CodesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('code')->label(__('Code')),
+                TextColumn::make('code')
+                    ->label(__('Code'))
+                    ->copyable()
+                    ->copyableState(fn ($record) => config('app.url').'?'.DiscountConstants::COUPON_QUERY_PARAMETER.'='.urlencode($record->code))
+                    ->copyMessage(__('URL Copied!')),
                 TextColumn::make('redemptions_count')
                     ->label(__('Redemptions'))
                     ->counts('redemptions'),
