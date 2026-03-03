@@ -72,4 +72,40 @@ class SessionService
     {
         session()->forget(SessionConstants::SMS_VERIFICATION_DTO);
     }
+
+    public function getCouponCode(): ?string
+    {
+        $data = session(SessionConstants::COUPON_CODE);
+
+        if ($data === null) {
+            return null;
+        }
+
+        if (! is_array($data) || ! isset($data['code'], $data['stored_at'])) {
+            session()->forget(SessionConstants::COUPON_CODE);
+
+            return null;
+        }
+
+        if (now()->diffInHours($data['stored_at'], absolute: true) >= 8) { // expire coupon code after 8 hours
+            session()->forget(SessionConstants::COUPON_CODE);
+
+            return null;
+        }
+
+        return $data['code'];
+    }
+
+    public function saveCouponCode(string $code): void
+    {
+        session([SessionConstants::COUPON_CODE => [
+            'code' => $code,
+            'stored_at' => now(),
+        ]]);
+    }
+
+    public function clearCouponCode(): void
+    {
+        session()->forget(SessionConstants::COUPON_CODE);
+    }
 }
