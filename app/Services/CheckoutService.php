@@ -14,11 +14,13 @@ class CheckoutService
         private SubscriptionService $subscriptionService,
         private OrderService $orderService,
         private TenantCreationService $tenantCreationService,
+        private PlanService $planService,
     ) {}
 
     public function initSubscriptionCheckout(string $planSlug, ?string $tenantUuid, int $quantity = 1, bool $shouldCreateNewTenant = false)
     {
-        $tenant = $this->resolveSubscriptionTenant($shouldCreateNewTenant, $tenantUuid);
+        $plan = $this->planService->getActivePlanBySlug($planSlug);
+        $tenant = $this->resolveSubscriptionTenant($shouldCreateNewTenant, $tenantUuid, $plan);
 
         $subscription = $this->subscriptionService->findNewByPlanSlugAndTenant($planSlug, $tenant);
         if ($subscription === null) {
@@ -41,7 +43,8 @@ class CheckoutService
 
     public function initLocalSubscriptionCheckout(string $planSlug, ?string $tenantUuid, int $quantity = 1, bool $shouldCreateNewTenant = false)
     {
-        $tenant = $this->resolveSubscriptionTenant($shouldCreateNewTenant, $tenantUuid);
+        $plan = $this->planService->getActivePlanBySlug($planSlug);
+        $tenant = $this->resolveSubscriptionTenant($shouldCreateNewTenant, $tenantUuid, $plan);
 
         $subscription = $this->subscriptionService->findNewByPlanSlugAndTenant($planSlug, $tenant);
         if ($subscription === null) {
@@ -102,12 +105,12 @@ class CheckoutService
         return $order;
     }
 
-    public function resolveSubscriptionTenant(bool $shouldCreateNewTenant, ?string $tenantUuid): Tenant
+    public function resolveSubscriptionTenant(bool $shouldCreateNewTenant, ?string $tenantUuid, ?\App\Models\Plan $plan = null): Tenant
     {
         if ($shouldCreateNewTenant) {
             $tenant = $this->tenantCreationService->createTenant(auth()->user());
         } else {
-            $tenant = $this->tenantCreationService->findUserTenantForNewSubscriptionByUuid(auth()->user(), $tenantUuid);
+            $tenant = $this->tenantCreationService->findUserTenantForNewSubscriptionByUuid(auth()->user(), $tenantUuid, $plan);
 
             if ($tenant === null) {
                 // just find any tenant user can use
