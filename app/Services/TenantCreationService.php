@@ -6,6 +6,7 @@ use App\Constants\SubscriptionConstants;
 use App\Constants\TenancyPermissionConstants;
 use App\Constants\TenantConstants;
 use App\Events\Tenant\TenantCreated;
+use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -48,25 +49,27 @@ class TenantCreationService
         )->first();
     }
 
-    public function findUserTenantsForNewSubscription(?User $user)
+    public function findUserTenantsForNewSubscription(?User $user, ?Plan $plan = null)
     {
         if ($user === null) {
             return collect();
         }
 
         if (config('app.tenant_multiple_subscriptions_enabled')) {
-            return $this->tenantPermissionService->filterTenantsWhereUserHasPermission(
-                $user->tenants()->get(),
+            $tenants = $this->tenantPermissionService->filterTenantsWhereUserHasPermission(
+                $user->tenants()->withCount('users')->get(),
+                TenancyPermissionConstants::PERMISSION_CREATE_SUBSCRIPTIONS
+            );
+        } else {
+            $tenants = $this->tenantPermissionService->filterTenantsWhereUserHasPermission(
+                $user->tenants()->whereDoesntHave('subscriptions', function ($query) {
+                    $query->whereIn('status', SubscriptionConstants::SUBSCRIPTION_STATUS_THAT_ARE_NOT_DEAD);
+                })->withCount('users')->get(),
                 TenancyPermissionConstants::PERMISSION_CREATE_SUBSCRIPTIONS
             );
         }
 
-        return $this->tenantPermissionService->filterTenantsWhereUserHasPermission(
-            $user->tenants()->whereDoesntHave('subscriptions', function ($query) {
-                $query->whereIn('status', SubscriptionConstants::SUBSCRIPTION_STATUS_THAT_ARE_NOT_DEAD);
-            })->get(),
-            TenancyPermissionConstants::PERMISSION_CREATE_SUBSCRIPTIONS
-        );
+        return $this->filterTenantsByPlanMaxUsers($tenants, $plan);
     }
 
     public function findUserTenantForNewSubscription(User $user)
@@ -79,26 +82,37 @@ class TenantCreationService
         )->first();
     }
 
-    public function findUserTenantForNewSubscriptionByUuid(User $user, ?string $tenantUuid): ?Tenant
+    public function findUserTenantForNewSubscriptionByUuid(User $user, ?string $tenantUuid, ?Plan $plan = null): ?Tenant
     {
         if ($tenantUuid === null) {
             return null;
         }
 
         if (config('app.tenant_multiple_subscriptions_enabled')) {
-            return $this->tenantPermissionService->filterTenantsWhereUserHasPermission(
+            $tenants = $this->tenantPermissionService->filterTenantsWhereUserHasPermission(
                 $user->tenants()
-                    ->where('uuid', $tenantUuid)->get(),
+                    ->where('uuid', $tenantUuid)->withCount('users')->get(),
                 TenancyPermissionConstants::PERMISSION_CREATE_SUBSCRIPTIONS
-            )->first();
+            );
+        } else {
+            $tenants = $this->tenantPermissionService->filterTenantsWhereUserHasPermission(
+                $user->tenants()->whereDoesntHave('subscriptions', function ($query) {
+                    $query->whereIn('status', SubscriptionConstants::SUBSCRIPTION_STATUS_THAT_ARE_NOT_DEAD);
+                })->where('uuid', $tenantUuid)->withCount('users')->get(),
+                TenancyPermissionConstants::PERMISSION_CREATE_SUBSCRIPTIONS
+            );
         }
 
-        return $this->tenantPermissionService->filterTenantsWhereUserHasPermission(
-            $user->tenants()->whereDoesntHave('subscriptions', function ($query) {
-                $query->whereIn('status', SubscriptionConstants::SUBSCRIPTION_STATUS_THAT_ARE_NOT_DEAD);
-            })->where('uuid', $tenantUuid)->get(),
-            TenancyPermissionConstants::PERMISSION_CREATE_SUBSCRIPTIONS
-        )->first();
+        return $this->filterTenantsByPlanMaxUsers($tenants, $plan)->first();
+    }
+
+    private function filterTenantsByPlanMaxUsers($tenants, ?Plan $plan)
+    {
+        if ($plan === null || $plan->max_users_per_tenant <= 0) {
+            return $tenants;
+        }
+
+        return $tenants->filter(fn ($tenant) => $tenant->users_count <= $plan->max_users_per_tenant);
     }
 
     public function createTenant(User $user, ?string $tenantName = null): Tenant
