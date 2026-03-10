@@ -371,6 +371,13 @@ class SubscriptionService
             return false;
         }
 
+        if ($subscription->tenant_id !== null) {
+            $tenantUserCount = $subscription->tenant->users()->count();
+            if ($newPlan->max_users_per_tenant > 0 && $tenantUserCount > $newPlan->max_users_per_tenant) {
+                return false;
+            }
+        }
+
         $changeResult = $paymentProviderStrategy->changePlan($subscription, $newPlan, $isProrated);
 
         if ($changeResult) {

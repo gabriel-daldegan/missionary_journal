@@ -42,6 +42,21 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', __('You are already subscribed to this plan.'));
         }
 
+        $newPlan = $this->planService->getActivePlanBySlug($newPlanSlug);
+
+        if (! $newPlan) {
+            return redirect()->back()->with('error', __('Plan not found.'));
+        }
+
+        $tenantUserCount = $tenant->users()->count();
+        if ($newPlan->max_users_per_tenant > 0 && $tenantUserCount > $newPlan->max_users_per_tenant) {
+            return redirect()->back()->with('error', __('This plan supports a maximum of :max users, but your workspace currently has :count users. Please remove :excess user(s) before switching to this plan.', [
+                'max' => $newPlan->max_users_per_tenant,
+                'count' => $tenantUserCount,
+                'excess' => $tenantUserCount - $newPlan->max_users_per_tenant,
+            ]));
+        }
+
         $paymentProvider = $subscription->paymentProvider()->first();
 
         if (! $paymentProvider) {
@@ -51,8 +66,6 @@ class SubscriptionController extends Controller
         $paymentProviderStrategy = $this->paymentService->getPaymentProviderBySlug(
             $paymentProvider->slug
         );
-
-        $newPlan = $this->planService->getActivePlanBySlug($newPlanSlug);
 
         $isProrated = config('app.payment.proration_enabled', true);
 
