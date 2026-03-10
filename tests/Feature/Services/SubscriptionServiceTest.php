@@ -14,6 +14,7 @@ use App\Models\PlanPrice;
 use App\Models\Product;
 use App\Models\Subscription;
 use App\Models\UserSubscriptionTrial;
+use App\Services\PaymentProviders\PaymentProviderInterface;
 use App\Services\SubscriptionService;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
@@ -698,6 +699,124 @@ class SubscriptionServiceTest extends FeatureTest
         // Should return false when checking with tenant2 (different tenant)
         $this->assertFalse($service->isUserSubscribed($user, null, $tenant2));
         $this->assertFalse($service->isUserSubscribed($user, $productSlug, $tenant2));
+    }
+
+    public function test_change_plan_returns_false_when_tenant_exceeds_new_plan_max_users(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        $this->createUser($tenant);
+        $this->createUser($tenant); // 3 users
+
+        $currentPlan = Plan::factory()->create([
+            'slug' => Str::random(),
+            'is_active' => true,
+            'max_users_per_tenant' => 5,
+        ]);
+
+        $newPlan = Plan::factory()->create([
+            'slug' => Str::random(),
+            'is_active' => true,
+            'max_users_per_tenant' => 2,
+        ]);
+
+        $subscription = Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $currentPlan->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $paymentProvider = \Mockery::mock(PaymentProviderInterface::class);
+        $paymentProvider->shouldNotReceive('changePlan');
+
+        $service = app()->make(SubscriptionService::class);
+
+        $result = $service->changePlan($subscription, $paymentProvider, $newPlan->slug);
+
+        $this->assertFalse($result);
+    }
+
+    public function test_change_plan_succeeds_when_tenant_within_new_plan_max_users(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant); // 1 user
+
+        $currentPlan = Plan::factory()->create([
+            'slug' => Str::random(),
+            'is_active' => true,
+            'max_users_per_tenant' => 5,
+        ]);
+
+        $newPlan = Plan::factory()->create([
+            'slug' => Str::random(),
+            'is_active' => true,
+            'max_users_per_tenant' => 3,
+        ]);
+
+        $subscription = Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $currentPlan->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $paymentProvider = \Mockery::mock(PaymentProviderInterface::class);
+        $paymentProvider->shouldReceive('changePlan')
+            ->once()
+            ->andReturn(true);
+
+        Event::fake();
+
+        $service = app()->make(SubscriptionService::class);
+
+        $result = $service->changePlan($subscription, $paymentProvider, $newPlan->slug);
+
+        $this->assertTrue($result);
+    }
+
+    public function test_change_plan_succeeds_when_new_plan_has_unlimited_users(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        $this->createUser($tenant);
+        $this->createUser($tenant);
+        $this->createUser($tenant); // 4 users
+
+        $currentPlan = Plan::factory()->create([
+            'slug' => Str::random(),
+            'is_active' => true,
+            'max_users_per_tenant' => 10,
+        ]);
+
+        $newPlan = Plan::factory()->create([
+            'slug' => Str::random(),
+            'is_active' => true,
+            'max_users_per_tenant' => 0, // unlimited
+        ]);
+
+        $subscription = Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $currentPlan->id,
+            'status' => SubscriptionStatus::ACTIVE->value,
+            'ends_at' => now()->addDays(30),
+            'tenant_id' => $tenant->id,
+        ]);
+
+        $paymentProvider = \Mockery::mock(PaymentProviderInterface::class);
+        $paymentProvider->shouldReceive('changePlan')
+            ->once()
+            ->andReturn(true);
+
+        Event::fake();
+
+        $service = app()->make(SubscriptionService::class);
+
+        $result = $service->changePlan($subscription, $paymentProvider, $newPlan->slug);
+
+        $this->assertTrue($result);
     }
 
     public static function nonDeadSubscriptionProvider()

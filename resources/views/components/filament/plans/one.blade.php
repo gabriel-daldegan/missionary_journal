@@ -8,6 +8,9 @@
 
 @php
     $price = $planService->getPlanPrice($plan);
+    $tenant = \Filament\Facades\Filament::getTenant();
+    $tenantUserCount = $tenant ? $tenant->users()->count() : 0;
+    $exceedsMaxUsers = $plan->max_users_per_tenant > 0 && $tenantUserCount > $plan->max_users_per_tenant;
 @endphp
 
 
@@ -70,11 +73,29 @@
         </div>
     </div>
     <div class="w-full">
-        <a class="btn btn-block bg-primary-500 dark:bg-primary-500 text-white px-6 mt-6 border-0 hover:bg-primary-500/90"
-           {{$subscription !== null && $subscription->plan_id === $plan->id ? 'disabled' : ''}}
-           href="{{ route($buyRoute, ['planSlug' => $plan->slug, 'subscriptionUuid' => $subscription?->uuid, 'tenantUuid' => \Filament\Facades\Filament::getTenant()->uuid]) }}">
-            {{__('Buy')}} {{ $plan->product->name }}
-        </a>
+        @if($exceedsMaxUsers)
+            <div class="relative mt-6">
+                <button class="btn btn-block bg-gray-400 text-white px-6 border-0 cursor-not-allowed" disabled>
+                    {{__('Buy')}} {{ $plan->product->name }}
+                </button>
+                <div class="flex justify-center mt-3">
+                    <div class="tooltip tooltip-bottom" data-tip="{{ __('This plan supports a maximum of :max users, but your workspace currently has :count users. Please remove :excess user(s) before switching to this plan.', ['max' => $plan->max_users_per_tenant, 'count' => $tenantUserCount, 'excess' => $tenantUserCount - $plan->max_users_per_tenant]) }}">
+                        <span class="inline-flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400 cursor-help">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                            </svg>
+                            {{ __('Not available for your workspace') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        @else
+            <a class="btn btn-block bg-primary-500 dark:bg-primary-500 text-white px-6 mt-6 border-0 hover:bg-primary-500/90"
+               {{$subscription !== null && $subscription->plan_id === $plan->id ? 'disabled' : ''}}
+               href="{{ route($buyRoute, ['planSlug' => $plan->slug, 'subscriptionUuid' => $subscription?->uuid, 'tenantUuid' => \Filament\Facades\Filament::getTenant()->uuid]) }}">
+                {{__('Buy')}} {{ $plan->product->name }}
+            </a>
+        @endif
         <p class="max-w-xs mt-6 text-xs text-gray-600 sm:text-sm sm:text-center sm:max-w-sm sm:mx-auto dark:text-zinc-400">
             {{ $plan->product->description }}
         </p>
