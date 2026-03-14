@@ -52,10 +52,20 @@ class PaddleProvider implements PaymentProviderInterface
 
         $planPrice = $this->calculationService->getPlanPrice($plan);
 
-        $paddlePrice = $this->planService->getPaymentProviderPriceId($planPrice, $paymentProvider);
+        $shouldSkipTrial = $this->subscriptionService->shouldSkipTrial($subscription);
 
-        if ($paddlePrice === null) {
-            $paddlePrice = $this->createPaddlePriceForPlan($plan, $paddleProductId, $currency, $paymentProvider, $planPrice);
+        if ($shouldSkipTrial && $plan->has_trial) {
+            $paddlePrice = $this->planService->getPaymentProviderPriceId($planPrice, $paymentProvider, PaymentProviderPlanPriceType::NO_TRIAL_PRICE);
+
+            if ($paddlePrice === null) {
+                $paddlePrice = $this->createPaddlePriceForPlan($plan, $paddleProductId, $currency, $paymentProvider, $planPrice, true, PaymentProviderPlanPriceType::NO_TRIAL_PRICE);
+            }
+        } else {
+            $paddlePrice = $this->planService->getPaymentProviderPriceId($planPrice, $paymentProvider, PaymentProviderPlanPriceType::MAIN_PRICE);
+
+            if ($paddlePrice === null) {
+                $paddlePrice = $this->createPaddlePriceForPlan($plan, $paddleProductId, $currency, $paymentProvider, $planPrice);
+            }
         }
 
         $results = [
@@ -362,12 +372,14 @@ class PaddleProvider implements PaymentProviderInterface
         string $paddleProductId,
         Currency $currency,
         PaymentProvider $paymentProvider,
-        PlanPrice $planPrice
+        PlanPrice $planPrice,
+        bool $skipTrial = false,
+        PaymentProviderPlanPriceType $priceType = PaymentProviderPlanPriceType::MAIN_PRICE,
     ) {
         $trialInterval = null;
         $trialFrequency = null;
 
-        if ($plan->has_trial) {
+        if (! $skipTrial && $plan->has_trial) {
             $trialInterval = $plan->trialInterval()->firstOrFail()->date_identifier;
             $trialFrequency = $plan->trial_interval_count;
         }
@@ -394,7 +406,7 @@ class PaddleProvider implements PaymentProviderInterface
 
         $paddlePrice = $response->json()['data']['id'];
 
-        $this->planService->addPaymentProviderPriceId($planPrice, $paymentProvider, $paddlePrice);
+        $this->planService->addPaymentProviderPriceId($planPrice, $paymentProvider, $paddlePrice, $priceType);
 
         return $paddlePrice;
     }
@@ -507,6 +519,6 @@ class PaddleProvider implements PaymentProviderInterface
 
     public function supportsSkippingTrial(): bool
     {
-        return false;
+        return true;
     }
 }
