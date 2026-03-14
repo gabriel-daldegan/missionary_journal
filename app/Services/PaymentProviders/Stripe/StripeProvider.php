@@ -319,7 +319,9 @@ class StripeProvider implements PaymentProviderInterface
             $stripeDiscountId = $this->findOrCreateStripeDiscount($discount, $paymentProvider, $subscription->currency()->firstOrFail()->code);
 
             $stripe->subscriptions->update($subscription->payment_provider_subscription_id, [
-                'coupon' => $stripeDiscountId,
+                'discounts' => [
+                    ['coupon' => $stripeDiscountId],
+                ],
             ]);
 
         } catch (ApiErrorException $e) {
