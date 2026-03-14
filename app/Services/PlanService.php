@@ -60,11 +60,16 @@ class PlanService
             ->get();
     }
 
-    public function getPaymentProviderPriceId(PlanPrice $planPrice, PaymentProvider $paymentProvider): ?string
+    public function getPaymentProviderPriceId(PlanPrice $planPrice, PaymentProvider $paymentProvider, ?PaymentProviderPlanPriceType $type = null): ?string
     {
-        $result = PlanPricePaymentProviderData::where('plan_price_id', $planPrice->id)
-            ->where('payment_provider_id', $paymentProvider->id)
-            ->first();
+        $query = PlanPricePaymentProviderData::where('plan_price_id', $planPrice->id)
+            ->where('payment_provider_id', $paymentProvider->id);
+
+        if ($type !== null) {
+            $query->where('type', $type->value);
+        }
+
+        $result = $query->first();
 
         if ($result) {
             return $result->payment_provider_price_id;
