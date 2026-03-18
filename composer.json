@@ -38,7 +38,7 @@
         "spatie/laravel-one-time-passwords": "^1.0",
         "spatie/laravel-permission": "^6.0",
         "spatie/laravel-sitemap": "^7.0",
-        "stechstudio/filament-impersonate": "^4.0",
+        "stechstudio/filament-impersonate": "^5.0",
         "stripe/stripe-php": "^17.0",
         "symfony/http-client": "^7.0",
         "symfony/mailgun-mailer": "^7.0",
