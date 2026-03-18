@@ -7,15 +7,11 @@ use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Lab404\Impersonate\Services\ImpersonateManager;
+use STS\FilamentImpersonate\Facades\Impersonation;
 use Symfony\Component\HttpFoundation\Response;
 
 class UpdateUserLastSeenAt
 {
-    public function __construct(
-        private ImpersonateManager $impersonateManager
-    ) {}
-
     /**
      * Handle an incoming request.
      *
@@ -27,7 +23,7 @@ class UpdateUserLastSeenAt
             $request->ajax() ||
             $request->expectsJson() ||
             $request->header('X-Livewire') !== null ||
-            $this->impersonateManager->isImpersonating()
+            Impersonation::isImpersonating()
         ) {
             return $next($request);
         }
