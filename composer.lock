@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "75d1cea09ce4c14dba2f311baee676a3",
+    "content-hash": "521208ef8dcd3432401975817981875f",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -4167,33 +4167,33 @@
         },
         {
             "name": "laravel/tinker",
-            "version": "v2.11.1",
+            "version": "v3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/tinker.git",
-                "reference": "c9f80cc835649b5c1842898fb043f8cc098dd741"
+                "reference": "cc74081282ba2e3dae1f0068ccb330370d24634e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/tinker/zipball/c9f80cc835649b5c1842898fb043f8cc098dd741",
-                "reference": "c9f80cc835649b5c1842898fb043f8cc098dd741",
+                "url": "https://api.github.com/repos/laravel/tinker/zipball/cc74081282ba2e3dae1f0068ccb330370d24634e",
+                "reference": "cc74081282ba2e3dae1f0068ccb330370d24634e",
                 "shasum": ""
             },
             "require": {
-                "illuminate/console": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
-                "illuminate/contracts": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
-                "illuminate/support": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
-                "php": "^7.2.5|^8.0",
-                "psy/psysh": "^0.11.1|^0.12.0",
-                "symfony/var-dumper": "^4.3.4|^5.0|^6.0|^7.0|^8.0"
+                "illuminate/console": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+                "illuminate/contracts": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+                "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.1",
+                "psy/psysh": "^0.12.0",
+                "symfony/var-dumper": "^5.4|^6.0|^7.0|^8.0"
             },
             "require-dev": {
                 "mockery/mockery": "~1.3.3|^1.4.2",
                 "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^8.5.8|^9.3.3|^10.0"
+                "phpunit/phpunit": "^10.5|^11.5"
             },
             "suggest": {
-                "illuminate/database": "The Illuminate Database package (^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0)."
+                "illuminate/database": "The Illuminate Database package (^8.0|^9.0|^10.0|^11.0|^12.0|^13.0)."
             },
             "type": "library",
             "extra": {
@@ -4201,6 +4201,9 @@
                     "providers": [
                         "Laravel\\Tinker\\TinkerServiceProvider"
                     ]
+                },
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
                 }
             },
             "autoload": {
@@ -4227,9 +4230,9 @@
             ],
             "support": {
                 "issues": "https://github.com/laravel/tinker/issues",
-                "source": "https://github.com/laravel/tinker/tree/v2.11.1"
+                "source": "https://github.com/laravel/tinker/tree/v3.0.0"
             },
-            "time": "2026-02-06T14:12:35+00:00"
+            "time": "2026-03-17T14:53:17+00:00"
         },
         {
             "name": "laravel/ui",
@@ -6990,29 +6993,30 @@
         },
         {
             "name": "propaganistas/laravel-phone",
-            "version": "5.3.6",
+            "version": "6.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Propaganistas/Laravel-Phone.git",
-                "reference": "89f26e8336cf8f8041609148b4fef752f0bd720e"
+                "reference": "b0e2bdb44cfbeaf2466862aaf854815605b5205a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Propaganistas/Laravel-Phone/zipball/89f26e8336cf8f8041609148b4fef752f0bd720e",
-                "reference": "89f26e8336cf8f8041609148b4fef752f0bd720e",
+                "url": "https://api.github.com/repos/Propaganistas/Laravel-Phone/zipball/b0e2bdb44cfbeaf2466862aaf854815605b5205a",
+                "reference": "b0e2bdb44cfbeaf2466862aaf854815605b5205a",
                 "shasum": ""
             },
             "require": {
-                "giggsey/libphonenumber-for-php-lite": "^8.13.35|^9.0.0",
-                "illuminate/contracts": "^10.0|^11.0|^12.0",
-                "illuminate/support": "^10.0|^11.0|^12.0",
-                "illuminate/validation": "^10.0|^11.0|^12.0",
-                "php": "^8.1"
+                "ext-mbstring": "*",
+                "giggsey/libphonenumber-for-php-lite": "^9.0",
+                "illuminate/contracts": "^11.0|^12.0|^13.0",
+                "illuminate/support": "^11.0|^12.0|^13.0",
+                "illuminate/validation": "^11.0|^12.0|^13.0",
+                "php": "^8.2"
             },
             "require-dev": {
-                "laravel/pint": "^1.14",
+                "laravel/pint": "^1.21",
                 "orchestra/testbench": "*",
-                "phpunit/phpunit": "^10.5|^11.5.3"
+                "phpunit/phpunit": "^11.5.3"
             },
             "type": "library",
             "extra": {
@@ -7049,7 +7053,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Propaganistas/Laravel-Phone/issues",
-                "source": "https://github.com/Propaganistas/Laravel-Phone/tree/5.3.6"
+                "source": "https://github.com/Propaganistas/Laravel-Phone/tree/6.0.3"
             },
             "funding": [
                 {
@@ -7057,7 +7061,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-03-21T09:07:26+00:00"
+            "time": "2026-03-18T07:05:47+00:00"
         },
         {
             "name": "psr/clock",
