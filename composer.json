@@ -16,7 +16,7 @@
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^3.4",
         "jeffgreco13/filament-breezy": "^3.0",
-        "laragear/two-factor": "^3.0",
+        "laragear/two-factor": "^4.0",
         "laravel/framework": "^12.0",
         "laravel/horizon": "^5.21",
         "laravel/sanctum": "^4.0",

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b01d7bd83fe786f45b9b65d2fe3b9b50",
+    "content-hash": "75d1cea09ce4c14dba2f311baee676a3",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -3344,25 +3344,27 @@
         },
         {
             "name": "laragear/meta",
-            "version": "v3.1.2",
+            "version": "v5.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Laragear/Meta.git",
-                "reference": "f204694aa232f56cfada912c56fb14e9ff643fcd"
+                "reference": "aab3973e77dc9a04d431500eb75953bbe75c590b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Laragear/Meta/zipball/f204694aa232f56cfada912c56fb14e9ff643fcd",
-                "reference": "f204694aa232f56cfada912c56fb14e9ff643fcd",
+                "url": "https://api.github.com/repos/Laragear/Meta/zipball/aab3973e77dc9a04d431500eb75953bbe75c590b",
+                "reference": "aab3973e77dc9a04d431500eb75953bbe75c590b",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.1"
+                "illuminate/database": "12.*|13.*",
+                "illuminate/filesystem": "12.*|13.*",
+                "illuminate/http": "12.*|13.*",
+                "illuminate/support": "12.*|13.*"
             },
             "require-dev": {
-                "laragear/meta-testing": "2.*",
-                "laravel/breeze": "1.*|2.*",
-                "orchestra/testbench": "8.*|9.*"
+                "laragear/meta-testing": "4.*",
+                "orchestra/testbench": "10.*|11.*"
             },
             "type": "library",
             "autoload": {
@@ -3400,31 +3402,31 @@
                     "type": "Paypal"
                 }
             ],
-            "time": "2025-01-29T00:29:43+00:00"
+            "time": "2026-03-18T01:21:41+00:00"
         },
         {
             "name": "laragear/meta-model",
-            "version": "v2.0.0",
+            "version": "v3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Laragear/MetaModel.git",
-                "reference": "1973517263d9ff1cfaabf682f3c2883425271dbc"
+                "reference": "5f6f15e390c934cb10068117555242c2d29e9caa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Laragear/MetaModel/zipball/1973517263d9ff1cfaabf682f3c2883425271dbc",
-                "reference": "1973517263d9ff1cfaabf682f3c2883425271dbc",
+                "url": "https://api.github.com/repos/Laragear/MetaModel/zipball/5f6f15e390c934cb10068117555242c2d29e9caa",
+                "reference": "5f6f15e390c934cb10068117555242c2d29e9caa",
                 "shasum": ""
             },
             "require": {
-                "illuminate/container": "11.*|12.*",
-                "illuminate/contracts": "11.*|12.*",
-                "illuminate/database": "11.*|12.*",
-                "php": "^8.2"
+                "illuminate/container": "12.*|13.*",
+                "illuminate/contracts": "12.*|13.*",
+                "illuminate/database": "12.*|13.*",
+                "php": "^8.3"
             },
             "require-dev": {
                 "mockery/mockery": "^1.6",
-                "phpunit/phpunit": "11.*|12.*"
+                "phpunit/phpunit": "12.*|13.*"
             },
             "type": "library",
             "autoload": {
@@ -3465,39 +3467,39 @@
                     "type": "Paypal"
                 }
             ],
-            "time": "2025-02-16T04:19:25+00:00"
+            "time": "2026-03-04T16:50:11+00:00"
         },
         {
             "name": "laragear/two-factor",
-            "version": "v3.0.0",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Laragear/TwoFactor.git",
-                "reference": "e895ce4f8eb96fa813e687a4138e6f88ac109748"
+                "reference": "8c3486c55d99a28b5ad4b4d02806c9ea14bf9fd6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Laragear/TwoFactor/zipball/e895ce4f8eb96fa813e687a4138e6f88ac109748",
-                "reference": "e895ce4f8eb96fa813e687a4138e6f88ac109748",
+                "url": "https://api.github.com/repos/Laragear/TwoFactor/zipball/8c3486c55d99a28b5ad4b4d02806c9ea14bf9fd6",
+                "reference": "8c3486c55d99a28b5ad4b4d02806c9ea14bf9fd6",
                 "shasum": ""
             },
             "require": {
                 "bacon/bacon-qr-code": "3.*",
                 "ext-json": "*",
-                "illuminate/auth": "11.*|12.*",
-                "illuminate/config": "11.*|12.*",
-                "illuminate/database": "11.*|12.*",
-                "illuminate/http": "11.*|12.*",
-                "illuminate/support": "11.*|12.*",
-                "illuminate/validation": "11.*|12.*",
-                "laragear/meta": "3.*",
-                "laragear/meta-model": "2.*",
+                "illuminate/auth": "12.*|13.*",
+                "illuminate/config": "12.*|13.*",
+                "illuminate/database": "12.*|13.*",
+                "illuminate/http": "12.*|13.*",
+                "illuminate/support": "12.*|13.*",
+                "illuminate/validation": "12.*|13.*",
+                "laragear/meta": "5.*",
+                "laragear/meta-model": "3.*",
                 "paragonie/constant_time_encoding": "3.*",
-                "php": "^8.2"
+                "php": "^8.3"
             },
             "require-dev": {
-                "laragear/meta-testing": "2.*",
-                "orchestra/testbench": "9.*|10.*"
+                "laragear/meta-testing": "4.*",
+                "orchestra/testbench": "10.*|11.*"
             },
             "type": "library",
             "extra": {
@@ -3545,7 +3547,7 @@
                     "type": "Paypal"
                 }
             ],
-            "time": "2025-02-16T19:29:26+00:00"
+            "time": "2026-03-04T20:18:04+00:00"
         },
         {
             "name": "laravel/framework",
