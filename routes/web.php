@@ -4,8 +4,12 @@ use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentProviders\PaddleController;
+use App\Http\Controllers\ProductCheckoutController;
 use App\Http\Controllers\RoadmapController;
+use App\Http\Controllers\SubscriptionCheckoutController;
+use App\Http\Controllers\SubscriptionController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -53,7 +57,7 @@ Route::get('/phone/verified', function () {
 })->name('user.phone-verified')
     ->middleware('auth');
 
-Route::post('/email/verification-notification', function (\Illuminate\Http\Request $request) {
+Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
 
     return back()->with('sent');
@@ -72,12 +76,12 @@ Route::get('/auth/{provider}/callback', [OAuthController::class, 'callback'])
     ->name('auth.oauth.callback');
 
 Route::get('/checkout/plan/{planSlug}', [
-    App\Http\Controllers\SubscriptionCheckoutController::class,
+    SubscriptionCheckoutController::class,
     'subscriptionCheckout',
 ])->name('checkout.subscription');
 
 Route::get('/checkout/convert-subscription/{subscriptionUuid}', [
-    App\Http\Controllers\SubscriptionCheckoutController::class,
+    SubscriptionCheckoutController::class,
     'convertLocalSubscriptionCheckout',
 ])->name('checkout.convert-local-subscription');
 
@@ -86,12 +90,12 @@ Route::get('/already-subscribed', function () {
 })->name('checkout.subscription.already-subscribed');
 
 Route::get('/checkout/subscription/success', [
-    App\Http\Controllers\SubscriptionCheckoutController::class,
+    SubscriptionCheckoutController::class,
     'subscriptionCheckoutSuccess',
 ])->name('checkout.subscription.success')->middleware('auth');
 
 Route::get('/checkout/convert-subscription-success', [
-    App\Http\Controllers\SubscriptionCheckoutController::class,
+    SubscriptionCheckoutController::class,
     'convertLocalSubscriptionCheckoutSuccess',
 ])->name('checkout.convert-local-subscription.success')->middleware('auth');
 
@@ -101,17 +105,17 @@ Route::get('/payment-provider/paddle/payment-link', [
 ])->name('payment-link.paddle');
 
 Route::get('/subscription/{subscriptionUuid}/change-plan/{planSlug}', [
-    App\Http\Controllers\SubscriptionController::class,
+    SubscriptionController::class,
     'changePlan',
 ])->name('subscription.change-plan')->middleware('auth');
 
 Route::post('/subscription/{subscriptionUuid}/change-plan/{planSlug}', [
-    App\Http\Controllers\SubscriptionController::class,
+    SubscriptionController::class,
     'changePlan',
 ])->name('subscription.change-plan.post')->middleware('auth');
 
 Route::get('/subscription/change-plan-thank-you', [
-    App\Http\Controllers\SubscriptionController::class,
+    SubscriptionController::class,
     'success',
 ])->name('subscription.change-plan.thank-you')->middleware('auth');
 
@@ -135,17 +139,17 @@ Route::get('/privacy-policy', function () {
 // Product checkout routes
 
 Route::get('/buy/product/{productSlug}/{quantity?}', [
-    App\Http\Controllers\ProductCheckoutController::class,
+    ProductCheckoutController::class,
     'addToCart',
 ])->name('buy.product');
 
 Route::get('/checkout/product', [
-    App\Http\Controllers\ProductCheckoutController::class,
+    ProductCheckoutController::class,
     'productCheckout',
 ])->name('checkout.product');
 
 Route::get('/checkout/product/success', [
-    App\Http\Controllers\ProductCheckoutController::class,
+    ProductCheckoutController::class,
     'productCheckoutSuccess',
 ])->name('checkout.product.success')->middleware('auth');
 

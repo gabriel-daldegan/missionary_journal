@@ -13,6 +13,7 @@ use App\Models\OneTimeProductPrice;
 use App\Models\Order;
 use App\Models\PaymentProvider;
 use App\Models\User;
+use App\Services\LoginService;
 use App\Services\OneTimePasswordService;
 use App\Services\PaymentProviders\PaymentProviderInterface;
 use App\Services\PaymentProviders\PaymentService;
@@ -25,6 +26,8 @@ use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 use Mockery;
 use Mockery\MockInterface;
+use Spatie\OneTimePasswords\Actions\ConsumeOneTimePasswordAction;
+use Spatie\OneTimePasswords\Enums\ConsumeOneTimePasswordResult;
 use Tests\Feature\FeatureTest;
 
 class ProductCheckoutFormTest extends FeatureTest
@@ -622,20 +625,20 @@ class ProductCheckoutFormTest extends FeatureTest
         $this->app->instance(UserService::class, $mockUserService);
 
         // Mock the OTP action to pass validation
-        $mockOtpAction = Mockery::mock(\Spatie\OneTimePasswords\Actions\ConsumeOneTimePasswordAction::class);
+        $mockOtpAction = Mockery::mock(ConsumeOneTimePasswordAction::class);
         $mockOtpAction->shouldReceive('execute')
             ->with($user, '123456', Mockery::any())
-            ->andReturn(\Spatie\OneTimePasswords\Enums\ConsumeOneTimePasswordResult::Ok);
-        $this->app->instance(\Spatie\OneTimePasswords\Actions\ConsumeOneTimePasswordAction::class, $mockOtpAction);
+            ->andReturn(ConsumeOneTimePasswordResult::Ok);
+        $this->app->instance(ConsumeOneTimePasswordAction::class, $mockOtpAction);
 
         // Mock LoginService for authentication
-        $mockLoginService = Mockery::mock(\App\Services\LoginService::class);
+        $mockLoginService = Mockery::mock(LoginService::class);
         $mockLoginService->shouldReceive('authenticateUser')
             ->with($user, true)
             ->andReturnUsing(function ($user) {
                 auth()->login($user);
             });
-        $this->app->instance(\App\Services\LoginService::class, $mockLoginService);
+        $this->app->instance(LoginService::class, $mockLoginService);
 
         Livewire::test(ProductCheckoutForm::class)
             ->set('email', $email)
