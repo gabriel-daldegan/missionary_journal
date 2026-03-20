@@ -4,10 +4,10 @@ namespace App\Filament\Dashboard\Pages;
 
 use App\Constants\TenancyPermissionConstants;
 use App\Services\TenantPermissionService;
+use BackedEnum;
 use Filament\Facades\Filament;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
-use BackedEnum;
 
 class Users extends Page
 {

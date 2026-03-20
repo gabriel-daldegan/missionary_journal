@@ -6,13 +6,14 @@ use App\Filament\Dashboard\Resources\Invitations\InvitationResource;
 use App\Services\TenantService;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class CreateInvitation extends CreateRecord
 {
     protected static string $resource = InvitationResource::class;
 
-    protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
+    protected function handleRecordCreation(array $data): Model
     {
         $emails = preg_split('/[\s,]+/', $data['email'], -1, PREG_SPLIT_NO_EMPTY);
         $lastInvitation = null;
