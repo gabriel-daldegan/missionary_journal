@@ -1,5 +1,6 @@
 <?php
 
+use App\Constants\InvoiceStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->foreignId('transaction_id')->constrained()->onDelete('cascade');
-            $table->string('status')->default(\App\Constants\InvoiceStatus::UNRENEDERED);
+            $table->string('status')->default(InvoiceStatus::UNRENEDERED);
             $table->string('filename')->nullable();
             $table->timestamps();
         });

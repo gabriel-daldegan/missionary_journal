@@ -1,5 +1,8 @@
 <?php
 
+use App\Constants\PaymentProviderPlanPriceType;
+use App\Constants\PlanPriceType;
+use App\Constants\PlanType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,18 +21,18 @@ return new class extends Migration
         });
 
         Schema::table('plans', function (Blueprint $table) {
-            $table->string('type')->default(\App\Constants\PlanType::FLAT_RATE->value);
+            $table->string('type')->default(PlanType::FLAT_RATE->value);
             $table->foreignId('meter_id')->nullable()->constrained('plan_meters');
         });
 
         Schema::table('plan_prices', function (Blueprint $table) {
             $table->unsignedInteger('price_per_unit')->nullable();
-            $table->string('type')->default(\App\Constants\PlanPriceType::FLAT_RATE->value);
+            $table->string('type')->default(PlanPriceType::FLAT_RATE->value);
             $table->json('tiers')->nullable();
         });
 
         Schema::table('plan_price_payment_provider_data', function (Blueprint $table) {
-            $table->string('type')->default(\App\Constants\PaymentProviderPlanPriceType::MAIN_PRICE->value);
+            $table->string('type')->default(PaymentProviderPlanPriceType::MAIN_PRICE->value);
 
             if (in_array(config('database.default'), ['mysql', 'mariadb'], true)) { // apparently the order of operations is important here since mysql differs from pgsql & sqlite
                 $table->unique(['plan_price_id', 'payment_provider_id', 'type'], 'plan_price_payment_provider_type_data_unq');
@@ -50,7 +53,7 @@ return new class extends Migration
         });
 
         Schema::table('subscriptions', function (Blueprint $table) {
-            $table->string('price_type')->default(\App\Constants\PlanPriceType::FLAT_RATE->value);
+            $table->string('price_type')->default(PlanPriceType::FLAT_RATE->value);
             $table->json('price_tiers')->nullable();
             $table->string('price_per_unit')->nullable();
             $table->json('extra_payment_provider_data')->nullable();
