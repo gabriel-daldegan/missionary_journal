@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Currency;
+use App\Models\PlanPrice;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PlanPrice>
+ * @extends Factory<PlanPrice>
  */
 class PlanPriceFactory extends Factory
 {

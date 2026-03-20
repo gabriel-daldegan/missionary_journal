@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\PaymentProviders\LemonSqueezyController;
+use App\Http\Controllers\PaymentProviders\PaddleController;
+use App\Http\Controllers\PaymentProviders\StripeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,16 +17,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/payments-providers/stripe/webhook', [
-    App\Http\Controllers\PaymentProviders\StripeController::class,
+    StripeController::class,
     'handleWebhook',
 ])->name('payments-providers.stripe.webhook');
 
 Route::post('/payments-providers/paddle/webhook', [
-    App\Http\Controllers\PaymentProviders\PaddleController::class,
+    PaddleController::class,
     'handleWebhook',
 ])->name('payments-providers.paddle.webhook');
 
 Route::post('/payments-providers/lemon-squeezy/webhook', [
-    App\Http\Controllers\PaymentProviders\LemonSqueezyController::class,
+    LemonSqueezyController::class,
     'handleWebhook',
 ])->name('payments-providers.lemon-squeezy.webhook');

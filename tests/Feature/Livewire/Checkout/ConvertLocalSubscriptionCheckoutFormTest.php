@@ -16,6 +16,7 @@ use App\Models\Plan;
 use App\Models\PlanPrice;
 use App\Models\Subscription;
 use App\Models\User;
+use App\Services\LoginService;
 use App\Services\OneTimePasswordService;
 use App\Services\PaymentProviders\PaymentProviderInterface;
 use App\Services\PaymentProviders\PaymentService;
@@ -26,6 +27,8 @@ use Exception;
 use Illuminate\Contracts\Validation\Validator;
 use Livewire\Livewire;
 use Mockery;
+use Spatie\OneTimePasswords\Actions\ConsumeOneTimePasswordAction;
+use Spatie\OneTimePasswords\Enums\ConsumeOneTimePasswordResult;
 use Tests\Feature\FeatureTest;
 
 class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
@@ -649,20 +652,20 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
         $this->app->instance(UserService::class, $mockUserService);
 
         // Mock the OTP action to pass validation
-        $mockOtpAction = Mockery::mock(\Spatie\OneTimePasswords\Actions\ConsumeOneTimePasswordAction::class);
+        $mockOtpAction = Mockery::mock(ConsumeOneTimePasswordAction::class);
         $mockOtpAction->shouldReceive('execute')
             ->with($existingUser, '123456', Mockery::any())
-            ->andReturn(\Spatie\OneTimePasswords\Enums\ConsumeOneTimePasswordResult::Ok);
-        $this->app->instance(\Spatie\OneTimePasswords\Actions\ConsumeOneTimePasswordAction::class, $mockOtpAction);
+            ->andReturn(ConsumeOneTimePasswordResult::Ok);
+        $this->app->instance(ConsumeOneTimePasswordAction::class, $mockOtpAction);
 
         // Mock LoginService for authentication
-        $mockLoginService = Mockery::mock(\App\Services\LoginService::class);
+        $mockLoginService = Mockery::mock(LoginService::class);
         $mockLoginService->shouldReceive('authenticateUser')
             ->with($existingUser, true)
             ->andReturnUsing(function ($user) {
                 auth()->login($user);
             });
-        $this->app->instance(\App\Services\LoginService::class, $mockLoginService);
+        $this->app->instance(LoginService::class, $mockLoginService);
 
         Livewire::test(ConvertLocalSubscriptionCheckoutForm::class)
             ->set('email', $email)
