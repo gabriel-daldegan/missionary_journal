@@ -6,6 +6,7 @@ use App\Constants\OrderStatus;
 use App\Constants\PlanType;
 use App\Dto\CartDto;
 use App\Dto\TotalsDto;
+use App\Models\Plan;
 use App\Models\Tenant;
 
 class CheckoutService
@@ -105,7 +106,7 @@ class CheckoutService
         return $order;
     }
 
-    public function resolveSubscriptionTenant(bool $shouldCreateNewTenant, ?string $tenantUuid, ?\App\Models\Plan $plan = null): Tenant
+    public function resolveSubscriptionTenant(bool $shouldCreateNewTenant, ?string $tenantUuid, ?Plan $plan = null): Tenant
     {
         if ($shouldCreateNewTenant) {
             $tenant = $this->tenantCreationService->createTenant(auth()->user());
