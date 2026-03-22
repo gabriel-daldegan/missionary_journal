@@ -52,6 +52,7 @@
         "fakerphp/faker": "^1.9.1",
         "kkomelin/laravel-translatable-string-exporter": "^1.22",
         "larastan/larastan": "^3.0",
+        "laravel/boost": "^2.3",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",
         "laravel/telescope": "^5.0",
