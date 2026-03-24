@@ -347,14 +347,7 @@ class StripeProvider implements PaymentProviderInterface
             if ($planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
                 $extraSeats = max(0, $quantity - $planPrice->included_seats);
 
-                $stripeProductPrices = $this->planService->getPaymentProviderPrices($planPrice, $paymentProvider);
-                $extraSeatStripePriceId = null;
-                foreach ($stripeProductPrices as $priceData) {
-                    if ($priceData->type === PaymentProviderPlanPriceType::EXTRA_SEAT_PRICE->value) {
-                        $extraSeatStripePriceId = $priceData->payment_provider_price_id;
-                        break;
-                    }
-                }
+                $extraSeatStripePriceId = $this->planService->getPaymentProviderPriceId($planPrice, $paymentProvider, PaymentProviderPlanPriceType::EXTRA_SEAT_PRICE);
 
                 if ($extraSeatStripePriceId === null) {
                     Log::error('Extra seat price not found for subscription: '.$subscription->id);

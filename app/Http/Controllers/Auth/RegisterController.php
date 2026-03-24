@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\TenantService;
 use App\Services\UserService;
 use App\Validator\RegisterValidator;
 use Illuminate\Contracts\Validation\Validator;
@@ -36,12 +37,19 @@ class RegisterController extends Controller
     public function __construct(
         protected RegisterValidator $registerValidator,
         protected UserService $userService,
+        protected TenantService $tenantService,
     ) {
         $this->middleware('guest');
     }
 
     public function redirectPath()
     {
+        $user = auth()->user();
+
+        if ($user && $this->tenantService->getUserInvitationCount($user) > 0) {
+            return route('invitations');
+        }
+
         return Redirect::getIntendedUrl() ?? route('home');
     }
 
