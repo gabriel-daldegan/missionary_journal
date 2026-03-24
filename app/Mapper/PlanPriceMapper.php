@@ -14,7 +14,8 @@ class PlanPriceMapper
                 PlanPriceType::FLAT_RATE->value => __('Flat Rate'),
             ],
             PlanType::SEAT_BASED->value => [
-                PlanPriceType::FLAT_RATE->value => __('Flat Rate'),
+                PlanPriceType::FLAT_RATE->value => __('Per Seat'),
+                PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value => __('Base Price + Extra Seats'),
             ],
             PlanType::USAGE_BASED->value => [
                 PlanPriceType::USAGE_BASED_PER_UNIT->value => __('Per Unit'),

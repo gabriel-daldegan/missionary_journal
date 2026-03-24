@@ -30,10 +30,17 @@
             @if($price->price > 0)
                 <div class="mr-1 text-4xl font-bold">@money($price->price, $price->currency->code)</div>
                 <div class="text-sm">
-                    @if($plan->type === \App\Constants\PlanType::SEAT_BASED->value)
-                        <span class="text-sm">{{__('per seat')}}</span>
+                    @if($plan->type === \App\Constants\PlanType::SEAT_BASED->value && $price->type === \App\Constants\PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value)
+                        / {{$plan->interval_count > 1 ? $plan->interval_count : '' }} {{ __($plan->interval->name) }}
+                        <div class="text-xs mt-1">
+                            {{ __('Includes :count seats, +:price/extra seat', ['count' => $price->included_seats, 'price' => money($price->extra_seat_price, $price->currency->code)]) }}
+                        </div>
+                    @else
+                        @if($plan->type === \App\Constants\PlanType::SEAT_BASED->value)
+                            <span class="text-sm">{{__('per seat')}}</span>
+                        @endif
+                        / {{$plan->interval_count > 1 ? $plan->interval_count : '' }} {{ __($plan->interval->name) }}
                     @endif
-                    / {{$plan->interval_count > 1 ? $plan->interval_count : '' }} {{ __($plan->interval->name) }}
                 </div>
             @endif
 

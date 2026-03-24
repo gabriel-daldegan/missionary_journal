@@ -58,8 +58,13 @@ class PricesRelationManager extends RelationManager
                         })
                         ->default(array_keys(PlanPriceMapper::getPlanPriceTypes($this->ownerRecord->type))[0])
                         ->visible(function () {
-                            return $this->ownerRecord->type === PlanType::USAGE_BASED->value;
+                            return $this->ownerRecord->type === PlanType::USAGE_BASED->value
+                                || $this->ownerRecord->type === PlanType::SEAT_BASED->value;
                         })
+                        ->disabled(function (string $operation) {
+                            return $operation === 'edit' && $this->ownerRecord->type === PlanType::SEAT_BASED->value;
+                        })
+                        ->dehydrated()
                         ->live()
                         ->required(),
                     Select::make('currency_id')
@@ -84,23 +89,53 @@ class PricesRelationManager extends RelationManager
                         ->gte(0)
                         ->live()
                         ->label(function (Get $get) {
+                            if ($get('type') === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+                                return __('Base Price');
+                            }
+
                             return $get('type') === PlanPriceType::FLAT_RATE->value ? __('Price') : __('Fixed Fee');
                         })
                         ->helperText(
                             function (Get $get) {
-                                if ($get('type') === PlanPriceType::FLAT_RATE->value) {
+                                if ($get('type') === PlanPriceType::FLAT_RATE->value || $get('type') === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
                                     return new HtmlString(
                                         __('Enter price in lowest denomination for a currency (cents). E.g. 1000 = $10.00')
                                     );
-                                } else {
-                                    return new HtmlString(
-                                        '<strong>'.__('Important: Fixed fee is available only for Stripe.').'</strong>'
-                                        .'<br/><br/>'.__('A fixed fee is an amount that your customer will be charged every billing cycle in addition to any usage-based amount. Enter fixed fee in lowest denomination for a currency (cents). E.g. 1000 = $10.00')
-                                        .'<br/><br/>'.__('It is highly recommended that you set up a fixed fee for your usage-based billing plans if you are dealing with low-trust customers, as customers can keep using your service and then disable their credit card to avoid being charged for usage.')
-                                    );
                                 }
+
+                                return new HtmlString(
+                                    '<strong>'.__('Important: Fixed fee is available only for Stripe.').'</strong>'
+                                    .'<br/><br/>'.__('A fixed fee is an amount that your customer will be charged every billing cycle in addition to any usage-based amount. Enter fixed fee in lowest denomination for a currency (cents). E.g. 1000 = $10.00')
+                                    .'<br/><br/>'.__('It is highly recommended that you set up a fixed fee for your usage-based billing plans if you are dealing with low-trust customers, as customers can keep using your service and then disable their credit card to avoid being charged for usage.')
+                                );
                             }
                         ),
+                    TextInput::make('included_seats')
+                        ->type('number')
+                        ->required()
+                        ->minValue(1)
+                        ->label(__('Included Seats'))
+                        ->helperText(function (string $operation) {
+                            $text = __('Number of seats included in the base price.');
+
+                            if ($operation === 'edit') {
+                                $text .= ' '.__('Warning: Changing this value will not update existing subscriptions on the payment provider. You may need to manually adjust active subscriptions.');
+                            }
+
+                            return $text;
+                        })
+                        ->visible(function (Get $get) {
+                            return $get('type') === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value;
+                        }),
+                    TextInput::make('extra_seat_price')
+                        ->type('number')
+                        ->required()
+                        ->gte(0)
+                        ->label(__('Price per Extra Seat'))
+                        ->helperText(__('Cost per additional seat beyond included seats (in cents).'))
+                        ->visible(function (Get $get) {
+                            return $get('type') === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value;
+                        }),
                     TextInput::make('setup_fee')
                         ->type('number')
                         ->gte(0)

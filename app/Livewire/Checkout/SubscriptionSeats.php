@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Checkout;
 
+use App\Constants\PlanPriceType;
 use App\Models\Plan;
+use App\Services\CalculationService;
 use App\Services\PlanService;
 use App\Services\SessionService;
 use App\Services\SubscriptionService;
@@ -19,6 +21,12 @@ class SubscriptionSeats extends Component
 
     public $maxQuantity;
 
+    public ?int $includedSeats = null;
+
+    public ?int $extraSeatPrice = null;
+
+    public ?string $extraSeatCurrencyCode = null;
+
     private SessionService $sessionService;
 
     private PlanService $planService;
@@ -27,16 +35,20 @@ class SubscriptionSeats extends Component
 
     private TenantSubscriptionService $tenantSubscriptionService;
 
+    private CalculationService $calculationService;
+
     public function boot(
         SessionService $sessionService,
         PlanService $planService,
         SubscriptionService $subscriptionService,
-        TenantSubscriptionService $tenantSubscriptionService
+        TenantSubscriptionService $tenantSubscriptionService,
+        CalculationService $calculationService,
     ) {
         $this->sessionService = $sessionService;
         $this->planService = $planService;
         $this->subscriptionService = $subscriptionService;
         $this->tenantSubscriptionService = $tenantSubscriptionService;
+        $this->calculationService = $calculationService;
     }
 
     public function mount(Plan $plan)
@@ -45,6 +57,13 @@ class SubscriptionSeats extends Component
         $this->planSlug = $plan->slug;
         $this->quantity = $this->sessionService->getSubscriptionCheckoutDto()->quantity;
         $this->maxQuantity = $plan->max_users_per_tenant;
+
+        $planPrice = $this->calculationService->getPlanPrice($plan);
+        if ($planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+            $this->includedSeats = $planPrice->included_seats;
+            $this->extraSeatPrice = $planPrice->extra_seat_price;
+            $this->extraSeatCurrencyCode = $planPrice->currency->code;
+        }
     }
 
     public function updatedQuantity(int $value)

@@ -7,6 +7,7 @@ use App\Constants\DiscountConstants;
 use App\Constants\PaddleConstants;
 use App\Constants\PaymentProviderConstants;
 use App\Constants\PaymentProviderPlanPriceType;
+use App\Constants\PlanPriceType;
 use App\Constants\PlanType;
 use App\Filament\Dashboard\Resources\Subscriptions\Pages\PaymentProviders\Paddle\PaddleUpdatePaymentDetails;
 use App\Models\Currency;
@@ -68,15 +69,39 @@ class PaddleProvider implements PaymentProviderInterface
             }
         }
 
-        $results = [
-            'productDetails' => [
-                [
-                    'paddleProductId' => $paddleProductId,
-                    'paddlePriceId' => $paddlePrice,
-                    'quantity' => $quantity,
+        if ($plan->type === PlanType::SEAT_BASED->value && $planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+            $extraSeatPaddlePriceId = $this->findOrCreateExtraSeatPrice($plan, $planPrice, $paddleProductId, $currency, $paymentProvider);
+
+            $extraSeats = max(0, $quantity - $planPrice->included_seats);
+
+            $results = [
+                'productDetails' => [
+                    [
+                        'paddleProductId' => $paddleProductId,
+                        'paddlePriceId' => $paddlePrice,
+                        'quantity' => 1,
+                    ],
                 ],
-            ],
-        ];
+            ];
+
+            if ($extraSeats > 0) {
+                $results['productDetails'][] = [
+                    'paddleProductId' => $paddleProductId,
+                    'paddlePriceId' => $extraSeatPaddlePriceId,
+                    'quantity' => $extraSeats,
+                ];
+            }
+        } else {
+            $results = [
+                'productDetails' => [
+                    [
+                        'paddleProductId' => $paddleProductId,
+                        'paddlePriceId' => $paddlePrice,
+                        'quantity' => $quantity,
+                    ],
+                ],
+            ];
+        }
 
         if (($planPrice->setup_fee ?? 0) > 0) {
             $setupFeePriceId = $this->findOrCreateSetupFeePrice($planPrice, $paddleProductId, $currency, $paymentProvider);
@@ -117,19 +142,48 @@ class PaddleProvider implements PaymentProviderInterface
         $currency = $subscription->currency()->firstOrFail();
         $planPrice = $this->calculationService->getPlanPrice($newPlan);
 
-        $paddlePrice = $this->planService->getPaymentProviderPriceId($planPrice, $paymentProvider);
+        $paddlePrice = $this->planService->getPaymentProviderPriceId($planPrice, $paymentProvider, PaymentProviderPlanPriceType::MAIN_PRICE);
 
         if ($paddlePrice === null) {
             $paddlePrice = $this->createPaddlePriceForPlan($newPlan, $paddleProductId, $currency, $paymentProvider, $planPrice);
         }
 
-        $response = $this->paddleClient->updateSubscription(
-            $subscription->payment_provider_subscription_id,
-            $paddlePrice,
-            $withProration,
-            $subscription->trial_ends_at !== null && Carbon::parse($subscription->trial_ends_at)->isFuture(),
-            quantity: $subscription->quantity,
-        );
+        $isTrialing = $subscription->trial_ends_at !== null && Carbon::parse($subscription->trial_ends_at)->isFuture();
+
+        if ($newPlan->type === PlanType::SEAT_BASED->value && $planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+            $extraSeatPaddlePriceId = $this->findOrCreateExtraSeatPrice($newPlan, $planPrice, $paddleProductId, $currency, $paymentProvider);
+
+            $extraSeats = max(0, $subscription->quantity - $planPrice->included_seats);
+
+            $items = [
+                [
+                    'price_id' => $paddlePrice,
+                    'quantity' => 1,
+                ],
+            ];
+
+            if ($extraSeats > 0) {
+                $items[] = [
+                    'price_id' => $extraSeatPaddlePriceId,
+                    'quantity' => $extraSeats,
+                ];
+            }
+
+            $response = $this->paddleClient->updateSubscriptionWithItems(
+                $subscription->payment_provider_subscription_id,
+                $items,
+                $withProration,
+                $isTrialing,
+            );
+        } else {
+            $response = $this->paddleClient->updateSubscription(
+                $subscription->payment_provider_subscription_id,
+                $paddlePrice,
+                $withProration,
+                $isTrialing,
+                quantity: $subscription->quantity,
+            );
+        }
 
         if ($response->failed()) {
             throw new Exception('Failed to update paddle subscription: '.$response->body());
@@ -204,11 +258,41 @@ class PaddleProvider implements PaymentProviderInterface
 
         $planPrice = $this->calculationService->getPlanPrice($plan);
 
-        $priceId = $this->planService->getPaymentProviderPriceId($planPrice, $paymentProvider);
+        $priceId = $this->planService->getPaymentProviderPriceId($planPrice, $paymentProvider, PaymentProviderPlanPriceType::MAIN_PRICE);
 
         $isTrialing = $subscription->trial_ends_at !== null && Carbon::parse($subscription->trial_ends_at)->isFuture();
 
-        $response = $this->paddleClient->updateSubscriptionQuantity($subscription->payment_provider_subscription_id, $priceId, $quantity, $isTrialing, $isProrated);
+        if ($planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+            $currency = $subscription->currency()->firstOrFail();
+            $paddleProductId = $this->planService->getPaymentProviderProductId($plan, $paymentProvider);
+
+            $extraSeatPaddlePriceId = $this->findOrCreateExtraSeatPrice($plan, $planPrice, $paddleProductId, $currency, $paymentProvider);
+
+            $extraSeats = max(0, $quantity - $planPrice->included_seats);
+
+            $items = [
+                [
+                    'price_id' => $priceId,
+                    'quantity' => 1,
+                ],
+            ];
+
+            if ($extraSeats > 0) {
+                $items[] = [
+                    'price_id' => $extraSeatPaddlePriceId,
+                    'quantity' => $extraSeats,
+                ];
+            }
+
+            $response = $this->paddleClient->updateSubscriptionWithItems(
+                $subscription->payment_provider_subscription_id,
+                $items,
+                $isProrated,
+                $isTrialing,
+            );
+        } else {
+            $response = $this->paddleClient->updateSubscriptionQuantity($subscription->payment_provider_subscription_id, $priceId, $quantity, $isTrialing, $isProrated);
+        }
 
         if ($response->failed()) {
             logger()->error('Failed to update paddle subscription quantity: '.$subscription->payment_provider_subscription_id.' '.$response->body());
@@ -385,7 +469,7 @@ class PaddleProvider implements PaymentProviderInterface
         }
 
         $maxQuantity = 1;
-        if ($plan->type === PlanType::SEAT_BASED->value) {
+        if ($plan->type === PlanType::SEAT_BASED->value && $planPrice->type !== PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
             $maxQuantity = $plan->max_users_per_tenant > 0 ? $plan->max_users_per_tenant : 10000;
         }
 
@@ -520,5 +604,49 @@ class PaddleProvider implements PaymentProviderInterface
     public function supportsSkippingTrial(): bool
     {
         return true;
+    }
+
+    public function supportsSeatBasedWithIncludedSeats(): bool
+    {
+        return true;
+    }
+
+    private function findOrCreateExtraSeatPrice(
+        Plan $plan,
+        PlanPrice $planPrice,
+        string $paddleProductId,
+        Currency $currency,
+        PaymentProvider $paymentProvider,
+    ): string {
+        $existingPrices = $this->planService->getPaymentProviderPrices($planPrice, $paymentProvider);
+
+        foreach ($existingPrices as $existingPrice) {
+            if ($existingPrice->type === PaymentProviderPlanPriceType::EXTRA_SEAT_PRICE->value) {
+                return $existingPrice->payment_provider_price_id;
+            }
+        }
+
+        $maxQuantity = $plan->max_users_per_tenant > 0
+            ? max(1, $plan->max_users_per_tenant - $planPrice->included_seats)
+            : 10000;
+
+        $response = $this->paddleClient->createPriceForPlan(
+            $paddleProductId,
+            $plan->interval()->firstOrFail()->date_identifier,
+            $plan->interval_count,
+            $planPrice->extra_seat_price,
+            $currency->code,
+            maxQuantity: $maxQuantity,
+        );
+
+        if ($response->failed()) {
+            throw new Exception('Failed to create paddle extra seat price: '.$response->body());
+        }
+
+        $paddleExtraSeatPrice = $response->json()['data']['id'];
+
+        $this->planService->addPaymentProviderPriceId($planPrice, $paymentProvider, $paddleExtraSeatPrice, PaymentProviderPlanPriceType::EXTRA_SEAT_PRICE);
+
+        return $paddleExtraSeatPrice;
     }
 }

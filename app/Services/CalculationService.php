@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Constants\DiscountConstants;
+use App\Constants\PlanPriceType;
 use App\Constants\PlanType;
 use App\Dto\CartDto;
 use App\Dto\SubscriptionTotalsDto;
@@ -65,7 +66,16 @@ class CalculationService
 
         $totalsDto->setupFee = $planPrice->setup_fee ?? 0;
         if ($plan->type === PlanType::SEAT_BASED->value) {
-            $totalsDto->subtotal = $planPrice->price * $quantity;
+            if ($planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+                $extraSeats = max(0, $quantity - $planPrice->included_seats);
+                $totalsDto->subtotal = $planPrice->price + ($extraSeats * $planPrice->extra_seat_price);
+                $totalsDto->basePrice = $planPrice->price;
+                $totalsDto->includedSeats = $planPrice->included_seats;
+                $totalsDto->extraSeatPrice = $planPrice->extra_seat_price;
+                $totalsDto->extraSeats = $extraSeats;
+            } else {
+                $totalsDto->subtotal = $planPrice->price * $quantity;
+            }
         } else {
             $totalsDto->subtotal = $planPrice->price;
         }
@@ -102,8 +112,17 @@ class CalculationService
 
         if ($newPlan->type === PlanType::SEAT_BASED->value) {
             $quantity = $subscription->tenant->users->count();
-            $totalsDto->subtotal = $planPrice->price * $quantity;
-            $totalsDto->pricePerSeat = $planPrice->price;
+            if ($planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+                $extraSeats = max(0, $quantity - $planPrice->included_seats);
+                $totalsDto->subtotal = $planPrice->price + ($extraSeats * $planPrice->extra_seat_price);
+                $totalsDto->basePrice = $planPrice->price;
+                $totalsDto->includedSeats = $planPrice->included_seats;
+                $totalsDto->extraSeatPrice = $planPrice->extra_seat_price;
+                $totalsDto->extraSeats = $extraSeats;
+            } else {
+                $totalsDto->subtotal = $planPrice->price * $quantity;
+                $totalsDto->pricePerSeat = $planPrice->price;
+            }
             $totalsDto->quantity = $quantity;
         } else {
             $totalsDto->subtotal = $planPrice->price;

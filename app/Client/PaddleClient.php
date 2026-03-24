@@ -132,6 +132,19 @@ class PaddleClient
         ])->patch($this->getApiUrl('/subscriptions/'.$paddleSubscriptionId), $subscriptionObject);
     }
 
+    public function updateSubscriptionWithItems(string $paddleSubscriptionId, array $items, bool $withProration, bool $isTrialing = false): Response
+    {
+        $proration = $isTrialing ? 'do_not_bill' : ($withProration ? 'prorated_immediately' : 'full_immediately');
+        $subscriptionObject = [
+            'proration_billing_mode' => $proration,
+            'items' => $items,
+        ];
+
+        return Http::withHeaders([
+            'Authorization' => 'Bearer '.config('services.paddle.vendor_auth_code'),
+        ])->patch($this->getApiUrl('/subscriptions/'.$paddleSubscriptionId), $subscriptionObject);
+    }
+
     public function addDiscountToSubscription(string $paddleSubscriptionId, string $paddleDiscountId, string $effectiveFrom = 'next_billing_period')
     {
         $subscriptionObject = [

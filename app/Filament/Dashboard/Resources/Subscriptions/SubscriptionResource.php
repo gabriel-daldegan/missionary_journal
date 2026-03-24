@@ -58,17 +58,28 @@ class SubscriptionResource extends Resource
                     ->label(__('Plan')),
                 TextColumn::make('price')
                     ->label(__('Price'))
-                    ->formatStateUsing(function (string $state, $record) {
+                    ->formatStateUsing(function (string $state, Subscription $record) {
                         $interval = $record->interval->name;
                         if ($record->interval_count > 1) {
                             $interval = $record->interval_count.' '.__(str()->of($record->interval->name)->plural()->toString());
                         }
 
-                        if ($record->plan->type === PlanType::SEAT_BASED->value) {
-                            $interval .= ' / '.__('seat');
+                        $formatted = money($state, $record->currency->code).' / '.$interval;
+
+                        if ($record->price_type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+                            $planPrice = $record->plan->prices()->where('currency_id', $record->currency_id)->first();
+
+                            if ($planPrice !== null) {
+                                $formatted .= ' ('.__('Includes :count seats, +:price/extra seat', [
+                                    'count' => $planPrice->included_seats,
+                                    'price' => money($planPrice->extra_seat_price, $record->currency->code),
+                                ]).')';
+                            }
+                        } elseif ($record->plan->type === PlanType::SEAT_BASED->value) {
+                            $formatted .= ' / '.__('seat');
                         }
 
-                        return money($state, $record->currency->code).' / '.$interval;
+                        return $formatted;
                     }),
                 TextColumn::make('ends_at')->dateTime(config('app.datetime_format'))->label(__('Next Renewal')),
                 TextColumn::make('status')
@@ -189,17 +200,28 @@ class SubscriptionResource extends Resource
                         TextEntry::make('plan.name')->label(__('Plan')),
                         TextEntry::make('price')
                             ->label(__('Price'))
-                            ->formatStateUsing(function (string $state, $record) {
+                            ->formatStateUsing(function (string $state, Subscription $record) {
                                 $interval = $record->interval->name;
                                 if ($record->interval_count > 1) {
                                     $interval = $record->interval_count.' '.__(str()->of($record->interval->name)->plural()->toString());
                                 }
 
-                                if ($record->plan->type === PlanType::SEAT_BASED->value) {
-                                    $interval .= ' / '.__('seat');
+                                $formatted = money($state, $record->currency->code).' / '.$interval;
+
+                                if ($record->price_type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+                                    $planPrice = $record->plan->prices()->where('currency_id', $record->currency_id)->first();
+
+                                    if ($planPrice !== null) {
+                                        $formatted .= ' ('.__('Includes :count seats, +:price/extra seat', [
+                                            'count' => $planPrice->included_seats,
+                                            'price' => money($planPrice->extra_seat_price, $record->currency->code),
+                                        ]).')';
+                                    }
+                                } elseif ($record->plan->type === PlanType::SEAT_BASED->value) {
+                                    $formatted .= ' / '.__('seat');
                                 }
 
-                                return money($state, $record->currency->code).' / '.$interval;
+                                return $formatted;
                             }),
                         TextEntry::make('price_per_unit')
                             ->label(__('Price per Unit'))

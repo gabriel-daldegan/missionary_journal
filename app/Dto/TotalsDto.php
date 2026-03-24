@@ -25,4 +25,12 @@ class TotalsDto
     public ?string $pricePerUnit = null;
 
     public ?array $tiers = null;
+
+    public ?int $basePrice = null;
+
+    public ?int $includedSeats = null;
+
+    public ?int $extraSeatPrice = null;
+
+    public ?int $extraSeats = null;
 }

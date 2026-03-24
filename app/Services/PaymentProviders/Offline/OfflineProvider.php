@@ -138,6 +138,11 @@ class OfflineProvider implements PaymentProviderInterface
         return false;
     }
 
+    public function supportsSeatBasedWithIncludedSeats(): bool
+    {
+        return false;
+    }
+
     public function updateSubscriptionQuantity(Subscription $subscription, int $quantity, bool $isProrated = true): bool
     {
         $this->subscriptionService->updateSubscription(
