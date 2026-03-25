@@ -115,7 +115,7 @@ class CalculationServiceTest extends FeatureTest
         $this->assertEquals(7, $totals->quantity);
     }
 
-    public function test_regular_seat_based_still_works()
+    public function test_seat_based()
     {
         $product = Product::factory()->create();
         $currency = Currency::where('code', 'USD')->first();
