@@ -67,17 +67,47 @@
                 <div>
 
                     <hr class="mb-6 mt-2 text-neutral-200">
-                    <div class="flex flex-row justify-between">
-                        <div class="text-primary-900">
-                            {{ __('New Subscription price') }}
-                            @if ($newPlan->type === \App\Constants\PlanType::SEAT_BASED->value)
-                                ({{ $totals->quantity }} x @money($totals->pricePerSeat, $totals->currencyCode) / {{ __(' seat') }})
-                            @endif
+                    @if ($newPlan->type === \App\Constants\PlanType::SEAT_BASED->value && $totals->basePrice !== null)
+                        <div class="flex flex-row justify-between">
+                            <div class="text-primary-900">
+                                {{ __('Base price') }} <span class="text-xs text-neutral-400">({{ __('includes :count seats', ['count' => $totals->includedSeats]) }})</span>
+                            </div>
+                            <div class="text-primary-900">
+                                @money($totals->basePrice, $totals->currencyCode)
+                            </div>
                         </div>
-                        <div class="text-primary-900">
-                            @money($totals->subtotal, $totals->currencyCode)
+                        @if ($totals->extraSeats > 0)
+                            <div class="flex flex-row justify-between mt-2">
+                                <div class="text-primary-900">
+                                    {{ __('Extra seats') }} <span class="text-xs text-neutral-400">({{ $totals->extraSeats }} &times; @money($totals->extraSeatPrice, $totals->currencyCode))</span>
+                                </div>
+                                <div class="text-primary-900">
+                                    @money($totals->extraSeats * $totals->extraSeatPrice, $totals->currencyCode)
+                                </div>
+                            </div>
+                        @endif
+                        <hr class="my-4 text-neutral-200">
+                        <div class="flex flex-row justify-between">
+                            <div class="text-primary-900">
+                                {{ __('New Subscription price') }}
+                            </div>
+                            <div class="text-primary-900">
+                                @money($totals->subtotal, $totals->currencyCode)
+                            </div>
                         </div>
-                    </div>
+                    @else
+                        <div class="flex flex-row justify-between">
+                            <div class="text-primary-900">
+                                {{ __('New Subscription price') }}
+                                @if ($newPlan->type === \App\Constants\PlanType::SEAT_BASED->value)
+                                    ({{ $totals->quantity }} x @money($totals->pricePerSeat, $totals->currencyCode) / {{ __(' seat') }})
+                                @endif
+                            </div>
+                            <div class="text-primary-900">
+                                @money($totals->subtotal, $totals->currencyCode)
+                            </div>
+                        </div>
+                    @endif
 
                     @if (!$isProrated)
                         <hr class="my-6 text-neutral-200">

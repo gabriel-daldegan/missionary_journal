@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Constants\InvoiceStatus;
+use App\Constants\PlanPriceType;
+use App\Constants\PlanType;
 use App\Constants\TransactionStatus;
 use App\Models\Invoice as InvoiceEntity;
 use App\Models\PlanPrice;
@@ -122,15 +124,47 @@ class InvoiceService
             $itemName .= ' - '.$subscription->plan->trial_interval_count.' '.$subscription->plan->trialInterval()->firstOrFail()->name.' '.__('free trial included');
         }
 
-        $items[] = InvoiceItem::make($itemName)
-            ->quantity(1)
-            ->formattedPricePerUnit(
-                money($subscription->price, $subscription->currency->code)
-            );
-
         $planPrice = PlanPrice::where('plan_id', $subscription->plan_id)
             ->where('currency_id', $subscription->currency_id)
             ->first();
+
+        if ($subscription->plan->type === PlanType::SEAT_BASED->value
+            && $planPrice
+            && $planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value
+        ) {
+            $items[] = InvoiceItem::make($itemName.' - '.__('Base Price (:count seats included)', ['count' => $planPrice->included_seats]))
+                ->quantity(1)
+                ->formattedPricePerUnit(
+                    money($planPrice->price, $subscription->currency->code)
+                );
+
+            $setupFeeAmount = 0;
+            if (($planPrice->setup_fee ?? 0) > 0) {
+                $isFirstTransaction = ! $subscription->transactions()
+                    ->where('id', '<', $transaction->id)
+                    ->where('status', TransactionStatus::SUCCESS->value)
+                    ->exists();
+
+                if ($isFirstTransaction) {
+                    $setupFeeAmount = $planPrice->setup_fee;
+                }
+            }
+
+            $extraSeatsAmount = $transaction->amount - $planPrice->price - $setupFeeAmount - $transaction->total_discount - $transaction->total_tax;
+            if ($extraSeatsAmount > 0) {
+                $items[] = InvoiceItem::make(__('Extra Seats'))
+                    ->quantity(1)
+                    ->formattedPricePerUnit(
+                        money($extraSeatsAmount, $subscription->currency->code)
+                    );
+            }
+        } else {
+            $items[] = InvoiceItem::make($itemName)
+                ->quantity(1)
+                ->formattedPricePerUnit(
+                    money($subscription->price, $subscription->currency->code)
+                );
+        }
 
         if ($planPrice && ($planPrice->setup_fee ?? 0) > 0) {
             $isFirstTransaction = ! $subscription->transactions()

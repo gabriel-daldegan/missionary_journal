@@ -15,6 +15,12 @@
                 </span>
             </div>
 
+            @if($includedSeats)
+                <div class="text-xs text-neutral-500 mt-1">
+                    {{ __(':count seats included, additional seats at :price each', ['count' => $includedSeats, 'price' => money($extraSeatPrice, $extraSeatCurrencyCode)]) }}
+                </div>
+            @endif
+
             @error('quantity')
                 <span class="text-xs text-red-500 mt-1" role="alert">
                     {{ $message }}

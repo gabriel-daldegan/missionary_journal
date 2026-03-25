@@ -54,7 +54,35 @@
 
     <hr class="mb-6 mt-4 text-neutral-200">
 
-    @if ($subtotal > 0)
+    @if ($planPriceType === \App\Constants\PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value && $basePrice !== null)
+        <div class="flex flex-row justify-between">
+            <div class="text-primary-900">
+                {{ __('Base price') }} <span class="text-xs text-neutral-400">({{ __('includes :count seats', ['count' => $includedSeats]) }})</span>
+            </div>
+            <div class="text-primary-900">
+                @money($basePrice, $currencyCode)
+            </div>
+        </div>
+        @if ($extraSeats > 0)
+            <div class="flex flex-row justify-between mt-2">
+                <div class="text-primary-900">
+                    {{ __('Extra seats') }} <span class="text-xs text-neutral-400">({{ $extraSeats }} &times; @money($extraSeatPrice, $currencyCode))</span>
+                </div>
+                <div class="text-primary-900">
+                    @money($extraSeats * $extraSeatPrice, $currencyCode)
+                </div>
+            </div>
+        @endif
+        <hr class="my-4 text-neutral-200">
+        <div class="flex flex-row justify-between">
+            <div class="text-primary-900">
+                {{ __('Subscription price') }}
+            </div>
+            <div class="text-primary-900">
+                @money($subtotal, $currencyCode)
+            </div>
+        </div>
+    @elseif ($subtotal > 0)
         <div class="flex flex-row justify-between">
             <div class="text-primary-900">
                 {{ __('Subscription price') }}

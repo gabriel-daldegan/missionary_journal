@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Checkout;
 
+use App\Constants\PlanPriceType;
 use App\Exceptions\LoginException;
 use App\Exceptions\NoPaymentProvidersAvailableException;
 use App\Exceptions\SubscriptionCreationNotAllowedException;
@@ -167,7 +168,14 @@ class SubscriptionCheckoutForm extends CheckoutForm
 
         $plan = $this->planService->getActivePlanBySlug($planSlug);
 
-        $this->paymentProviders = $paymentService->getActivePaymentProvidersForPlan($plan, $shouldSupportSkippingTrial, true);
+        $planPrice = $this->calculationService->getPlanPrice($plan);
+
+        $this->paymentProviders = $paymentService->getActivePaymentProvidersForPlan(
+            $plan,
+            $shouldSupportSkippingTrial,
+            true,
+            $planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value,
+        );
 
         if (empty($this->paymentProviders)) {
             logger()->error('No payment providers available for plan', [

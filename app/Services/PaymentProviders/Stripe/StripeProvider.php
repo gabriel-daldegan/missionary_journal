@@ -341,10 +341,64 @@ class StripeProvider implements PaymentProviderInterface
         try {
             $stripe = $this->getClient();
 
-            $stripe->subscriptions->update($subscription->payment_provider_subscription_id, [
-                'quantity' => $quantity,
-                'proration_behavior' => $isProrated ? 'always_invoice' : 'none',
-            ]);
+            $plan = $subscription->plan;
+            $planPrice = $this->calculationService->getPlanPrice($plan);
+
+            if ($planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+                $extraSeats = max(0, $quantity - $planPrice->included_seats);
+
+                $extraSeatStripePriceId = $this->planService->getPaymentProviderPriceId($planPrice, $paymentProvider, PaymentProviderPlanPriceType::EXTRA_SEAT_PRICE);
+
+                if ($extraSeatStripePriceId === null) {
+                    Log::error('Extra seat price not found for subscription: '.$subscription->id);
+
+                    return false;
+                }
+
+                $subscriptionItems = $stripe->subscriptionItems->all([
+                    'subscription' => $subscription->payment_provider_subscription_id,
+                ]);
+
+                $extraSeatItemId = null;
+                foreach ($subscriptionItems as $item) {
+                    if ($item->price->id === $extraSeatStripePriceId) {
+                        $extraSeatItemId = $item->id;
+                        break;
+                    }
+                }
+
+                $items = [];
+                if ($extraSeatItemId !== null) {
+                    if ($extraSeats > 0) {
+                        $items[] = [
+                            'id' => $extraSeatItemId,
+                            'quantity' => $extraSeats,
+                        ];
+                    } else {
+                        $items[] = [
+                            'id' => $extraSeatItemId,
+                            'deleted' => true,
+                        ];
+                    }
+                } elseif ($extraSeats > 0) {
+                    $items[] = [
+                        'price' => $extraSeatStripePriceId,
+                        'quantity' => $extraSeats,
+                    ];
+                }
+
+                if (! empty($items)) {
+                    $stripe->subscriptions->update($subscription->payment_provider_subscription_id, [
+                        'items' => $items,
+                        'proration_behavior' => $isProrated ? 'always_invoice' : 'none',
+                    ]);
+                }
+            } else {
+                $stripe->subscriptions->update($subscription->payment_provider_subscription_id, [
+                    'quantity' => $quantity,
+                    'proration_behavior' => $isProrated ? 'always_invoice' : 'none',
+                ]);
+            }
 
         } catch (ApiErrorException $e) {
             Log::error($e->getMessage());
@@ -548,6 +602,22 @@ class StripeProvider implements PaymentProviderInterface
 
             $results[PaymentProviderPlanPriceType::MAIN_PRICE->value] = $stripeProductPriceId;
 
+            if ($plan->type === PlanType::SEAT_BASED->value && $planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+                $extraSeatPriceId = $stripe->prices->create([
+                    'product' => $stripeProductId,
+                    'unit_amount' => $planPrice->extra_seat_price,
+                    'currency' => $planPrice->currency()->firstOrFail()->code,
+                    'recurring' => [
+                        'interval' => $plan->interval()->firstOrFail()->date_identifier,
+                        'interval_count' => $plan->interval_count,
+                    ],
+                ])->id;
+
+                $this->planService->addPaymentProviderPriceId($planPrice, $paymentProvider, $extraSeatPriceId, PaymentProviderPlanPriceType::EXTRA_SEAT_PRICE);
+
+                $results[PaymentProviderPlanPriceType::EXTRA_SEAT_PRICE->value] = $extraSeatPriceId;
+            }
+
         } elseif ($plan->type === PlanType::USAGE_BASED->value) {
 
             $stripeMeterId = $this->findOrCreateStripeMeter($plan, $paymentProvider);
@@ -664,12 +734,31 @@ class StripeProvider implements PaymentProviderInterface
             ];
 
         } elseif ($plan->type === PlanType::SEAT_BASED->value) {
-            $lineItems = [
-                [
-                    'price' => $stripePrices[PaymentProviderPlanPriceType::MAIN_PRICE->value],
-                    'quantity' => $quantity,
-                ],
-            ];
+            $planPrice = $this->calculationService->getPlanPrice($plan);
+
+            if ($planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value) {
+                $lineItems = [
+                    [
+                        'price' => $stripePrices[PaymentProviderPlanPriceType::MAIN_PRICE->value],
+                        'quantity' => 1,
+                    ],
+                ];
+
+                $extraSeats = max(0, $quantity - $planPrice->included_seats);
+                if ($extraSeats > 0 && isset($stripePrices[PaymentProviderPlanPriceType::EXTRA_SEAT_PRICE->value])) {
+                    $lineItems[] = [
+                        'price' => $stripePrices[PaymentProviderPlanPriceType::EXTRA_SEAT_PRICE->value],
+                        'quantity' => $extraSeats,
+                    ];
+                }
+            } else {
+                $lineItems = [
+                    [
+                        'price' => $stripePrices[PaymentProviderPlanPriceType::MAIN_PRICE->value],
+                        'quantity' => $quantity,
+                    ],
+                ];
+            }
         }
 
         if ($includeSetupFee && isset($stripePrices[PaymentProviderPlanPriceType::SETUP_FEE_PRICE->value])) {
@@ -801,6 +890,11 @@ class StripeProvider implements PaymentProviderInterface
     }
 
     public function supportsSkippingTrial(): bool
+    {
+        return true;
+    }
+
+    public function supportsSeatBasedWithIncludedSeats(): bool
     {
         return true;
     }

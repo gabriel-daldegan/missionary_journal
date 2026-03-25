@@ -19,6 +19,8 @@ class PlanPrice extends Model
         'price_per_unit',
         'type',
         'tiers',
+        'included_seats',
+        'extra_seat_price',
     ];
 
     protected $casts = [
@@ -33,7 +35,9 @@ class PlanPrice extends Model
                 $planPrice->getOriginal('setup_fee') !== $planPrice->setup_fee ||
                 $planPrice->getOriginal('price_per_unit') !== $planPrice->price_per_unit ||
                 $planPrice->getOriginal('type') !== $planPrice->type ||
-                $planPrice->getOriginal('tiers') !== $planPrice->tiers
+                $planPrice->getOriginal('tiers') !== $planPrice->tiers ||
+                $planPrice->getOriginal('included_seats') !== $planPrice->included_seats ||
+                $planPrice->getOriginal('extra_seat_price') !== $planPrice->extra_seat_price
             ) {
                 $planPrice->planPricePaymentProviderData()->delete();
             }

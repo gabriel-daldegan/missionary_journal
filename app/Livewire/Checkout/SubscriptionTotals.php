@@ -41,6 +41,14 @@ class SubscriptionTotals extends Component
 
     public int $setupFee = 0;
 
+    public ?int $basePrice = null;
+
+    public ?int $includedSeats = null;
+
+    public ?int $extraSeatPrice = null;
+
+    public ?int $extraSeats = null;
+
     public bool $canAddDiscount = true;
 
     private DiscountService $discountService;
@@ -74,6 +82,10 @@ class SubscriptionTotals extends Component
         $this->planPriceType = $totals->planPriceType;
         $this->pricePerUnit = $totals->pricePerUnit;
         $this->tiers = $totals->tiers;
+        $this->basePrice = $totals->basePrice;
+        $this->includedSeats = $totals->includedSeats;
+        $this->extraSeatPrice = $totals->extraSeatPrice;
+        $this->extraSeats = $totals->extraSeats;
         $this->canAddDiscount = $canAddDiscount;
 
         $this->applyCouponFromSession($plan);
@@ -172,6 +184,10 @@ class SubscriptionTotals extends Component
         $this->discountAmount = $totals->discountAmount;
         $this->amountDue = $totals->amountDue;
         $this->currencyCode = $totals->currencyCode;
+        $this->basePrice = $totals->basePrice;
+        $this->includedSeats = $totals->includedSeats;
+        $this->extraSeatPrice = $totals->extraSeatPrice;
+        $this->extraSeats = $totals->extraSeats;
     }
 
     public function render()

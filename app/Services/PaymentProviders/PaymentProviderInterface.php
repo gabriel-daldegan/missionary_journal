@@ -42,4 +42,6 @@ interface PaymentProviderInterface
     public function reportUsage(Subscription $subscription, int $unitCount): bool;
 
     public function supportsSkippingTrial(): bool;
+
+    public function supportsSeatBasedWithIncludedSeats(): bool;
 }
