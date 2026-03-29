@@ -20,7 +20,9 @@ class CreemClient
 
     public function cancelSubscription(string $id): Response
     {
-        return $this->request()->post($this->getApiUrl('/v1/subscriptions/'.$id.'/cancel'));
+        return $this->request()->post($this->getApiUrl('/v1/subscriptions/'.$id.'/cancel'), [
+            'mode' => 'scheduled',
+        ]);
     }
 
     public function pauseSubscription(string $id): Response
