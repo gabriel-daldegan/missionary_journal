@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\PaymentProviders;
 
+use App\Filament\Admin\Resources\PaymentProviders\Pages\CreemSettings;
 use App\Filament\Admin\Resources\PaymentProviders\Pages\EditPaymentProvider;
 use App\Filament\Admin\Resources\PaymentProviders\Pages\LemonSqueezySettings;
 use App\Filament\Admin\Resources\PaymentProviders\Pages\ListPaymentProviders;
@@ -110,6 +111,7 @@ class PaymentProviderResource extends Resource
             'stripe-settings' => StripeSettings::route('/stripe-settings'),
             'paddle-settings' => PaddleSettings::route('/paddle-settings'),
             'lemon-squeezy-settings' => LemonSqueezySettings::route('/lemon-squeezy-settings'),
+            'creem-settings' => CreemSettings::route('/creem-settings'),
         ];
     }
 
