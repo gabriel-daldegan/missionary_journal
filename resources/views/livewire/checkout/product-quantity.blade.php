@@ -6,7 +6,7 @@
             </div>
             <input type="number" min="1"
                   {{ $maxQuantity > 0 ? 'max=' . $maxQuantity : '' }}
-                   wire:model.blur="quantity"
+                   wire:model.live.blur="quantity"
                    class="input input-bordered md:w-2/3 max-w-s">
 
             <div class="absolute top-0 right-0 p-2">

@@ -79,11 +79,12 @@ class CreemWebhookHandler
 
         $order = $this->orderService->findByUuidOrFail($orderUuid);
 
+        $creemOrderObject = $object['order'];
         $transactionId = $object['id'] ?? null;
-        $amount = $object['amount'] ?? 0;
-        $tax = $object['tax'] ?? 0;
-        $discount = $object['discount'] ?? 0;
-        $currencyCode = strtoupper($object['currency'] ?? 'USD');
+        $amount = $creemOrderObject['amount'] ?? 0;
+        $tax = $creemOrderObject['tax_amount'] ?? 0;
+        $discount = $creemOrderObject['discount_amount'] ?? 0;
+        $currencyCode = strtoupper($creemOrderObject['currency'] ?? 'USD');
         $currency = Currency::where('code', $currencyCode)->firstOrFail();
 
         $transaction = $this->transactionService->getTransactionByPaymentProviderTxId($transactionId);
@@ -112,7 +113,11 @@ class CreemWebhookHandler
         $this->orderService->updateOrder($order, [
             'status' => OrderStatus::SUCCESS,
             'payment_provider_id' => $paymentProvider->id,
-            'payment_provider_order_id' => $transactionId,
+            'payment_provider_order_id' => $creemOrderObject['id'] ?? $transactionId,
+            'total_amount' => $creemOrderObject['sub_total'] ?? $amount,
+            'total_amount_after_discount' => $creemOrderObject['sub_total'] - $discount,
+            'total_discount_amount' => $discount,
+            'currency_id' => $currency->id,
         ]);
     }
 

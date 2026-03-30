@@ -14,7 +14,6 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Services\CalculationService;
-use App\Services\DiscountService;
 use App\Services\OneTimeProductService;
 use App\Services\PaymentProviders\PaymentProviderInterface;
 use App\Services\PlanService;
@@ -30,7 +29,6 @@ class CreemProvider implements PaymentProviderInterface
         private SubscriptionService $subscriptionService,
         private CalculationService $calculationService,
         private PlanService $planService,
-        private DiscountService $discountService,
         private OneTimeProductService $oneTimeProductService,
     ) {}
 
@@ -71,7 +69,7 @@ class CreemProvider implements PaymentProviderInterface
 
         if ($discount) {
             try {
-                $discountCode = $this->findOrCreateCreemDiscount($discount, $paymentProvider);
+                $discountCode = $this->createCreemDiscount($discount, $productId);
                 $params['discount_code'] = $discountCode;
             } catch (Exception $e) {
                 Log::error('Failed to create Creem discount: '.$e->getMessage());
@@ -129,7 +127,7 @@ class CreemProvider implements PaymentProviderInterface
 
         if ($discount) {
             try {
-                $discountCode = $this->findOrCreateCreemDiscount($discount, $paymentProvider);
+                $discountCode = $this->createCreemDiscount($discount, $productId);
                 $params['discount_code'] = $discountCode;
             } catch (Exception $e) {
                 Log::error('Failed to create Creem discount: '.$e->getMessage());
@@ -302,19 +300,16 @@ class CreemProvider implements PaymentProviderInterface
         return false;
     }
 
-    private function findOrCreateCreemDiscount(Discount $discount, PaymentProvider $paymentProvider): string
+    private function createCreemDiscount(Discount $discount, string $productId): string
     {
-        $discountId = $this->discountService->getPaymentProviderDiscountId($discount, $paymentProvider);
+        $sessionKey = "creem_discount_{$discount->id}_{$productId}";
+        $cachedCode = session($sessionKey);
 
-        if ($discountId !== null) {
-            return $discountId;
+        if ($cachedCode !== null) {
+            return $cachedCode;
         }
 
-        $discountCode = $discount->codes()->first()->code ?? null;
-        $discountCode = $discountCode ?? '';
-        $discountCode = preg_replace('/[^A-Za-z0-9]/', '', $discountCode);
-
-        $code = strtoupper($discountCode.Str::random(16));
+        $code = strtoupper(Str::random(14));
 
         $duration = 'once';
         if ($discount->duration_in_months !== null) {
@@ -328,6 +323,7 @@ class CreemProvider implements PaymentProviderInterface
             'code' => $code,
             'type' => $discount->type === DiscountConstants::TYPE_FIXED ? 'fixed' : 'percentage',
             'duration' => $duration,
+            'applies_to_products' => [$productId],
         ];
 
         if ($discount->type === DiscountConstants::TYPE_FIXED) {
@@ -347,7 +343,7 @@ class CreemProvider implements PaymentProviderInterface
             throw new Exception('Failed to create Creem discount');
         }
 
-        $this->discountService->addPaymentProviderDiscountId($discount, $paymentProvider, $code);
+        session([$sessionKey => $code]);
 
         return $code;
     }
