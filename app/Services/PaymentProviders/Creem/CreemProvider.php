@@ -331,14 +331,14 @@ class CreemProvider implements PaymentProviderInterface
             'applies_to_products' => [$productId],
         ];
 
+        if ($discount->duration_in_months !== null) {
+            $params['duration_in_months'] = $discount->duration_in_months;
+        }
+
         if ($discount->type === DiscountConstants::TYPE_FIXED) {
             $params['amount'] = intval($discount->amount);
         } else {
             $params['percentage'] = intval($discount->amount);
-        }
-
-        if ($discount->max_redemptions > 0) {
-            $params['max_redemptions'] = $discount->max_redemptions;
         }
 
         $response = $this->client->createDiscount($params);

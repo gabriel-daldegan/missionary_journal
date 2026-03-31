@@ -198,7 +198,7 @@ class CreemWebhookHandler
             $discountAmount = $object['discount'] ?? 0;
             $currencyCode = strtoupper($object['currency'] ?? 'USD');
             $currency = Currency::where('code', $currencyCode)->firstOrFail();
-            $transactionId = $object['transaction_id'] ?? $providerSubscriptionId.'_'.now()->timestamp;
+            $transactionId = $object['last_transaction']['order'] ?? $object['last_transaction_id'];
 
             $transaction = $this->transactionService->getTransactionByPaymentProviderTxId($transactionId);
 
