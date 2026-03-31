@@ -56,7 +56,7 @@ class CreemClient
     public function getCustomerBillingPortal(string $customerId): Response
     {
         return $this->request()->post($this->getApiUrl('/v1/customers/billing'), [
-            'id' => $customerId,
+            'customer_id' => $customerId,
         ]);
     }
 

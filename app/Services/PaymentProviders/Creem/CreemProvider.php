@@ -270,7 +270,7 @@ class CreemProvider implements PaymentProviderInterface
                 throw new Exception('Failed to get Creem billing portal link');
             }
 
-            return $response->json()['customer_portal_url'] ?? '/';
+            return $response->json()['customer_portal_link'] ?? '/';
         } catch (Exception $e) {
             Log::error($e->getMessage());
 

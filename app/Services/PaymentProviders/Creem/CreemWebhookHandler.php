@@ -193,12 +193,13 @@ class CreemWebhookHandler
         } elseif ($eventType === 'subscription.paid') {
             $subscription = $this->findSubscription($subscriptionUuid, $providerSubscriptionId, $paymentProvider);
 
-            $amount = $object['amount'] ?? 0;
-            $tax = $object['tax'] ?? 0;
-            $discountAmount = $object['discount'] ?? 0;
-            $currencyCode = strtoupper($object['currency'] ?? 'USD');
+            $lastTransaction = $object['last_transaction'] ?? [];
+            $amount = $lastTransaction['amount_paid'] ?? 0;
+            $tax = $lastTransaction['tax_amount'] ?? 0;
+            $discountAmount = $lastTransaction['discount_amount'] ?? 0;
+            $currencyCode = strtoupper($lastTransaction['currency'] ?? $object['currency'] ?? 'USD');
             $currency = Currency::where('code', $currencyCode)->firstOrFail();
-            $transactionId = $object['last_transaction']['order'] ?? $object['last_transaction_id'];
+            $transactionId = $lastTransaction['order'] ?? $object['last_transaction_id'];
 
             $transaction = $this->transactionService->getTransactionByPaymentProviderTxId($transactionId);
 
