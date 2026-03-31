@@ -774,6 +774,11 @@ class StripeProvider implements PaymentProviderInterface
         return true;
     }
 
+    public function supportsOneTimePurchaseProductQuantity(): bool
+    {
+        return true;
+    }
+
     private function getSubscriptionCheckoutCancelUrl(Plan $plan, Subscription $subscription)
     {
         if ($subscription->type === SubscriptionType::LOCALLY_MANAGED) {

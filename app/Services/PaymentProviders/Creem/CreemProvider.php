@@ -300,6 +300,11 @@ class CreemProvider implements PaymentProviderInterface
         return false;
     }
 
+    public function supportsOneTimePurchaseProductQuantity(): bool
+    {
+        return false;
+    }
+
     private function createCreemDiscount(Discount $discount, string $productId): string
     {
         $sessionKey = "creem_discount_{$discount->id}_{$productId}";

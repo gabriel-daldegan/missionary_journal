@@ -60,6 +60,20 @@ class PaymentService
         return $paymentProviders;
     }
 
+    public function getActivePaymentProvidersForOneTimePurchase(bool $requireQuantitySupport = false, bool $isNewPayment = false): array
+    {
+        $paymentProviders = $this->getActivePaymentProviders($isNewPayment);
+
+        if ($requireQuantitySupport) {
+            $paymentProviders = array_values(array_filter(
+                $paymentProviders,
+                fn (PaymentProviderInterface $p) => $p->supportsOneTimePurchaseProductQuantity(),
+            ));
+        }
+
+        return $paymentProviders;
+    }
+
     public function getPaymentProviderBySlug(string $slug): PaymentProviderInterface
     {
         $paymentProviderInterfaceMap = $this->getPaymentProviderInterfaceMap();

@@ -4,6 +4,7 @@ namespace App\Livewire\Checkout;
 
 use App\Dto\TotalsDto;
 use App\Exceptions\LoginException;
+use App\Exceptions\NoPaymentProvidersAvailableException;
 use App\Services\CalculationService;
 use App\Services\CheckoutService;
 use App\Services\DiscountService;
@@ -119,12 +120,16 @@ class ProductCheckoutForm extends CheckoutForm
 
         $totals = $this->calculationService->calculateCartTotals($cartDto, auth()->user());
 
+        $productHasEditableQuantity = intval($product->max_quantity) !== 1;
+
+        $paymentProviders = $this->getPaymentProvidersForProduct($paymentService, $productHasEditableQuantity);
+
         return view('livewire.checkout.product-checkout-form', [
             'product' => $product,
             'cartDto' => $cartDto,
             'successUrl' => route('checkout.product.success'),
             'userExists' => $this->userExists($this->email),
-            'paymentProviders' => $this->getPaymentProviders($paymentService),
+            'paymentProviders' => $paymentProviders,
             'totals' => $totals,
             'requiresPayment' => $this->requiresPayment($totals),
             'otpEnabled' => config('app.otp_login_enabled'),
@@ -136,6 +141,27 @@ class ProductCheckoutForm extends CheckoutForm
     public function refresh()
     {
         // do nothing, just re-render the component
+    }
+
+    protected function getPaymentProvidersForProduct(PaymentService $paymentService, bool $requireQuantitySupport): array
+    {
+        if (count($this->paymentProviders) > 0) {
+            return $this->paymentProviders;
+        }
+
+        $this->paymentProviders = $paymentService->getActivePaymentProvidersForOneTimePurchase($requireQuantitySupport, true);
+
+        if (empty($this->paymentProviders)) {
+            logger()->error('No payment providers available');
+
+            throw new NoPaymentProvidersAvailableException('No payment providers available');
+        }
+
+        if ($this->paymentProvider === null) {
+            $this->paymentProvider = $this->paymentProviders[0]->getSlug();
+        }
+
+        return $this->paymentProviders;
     }
 
     public function requiresPayment(TotalsDto $totals): bool
