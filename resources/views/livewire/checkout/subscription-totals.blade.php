@@ -42,6 +42,7 @@
                                value="{{$addedCode ?? ''}}" disabled="{{$isDiscountCodeAdded}}"/>
 
                         <x-button-link.primary-outline wire:click.prevent="add" tabindex="0"
+                                                       @keydown.enter.prevent="$wire.add()"
                                                        class="!text-primary-500 !border-primary-500 text-xs! py-1! whitespace-nowrap">
                             {{ __('Add Discount') }}
                         </x-button-link.primary-outline>
