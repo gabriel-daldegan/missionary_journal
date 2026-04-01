@@ -11,7 +11,6 @@ use App\Exceptions\SubscriptionCreationNotAllowedException;
 use App\Models\Currency;
 use App\Models\PaymentProvider;
 use App\Models\User;
-use App\Services\OneTimeProductService;
 use App\Services\OrderService;
 use App\Services\PlanService;
 use App\Services\SubscriptionService;
@@ -30,7 +29,6 @@ class CreemWebhookHandler
         private TransactionService $transactionService,
         private OrderService $orderService,
         private PlanService $planService,
-        private OneTimeProductService $oneTimeProductService,
     ) {}
 
     public function handleWebhook(Request $request): JsonResponse
@@ -63,8 +61,8 @@ class CreemWebhookHandler
         match (true) {
             str_starts_with($eventType, 'subscription.') => $this->handleSubscriptionEvent($eventType, $object, $paymentProvider),
             $eventType === 'checkout.completed' => $this->handleCheckoutCompleted($object, $paymentProvider),
-            $eventType === 'refund.created' => $this->handleRefund($object, $paymentProvider),
-            default => Log::info('Unhandled Creem webhook event: '.$eventType),
+            $eventType === 'refund.created' => $this->handleRefund($object),
+            default => Log::warning('Unhandled Creem webhook event: '.$eventType),
         };
     }
 
@@ -80,8 +78,9 @@ class CreemWebhookHandler
         $order = $this->orderService->findByUuidOrFail($orderUuid);
 
         $creemOrderObject = $object['order'];
-        $transactionId = $object['id'] ?? null;
+        $transactionId = $object['order']['transaction'] ?? null;
         $amount = $creemOrderObject['amount'] ?? 0;
+        $amountPaid = $creemOrderObject['amount_paid'] ?? 0;
         $tax = $creemOrderObject['tax_amount'] ?? 0;
         $discount = $creemOrderObject['discount_amount'] ?? 0;
         $currencyCode = strtoupper($creemOrderObject['currency'] ?? 'USD');
@@ -98,7 +97,7 @@ class CreemWebhookHandler
         } else {
             $this->transactionService->createForOrder(
                 $order,
-                $amount,
+                $amountPaid,
                 $tax,
                 $discount,
                 0,
@@ -113,7 +112,7 @@ class CreemWebhookHandler
         $this->orderService->updateOrder($order, [
             'status' => OrderStatus::SUCCESS,
             'payment_provider_id' => $paymentProvider->id,
-            'payment_provider_order_id' => $creemOrderObject['id'] ?? $transactionId,
+            'payment_provider_order_id' => $creemOrderObject['id'],
             'total_amount' => $creemOrderObject['sub_total'] ?? $amount,
             'total_amount_after_discount' => $creemOrderObject['sub_total'] - $discount,
             'total_discount_amount' => $discount,
@@ -199,7 +198,7 @@ class CreemWebhookHandler
             $discountAmount = $lastTransaction['discount_amount'] ?? 0;
             $currencyCode = strtoupper($lastTransaction['currency'] ?? $object['currency'] ?? 'USD');
             $currency = Currency::where('code', $currencyCode)->firstOrFail();
-            $transactionId = $lastTransaction['order'] ?? $object['last_transaction_id'];
+            $transactionId = $object['last_transaction_id'];
 
             $transaction = $this->transactionService->getTransactionByPaymentProviderTxId($transactionId);
 
@@ -266,9 +265,10 @@ class CreemWebhookHandler
         }
     }
 
-    private function handleRefund(array $object, PaymentProvider $paymentProvider): void
+    private function handleRefund(array $object): void
     {
-        $transactionId = $object['transaction_id'] ?? null;
+        $transactionData = $object['transaction'] ?? [];
+        $transactionId = $transactionData['transaction'] ?? $transactionData['id'] ?? null;
 
         if ($transactionId === null) {
             return;
