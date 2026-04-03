@@ -65,7 +65,7 @@ class PaymentProviderDataRelationManager extends RelationManager
                         ->label(__('Validate Product (Lemon Squeezy)'))
                         ->color('success')
                         ->outlined()
-                        ->disabled(fn ($get) => $get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::LEMON_SQUEEZY_SLUG)?->first()?->id)
+                        ->visible(fn ($get) => $get('payment_provider_id') == PaymentProvider::where('slug', PaymentProviderConstants::LEMON_SQUEEZY_SLUG)?->first()?->id)
                         ->action(function (LemonSqueezyProductValidator $validator, $get) {
                             if ($get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::LEMON_SQUEEZY_SLUG)?->first()?->id) {
                                 Notification::make()
@@ -104,7 +104,7 @@ class PaymentProviderDataRelationManager extends RelationManager
                         ->label(__('Validate Product (Creem)'))
                         ->color('success')
                         ->outlined()
-                        ->disabled(fn ($get) => $get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::CREEM_SLUG)?->first()?->id)
+                        ->visible(fn ($get) => $get('payment_provider_id') == PaymentProvider::where('slug', PaymentProviderConstants::CREEM_SLUG)?->first()?->id)
                         ->action(function (CreemProductValidator $validator, $get) {
                             if ($get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::CREEM_SLUG)?->first()?->id) {
                                 Notification::make()
