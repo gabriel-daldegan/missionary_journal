@@ -42,4 +42,6 @@ interface PaymentProviderInterface
     public function supportsSkippingTrial(): bool;
 
     public function supportsOneTimePurchaseProductQuantity(): bool;
+
+    public function supportsSetupFees(): bool;
 }
