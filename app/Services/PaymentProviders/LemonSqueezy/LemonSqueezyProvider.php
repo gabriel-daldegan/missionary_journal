@@ -441,7 +441,7 @@ class LemonSqueezyProvider implements PaymentProviderInterface
 
     public function supportsSetupFees(): bool
     {
-        return false;
+        return true;
     }
 
     private function getSubscriptionCheckoutSuccessUrl(Subscription $subscription)
