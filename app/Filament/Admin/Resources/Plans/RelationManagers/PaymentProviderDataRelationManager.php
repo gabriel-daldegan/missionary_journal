@@ -147,7 +147,7 @@ class PaymentProviderDataRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->description(new HtmlString('⚠️ Advanced settings, these records are created automatically when a plan is created. You <b>SHOULD NOT</b> need to create or edit these records manually unless you use "Lemon Squeezy" as your payment provider because it does not support plan creation via the API.'))
+            ->description(new HtmlString('⚠️ Advanced settings, these records are created automatically when a plan is created. You <b>SHOULD NOT</b> need to create or edit these records manually unless you use "Lemon Squeezy" or "Creem" as your payment provider because they do not support plan creation via the API.'))
             ->recordTitleAttribute('Payment Provider Product/Variant ID')
             ->columns([
                 TextColumn::make('payment_provider_id')
