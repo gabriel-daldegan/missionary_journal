@@ -42,7 +42,8 @@ class PaymentProviderDataRelationManager extends RelationManager
                 Select::make('payment_provider_id')
                     ->label('Payment Provider')
                     ->options(
-                        PaymentProvider::all()
+                        PaymentProvider::where('slug', '!=', PaymentProviderConstants::OFFLINE_SLUG)
+                            ->get()
                             ->mapWithKeys(function ($paymentProvider) {
                                 return [$paymentProvider->id => $paymentProvider->name];
                             })
