@@ -54,6 +54,7 @@ class PaymentProviderDataRelationManager extends RelationManager
                     ->unique(modifyRuleUsing: function ($rule, Get $get, RelationManager $livewire) {
                         return $rule->where('plan_id', $livewire->ownerRecord->id)->ignore($get('id'));
                     })
+                    ->live()
                     ->preload()
                     ->required(),
                 TextInput::make('payment_provider_product_id')
