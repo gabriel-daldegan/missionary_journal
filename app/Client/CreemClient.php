@@ -15,7 +15,7 @@ class CreemClient
 
     public function getSubscription(string $id): Response
     {
-        return $this->request()->get($this->getApiUrl('/v1/subscriptions'), ['id' => $id]);
+        return $this->request()->get($this->getApiUrl('/v1/subscriptions'), ['subscription_id' => $id]);
     }
 
     public function cancelSubscription(string $id): Response
@@ -33,6 +33,14 @@ class CreemClient
     public function resumeSubscription(string $id): Response
     {
         return $this->request()->post($this->getApiUrl('/v1/subscriptions/'.$id.'/resume'));
+    }
+
+    public function updateSubscription(string $id, array $items, string $updateBehavior = 'proration-charge'): Response
+    {
+        return $this->request()->post($this->getApiUrl('/v1/subscriptions/'.$id), [
+            'items' => $items,
+            'update_behavior' => $updateBehavior,
+        ]);
     }
 
     public function upgradeSubscription(string $id, string $productId, string $updateBehavior = 'proration-charge-immediately'): Response

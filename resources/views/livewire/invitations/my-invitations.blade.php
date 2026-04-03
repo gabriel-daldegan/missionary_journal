@@ -29,7 +29,7 @@
                         <td>{{ $invitation->tenant->name }}</td>
                         <td>{{ $invitation->user->name }}</td>
                         <td class="text-end flex gap-4 items-end justify-end">
-                            <x-button-link.primary wire:click="acceptInvitation('{{ $invitation->uuid }}')">
+                            <x-button-link.primary wire:click="acceptInvitation('{{ $invitation->uuid }}')" wire:loading.class="opacity-50 pointer-events-none" wire:target="acceptInvitation('{{ $invitation->uuid }}')">
                                 {{ __('Accept') }}
                                 <div wire:loading wire:target="acceptInvitation('{{ $invitation->uuid }}')">
                                     <span class="loading loading-spinner loading-xs"></span>

@@ -58,6 +58,7 @@ class CreemProvider implements PaymentProviderInterface
 
         $params = [
             'product_id' => $productId,
+            'units' => $quantity,
             'success_url' => $this->getSubscriptionCheckoutSuccessUrl($subscription),
             'customer' => [
                 'email' => $user->email,
@@ -287,6 +288,7 @@ class CreemProvider implements PaymentProviderInterface
     {
         return [
             PlanType::FLAT_RATE->value,
+            PlanType::SEAT_BASED->value,
         ];
     }
 
@@ -375,11 +377,58 @@ class CreemProvider implements PaymentProviderInterface
 
     public function updateSubscriptionQuantity(Subscription $subscription, int $quantity, bool $isProrated = true): bool
     {
-        // TODO: Implement updateSubscriptionQuantity() method.
+        $this->assertProviderIsActive();
+
+        try {
+            $response = $this->client->getSubscription($subscription->payment_provider_subscription_id);
+
+            if (! $response->successful()) {
+                throw new Exception('Failed to get Creem subscription');
+            }
+
+            $subscriptionData = $response->json();
+            $items = $subscriptionData['items'] ?? [];
+
+            if (empty($items)) {
+                throw new Exception('No items found on Creem subscription');
+            }
+
+            $updatedItems = [];
+            foreach ($items as $item) {
+                $updatedItems[] = [
+                    'id' => $item['id'],
+                    'price_id' => $item['price_id'],
+                    'product_id' => $item['product_id'],
+                    'units' => $quantity,
+                ];
+            }
+
+            $updateBehavior = $isProrated ? 'proration-charge-immediately' : 'proration-none';
+
+            $response = $this->client->updateSubscription(
+                $subscription->payment_provider_subscription_id,
+                $updatedItems,
+                $updateBehavior,
+            );
+
+            if (! $response->successful()) {
+                throw new Exception('Failed to update Creem subscription quantity');
+            }
+
+            $this->subscriptionService->updateSubscription($subscription, [
+                'quantity' => $quantity,
+            ]);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+
+            return false;
+        }
+
+        return true;
     }
 
     public function supportsSeatBasedWithIncludedSeats(): bool
     {
-        // TODO: Implement supportsSeatBasedWithIncludedSeats() method.
+        return false;
     }
 }
