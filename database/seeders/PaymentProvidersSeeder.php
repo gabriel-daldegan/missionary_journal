@@ -36,11 +36,18 @@ class PaymentProvidersSeeder extends Seeder
                 'sort' => 3,
             ],
             [
+                'name' => 'Creem',
+                'slug' => PaymentProviderConstants::CREEM_SLUG,
+                'type' => 'multi',
+                'is_active' => false,
+                'sort' => 4,
+            ],
+            [
                 'name' => 'Offline',
                 'slug' => PaymentProviderConstants::OFFLINE_SLUG,
                 'type' => 'multi',
                 'is_active' => false,
-                'sort' => 4,
+                'sort' => 5,
             ],
         ];
 

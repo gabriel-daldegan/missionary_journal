@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\PaymentProviders\Creem\CreemProvider;
 use App\Services\PaymentProviders\LemonSqueezy\LemonSqueezyProvider;
 use App\Services\PaymentProviders\Offline\OfflineProvider;
 use App\Services\PaymentProviders\Paddle\PaddleProvider;
@@ -33,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
             StripeProvider::class,
             PaddleProvider::class,
             LemonSqueezyProvider::class,
+            CreemProvider::class,
             OfflineProvider::class,
         ], 'payment-providers');
 

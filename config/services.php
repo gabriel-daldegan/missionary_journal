@@ -99,6 +99,12 @@ return [
         'is_test_mode' => env('LEMON_SQUEEZY_IS_TEST_MODE', false),
     ],
 
+    'creem' => [
+        'api_key' => env('CREEM_API_KEY'),
+        'webhook_secret' => env('CREEM_WEBHOOK_SECRET'),
+        'is_test_mode' => env('CREEM_IS_TEST_MODE', false),
+    ],
+
     'twilio' => [
         'sid' => env('TWILIO_SID'),
         'token' => env('TWILIO_TOKEN'),

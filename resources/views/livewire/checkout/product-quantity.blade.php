@@ -1,13 +1,13 @@
 <div>
     <div class="my-4">
-
-        <div class="flex flex-row gap-3 items-center">
-            <span class="font-medium text-sm">{{ __('Quantity') }}</span>
-            <fieldset class="fieldset">
-                <input type="number" min="1" class="input input-md" {{ $maxQuantity > 0 ? 'max=' . $maxQuantity : '' }}
-                wire:model.live.debounce.300ms="quantity" />
-            </fieldset>
-        </div>
+        <label class="form-control w-full max-w-xs flex flex-row gap-2">
+            <div class="label">
+                <span class="label-text">{{ __('Quantity:') }}</span>
+            </div>
+            <input type="number" min="1"
+                  {{ $maxQuantity > 0 ? 'max=' . $maxQuantity : '' }}
+                   wire:model.live.blur="quantity"
+                   class="input input-bordered md:w-2/3 max-w-s">
 
         <div class="absolute top-0 right-0 p-2">
                 <span wire:loading>

@@ -471,6 +471,11 @@ class LemonSqueezyProvider implements PaymentProviderInterface
         return false;
     }
 
+    public function supportsOneTimePurchaseProductQuantity(): bool
+    {
+        return true;
+    }
+
     private function getSubscriptionCheckoutSuccessUrl(Subscription $subscription)
     {
         if ($subscription->type === SubscriptionType::LOCALLY_MANAGED) {

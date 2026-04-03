@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PaymentProviders\CreemController;
 use App\Http\Controllers\PaymentProviders\LemonSqueezyController;
 use App\Http\Controllers\PaymentProviders\PaddleController;
 use App\Http\Controllers\PaymentProviders\StripeController;
@@ -30,3 +31,8 @@ Route::post('/payments-providers/lemon-squeezy/webhook', [
     LemonSqueezyController::class,
     'handleWebhook',
 ])->name('payments-providers.lemon-squeezy.webhook');
+
+Route::post('/payments-providers/creem/webhook', [
+    CreemController::class,
+    'handleWebhook',
+])->name('payments-providers.creem.webhook');

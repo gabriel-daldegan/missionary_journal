@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Plans\RelationManagers;
 
 use App\Constants\PaymentProviderConstants;
 use App\Models\PaymentProvider;
+use App\Services\PaymentProviders\Creem\CreemProductValidator;
 use App\Services\PaymentProviders\LemonSqueezy\LemonSqueezyProductValidator;
 use Exception;
 use Filament\Actions\Action;
@@ -41,7 +42,8 @@ class PaymentProviderDataRelationManager extends RelationManager
                 Select::make('payment_provider_id')
                     ->label('Payment Provider')
                     ->options(
-                        PaymentProvider::all()
+                        PaymentProvider::where('slug', '!=', PaymentProviderConstants::OFFLINE_SLUG)
+                            ->get()
                             ->mapWithKeys(function ($paymentProvider) {
                                 return [$paymentProvider->id => $paymentProvider->name];
                             })
@@ -64,7 +66,7 @@ class PaymentProviderDataRelationManager extends RelationManager
                         ->label(__('Validate Product (Lemon Squeezy)'))
                         ->color('success')
                         ->outlined()
-                        ->disabled(fn ($get) => $get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::LEMON_SQUEEZY_SLUG)?->first()?->id)
+                        ->visible(fn ($get) => $get('payment_provider_id') == PaymentProvider::where('slug', PaymentProviderConstants::LEMON_SQUEEZY_SLUG)?->first()?->id)
                         ->action(function (LemonSqueezyProductValidator $validator, $get) {
                             if ($get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::LEMON_SQUEEZY_SLUG)?->first()?->id) {
                                 Notification::make()
@@ -96,6 +98,45 @@ class PaymentProviderDataRelationManager extends RelationManager
                                 ->success()
                                 ->title(__('Product found'))
                                 ->body(__('The product with the variant ID :variantId was found and is matching your plan product details.', ['variantId' => $variantId]))
+                                ->persistent()
+                                ->send();
+                        }),
+                    Action::make('validate_creem')
+                        ->label(__('Validate Product (Creem)'))
+                        ->color('success')
+                        ->outlined()
+                        ->visible(fn ($get) => $get('payment_provider_id') == PaymentProvider::where('slug', PaymentProviderConstants::CREEM_SLUG)?->first()?->id)
+                        ->action(function (CreemProductValidator $validator, $get) {
+                            if ($get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::CREEM_SLUG)?->first()?->id) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('Invalid Payment Provider'))
+                                    ->body(__('The selected payment provider is not Creem.'))
+                                    ->persistent()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $productId = $get('payment_provider_product_id');
+
+                            try {
+                                $validator->validatePlan($productId, $this->ownerRecord);
+                            } catch (Exception $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('Problem validating product'))
+                                    ->body(__($e->getMessage()))
+                                    ->persistent()
+                                    ->send();
+
+                                return;
+                            }
+
+                            Notification::make()
+                                ->success()
+                                ->title(__('Product found'))
+                                ->body(__('The product with the ID :productId was found and is matching your plan product details.', ['productId' => $productId]))
                                 ->persistent()
                                 ->send();
                         }),

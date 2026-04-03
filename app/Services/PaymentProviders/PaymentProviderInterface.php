@@ -44,4 +44,6 @@ interface PaymentProviderInterface
     public function supportsSkippingTrial(): bool;
 
     public function supportsSeatBasedWithIncludedSeats(): bool;
+
+    public function supportsOneTimePurchaseProductQuantity(): bool;
 }

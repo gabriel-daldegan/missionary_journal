@@ -54,6 +54,6 @@ class ProductCheckoutControllerTest extends FeatureTest
         $response->assertStatus(200);
 
         $response->assertSee('Complete your purchase');
-        $response->assertSeeHtml('wire:model.live.debounce.300ms="quantity"');
+        $response->assertSeeHtml('wire:model.live.blur="quantity"');
     }
 }
