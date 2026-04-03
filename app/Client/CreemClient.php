@@ -53,6 +53,11 @@ class CreemClient
         return $this->request()->get($this->getApiUrl('/v1/discounts'), ['id' => $id]);
     }
 
+    public function getProduct(string $productId): Response
+    {
+        return $this->request()->get($this->getApiUrl('/v1/products'), ['product_id' => $productId]);
+    }
+
     public function getCustomerBillingPortal(string $customerId): Response
     {
         return $this->request()->post($this->getApiUrl('/v1/customers/billing'), [

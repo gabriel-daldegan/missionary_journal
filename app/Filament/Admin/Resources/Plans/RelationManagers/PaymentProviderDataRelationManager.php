@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Plans\RelationManagers;
 
 use App\Constants\PaymentProviderConstants;
 use App\Models\PaymentProvider;
+use App\Services\PaymentProviders\Creem\CreemProductValidator;
 use App\Services\PaymentProviders\LemonSqueezy\LemonSqueezyProductValidator;
 use Exception;
 use Filament\Actions\Action;
@@ -96,6 +97,45 @@ class PaymentProviderDataRelationManager extends RelationManager
                                 ->success()
                                 ->title(__('Product found'))
                                 ->body(__('The product with the variant ID :variantId was found and is matching your plan product details.', ['variantId' => $variantId]))
+                                ->persistent()
+                                ->send();
+                        }),
+                    Action::make('validate_creem')
+                        ->label(__('Validate Product (Creem)'))
+                        ->color('success')
+                        ->outlined()
+                        ->disabled(fn ($get) => $get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::CREEM_SLUG)?->first()?->id)
+                        ->action(function (CreemProductValidator $validator, $get) {
+                            if ($get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::CREEM_SLUG)?->first()?->id) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('Invalid Payment Provider'))
+                                    ->body(__('The selected payment provider is not Creem.'))
+                                    ->persistent()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $productId = $get('payment_provider_product_id');
+
+                            try {
+                                $validator->validatePlan($productId, $this->ownerRecord);
+                            } catch (Exception $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('Problem validating product'))
+                                    ->body(__($e->getMessage()))
+                                    ->persistent()
+                                    ->send();
+
+                                return;
+                            }
+
+                            Notification::make()
+                                ->success()
+                                ->title(__('Product found'))
+                                ->body(__('The product with the ID :productId was found and is matching your plan product details.', ['productId' => $productId]))
                                 ->persistent()
                                 ->send();
                         }),
