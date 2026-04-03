@@ -21,6 +21,14 @@ class CreemControllerTest extends FeatureTest
         return PaymentProvider::where('slug', 'creem')->firstOrFail();
     }
 
+    private function createTenantAndUser(): array
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+
+        return [$tenant, $user];
+    }
+
     private function signPayload(array $payload): string
     {
         return hash_hmac('sha256', json_encode($payload), config('services.creem.webhook_secret'));
@@ -67,10 +75,13 @@ class CreemControllerTest extends FeatureTest
 
     public function test_subscription_active_webhook(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $subscription = Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 3000,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -100,12 +111,15 @@ class CreemControllerTest extends FeatureTest
 
     public function test_subscription_paid_webhook_creates_transaction(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $transactionId = 'tran_paid_create_'.Str::random(10);
 
         $subscription = Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 3000,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -136,6 +150,8 @@ class CreemControllerTest extends FeatureTest
 
     public function test_subscription_paid_webhook_updates_existing_transaction(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $transactionId = 'tran_paid_update_'.Str::random(10);
         $creemPaymentProvider = $this->getCreemPaymentProvider();
@@ -143,7 +159,8 @@ class CreemControllerTest extends FeatureTest
 
         $subscription = Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 3000,
             'currency_id' => $currency->id,
             'plan_id' => 1,
@@ -155,6 +172,7 @@ class CreemControllerTest extends FeatureTest
         $transaction = $subscription->transactions()->create([
             'uuid' => (string) Str::uuid(),
             'user_id' => $subscription->user_id,
+            'tenant_id' => $tenant->id,
             'currency_id' => $currency->id,
             'amount' => 3000,
             'status' => TransactionStatus::NOT_STARTED->value,
@@ -183,12 +201,15 @@ class CreemControllerTest extends FeatureTest
 
     public function test_subscription_update_webhook(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $creemPaymentProvider = $this->getCreemPaymentProvider();
 
         Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 3000,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -219,12 +240,15 @@ class CreemControllerTest extends FeatureTest
 
     public function test_subscription_scheduled_cancel_webhook(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $creemPaymentProvider = $this->getCreemPaymentProvider();
 
         Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 3000,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -254,12 +278,15 @@ class CreemControllerTest extends FeatureTest
 
     public function test_subscription_canceled_webhook(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $creemPaymentProvider = $this->getCreemPaymentProvider();
 
         Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 3000,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -289,12 +316,15 @@ class CreemControllerTest extends FeatureTest
 
     public function test_subscription_past_due_webhook(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $creemPaymentProvider = $this->getCreemPaymentProvider();
 
         Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 3000,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -324,12 +354,15 @@ class CreemControllerTest extends FeatureTest
 
     public function test_subscription_paused_webhook(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $creemPaymentProvider = $this->getCreemPaymentProvider();
 
         Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 3000,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -359,7 +392,7 @@ class CreemControllerTest extends FeatureTest
 
     public function test_checkout_completed_webhook_creates_transaction_and_updates_order(): void
     {
-        $user = $this->createUser();
+        [$tenant, $user] = $this->createTenantAndUser();
         $currency = Currency::where('code', 'USD')->firstOrFail();
         $creemPaymentProvider = $this->getCreemPaymentProvider();
         $transactionId = 'tran_checkout_'.Str::random(10);
@@ -367,6 +400,7 @@ class CreemControllerTest extends FeatureTest
         $orderUuid = (string) Str::uuid();
         $order = Order::create([
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'uuid' => $orderUuid,
             'status' => OrderStatus::NEW,
             'currency_id' => $currency->id,
@@ -400,7 +434,7 @@ class CreemControllerTest extends FeatureTest
 
     public function test_refund_created_webhook(): void
     {
-        $user = $this->createUser();
+        [$tenant, $user] = $this->createTenantAndUser();
         $currency = Currency::where('code', 'USD')->firstOrFail();
         $creemPaymentProvider = $this->getCreemPaymentProvider();
         $transactionId = 'tran_refund_'.Str::random(10);
@@ -408,6 +442,7 @@ class CreemControllerTest extends FeatureTest
         $orderUuid = (string) Str::uuid();
         $order = Order::create([
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'uuid' => $orderUuid,
             'status' => OrderStatus::SUCCESS,
             'currency_id' => $currency->id,
@@ -417,6 +452,7 @@ class CreemControllerTest extends FeatureTest
         $transaction = $order->transactions()->create([
             'uuid' => (string) Str::uuid(),
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'currency_id' => $currency->id,
             'amount' => 1530,
             'status' => TransactionStatus::SUCCESS->value,
