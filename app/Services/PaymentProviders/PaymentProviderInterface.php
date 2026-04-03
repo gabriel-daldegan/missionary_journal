@@ -46,4 +46,6 @@ interface PaymentProviderInterface
     public function supportsSeatBasedWithIncludedSeats(): bool;
 
     public function supportsOneTimePurchaseProductQuantity(): bool;
+
+    public function supportsSetupFees(): bool;
 }

@@ -37,6 +37,7 @@ class PaymentService
         bool $shouldSupportSkippingTrial = false,
         bool $isNewPayment = false,
         bool $shouldSupportSeatBasedWithIncludedSeats = false,
+        bool $shouldSupportSetupFees = false,
     ): array {
         $paymentProviderInterfaceMap = $this->getPaymentProviderInterfaceMap();
 
@@ -48,6 +49,10 @@ class PaymentService
                 in_array($plan->type, $paymentProviderInterfaceMap[$paymentProvider->slug]->getSupportedPlanTypes())
             ) {
                 $currentPaymentProvider = $paymentProviderInterfaceMap[$paymentProvider->slug];
+
+                if ($shouldSupportSetupFees && ! $currentPaymentProvider->supportsSetupFees()) {
+                    continue;
+                }
 
                 if ($plan->has_trial && $shouldSupportSkippingTrial && ! $currentPaymentProvider->supportsSkippingTrial()) {
                     continue;

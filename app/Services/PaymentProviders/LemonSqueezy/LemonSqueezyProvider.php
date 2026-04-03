@@ -476,6 +476,11 @@ class LemonSqueezyProvider implements PaymentProviderInterface
         return true;
     }
 
+    public function supportsSetupFees(): bool
+    {
+        return false;
+    }
+
     private function getSubscriptionCheckoutSuccessUrl(Subscription $subscription)
     {
         if ($subscription->type === SubscriptionType::LOCALLY_MANAGED) {

@@ -307,6 +307,11 @@ class CreemProvider implements PaymentProviderInterface
         return false;
     }
 
+    public function supportsSetupFees(): bool
+    {
+        return false;
+    }
+
     private function createCreemDiscount(Discount $discount, string $productId): string
     {
         $sessionKey = "creem_discount_{$discount->id}_{$productId}";
