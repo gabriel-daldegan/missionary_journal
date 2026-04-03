@@ -42,7 +42,7 @@ class CreemProvider implements PaymentProviderInterface
         return PaymentProvider::where('slug', $this->getSlug())->firstOrFail()->name;
     }
 
-    public function createSubscriptionCheckoutRedirectLink(Plan $plan, Subscription $subscription, ?Discount $discount = null): string
+    public function createSubscriptionCheckoutRedirectLink(Plan $plan, Subscription $subscription, ?Discount $discount = null, int $quantity = 1): string
     {
         $paymentProvider = $this->assertProviderIsActive();
 
@@ -151,7 +151,7 @@ class CreemProvider implements PaymentProviderInterface
         return $redirectLink;
     }
 
-    public function initSubscriptionCheckout(Plan $plan, Subscription $subscription, ?Discount $discount = null): array
+    public function initSubscriptionCheckout(Plan $plan, Subscription $subscription, ?Discount $discount = null, int $quantity = 1): array
     {
         return [];
     }
@@ -371,5 +371,15 @@ class CreemProvider implements PaymentProviderInterface
         }
 
         return route('checkout.subscription.success');
+    }
+
+    public function updateSubscriptionQuantity(Subscription $subscription, int $quantity, bool $isProrated = true): bool
+    {
+        // TODO: Implement updateSubscriptionQuantity() method.
+    }
+
+    public function supportsSeatBasedWithIncludedSeats(): bool
+    {
+        // TODO: Implement supportsSeatBasedWithIncludedSeats() method.
     }
 }
