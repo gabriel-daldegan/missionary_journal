@@ -18,7 +18,7 @@ $domain = 'yourdomain.com';   // the domain of the app
 $repository = 'git@github.com:username/saasykit.git';      // has to be in the SSH format
 $subDirectory = '';    // the subdirectory of the repository where the app is located (this is the directory that contains the composer.json file). Leave empty if the app is in the root of the repository (by default)
 
-$phpVersion = '8.2'; // the version of PHP to be installed on the server
+$phpVersion = '8.4'; // the version of PHP to be installed on the server
 
 // End of configs
 // ///////////////////////////////////
@@ -27,7 +27,7 @@ $phpVersion = '8.2'; // the version of PHP to be installed on the server
 set('repository', $repository);
 set('sub_directory', $subDirectory);
 
-set('nodejs_version', 'node_18.x');
+set('node_version', '23.x');
 
 add('shared_files', []);
 add('shared_dirs', []);
@@ -43,7 +43,7 @@ host($host)
 
 desc('Install & build npm packages');
 task('npm:build', function () {
-    run('cd {{release_path}} && npm ci && npm run build');
+    run('cd {{release_path}} && eval "$(fnm env)" && npm ci && npm run build');
 });
 
 desc('Provision extra PHP packages');
@@ -54,7 +54,7 @@ task('provision:php-extra', function () {
         "php$version-redis",
     ];
 
-    run('apt-get install -y '.implode(' ', $packages), ['env' => ['DEBIAN_FRONTEND' => 'noninteractive']]);
+    run('apt-get install -y '.implode(' ', $packages), env: ['DEBIAN_FRONTEND' => 'noninteractive']);
 })->verbose()
     ->limit(1);
 
@@ -62,7 +62,7 @@ desc('Provision supervisor');
 task('provision:supervisor', function () use ($remoteUser, $deployPath) {
     info('Installing Supervisor');
 
-    run('apt-get install -y supervisor', ['env' => ['DEBIAN_FRONTEND' => 'noninteractive']]);
+    run('apt-get install -y supervisor', env: ['DEBIAN_FRONTEND' => 'noninteractive']);
 
     $supervisorConfig = <<<'EOF'
 [program:horizon]
@@ -100,7 +100,7 @@ task('provision:fix-aws-ssh', function () {
     if (str_contains($authorizedKeys, $searchSting)) {
         $authorizedKeys = str_replace($searchSting, '', $authorizedKeys);
         $authorizedKeys = trim($authorizedKeys);
-        run('echo "$KEY" > /home/deployer/.ssh/authorized_keys', ['env' => ['KEY' => $authorizedKeys]]);
+        run('echo "$KEY" > /home/deployer/.ssh/authorized_keys', env: ['KEY' => $authorizedKeys]);
     }
 })->verbose()
     ->limit(1);
@@ -120,7 +120,7 @@ after('artisan:migrate', 'npm:build');
 // php
 after('provision:php', 'provision:php-extra');
 after('provision:verify', 'provision:supervisor');
-after('provision:deployer', 'provision:fix-aws-ssh');
+// after('provision:deployer', 'provision:fix-aws-ssh');  // Enable if you use AWS EC2 server
 
 after('deploy:success', 'artisan:horizon:terminate'); // to restart horizon after deploy
 after('deploy:success', 'crontab:sync');
@@ -132,3 +132,17 @@ after('deploy:failed', 'deploy:unlock');
 add('crontab:jobs', [
     '* * * * * cd {{current_path}} && {{bin/php}} artisan schedule:run >> /dev/null 2>&1',
 ]);
+
+task('provision:node:install', function () use ($remoteUser) {
+    set('remote_user', get('provision_user'));
+
+    // Install the specified Node version for provision user
+    run('eval "$(fnm env)" && fnm install {{node_version}}');
+    run('eval "$(fnm env)" && fnm default {{node_version}}');
+
+    // Also install for the deploy user so npm:build works during deploys
+    run("su - $remoteUser -c 'eval \"\$(fnm env)\" && fnm install {{node_version}} && fnm default {{node_version}}'");
+});
+
+// Run this task automatically after provision:node
+after('provision:node', 'provision:node:install');
