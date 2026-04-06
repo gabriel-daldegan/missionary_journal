@@ -1826,6 +1826,8 @@ JSON;
                   "collection_method": "charge_automatically",
                   "created": 1744812460,
                   "currency": "usd",
+                  "current_period_end": null,
+                  "current_period_start": null,
                   "customer": "cus_RSnUAW6ZWiYQMs",
                   "days_until_due": null,
                   "default_payment_method": "pm_1REWcnJQC7CL5JsVkBrOtDz0",
