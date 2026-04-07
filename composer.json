@@ -47,7 +47,7 @@
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.0",
-        "deployer/deployer": "7.3",
+        "deployer/deployer": "v8.0.0-rc",
         "doctrine/dbal": "^3.6",
         "fakerphp/faker": "^1.9.1",
         "kkomelin/laravel-translatable-string-exporter": "^1.22",
