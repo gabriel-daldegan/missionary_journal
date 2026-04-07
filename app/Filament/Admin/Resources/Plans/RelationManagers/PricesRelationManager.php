@@ -107,7 +107,7 @@ class PricesRelationManager extends RelationManager
                         ->label(__('Setup Fee'))
                         ->helperText(
                             new HtmlString(
-                                __('One-time fee charged on first subscription only. Enter in lowest denomination (cents). E.g. 500 = $5.00. Leave empty for no setup fee.')
+                                __('One-time fee charged on first subscription only. Enter in lowest denomination (cents). E.g. 500 = $5.00. Leave empty for no setup fee. Note: not all payment providers support setup fees.')
                             )
                         ),
                     TextInput::make('price_per_unit')

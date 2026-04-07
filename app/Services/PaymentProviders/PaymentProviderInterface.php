@@ -40,4 +40,8 @@ interface PaymentProviderInterface
     public function reportUsage(Subscription $subscription, int $unitCount): bool;
 
     public function supportsSkippingTrial(): bool;
+
+    public function supportsOneTimePurchaseProductQuantity(): bool;
+
+    public function supportsSetupFees(): bool;
 }

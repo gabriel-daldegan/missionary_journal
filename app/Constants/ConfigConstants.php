@@ -74,6 +74,10 @@ class ConfigConstants
         'services.lemon-squeezy.store_id',
         'services.lemon-squeezy.signing_secret',
         'services.lemon-squeezy.is_test_mode',
+        'services.creem.api_key',
+        'services.creem.webhook_secret',
+        'services.creem.is_test_mode',
+
         'services.postmark.token',
         'services.resend.key',
         'app.customer_dashboard.show_subscriptions',

@@ -73,8 +73,12 @@ class Plan extends Model
                 'trial_interval_id',
                 'trial_interval_count',
             ]) || boolval($plan->getOriginal('has_trial')) !== boolval($plan->has_trial)) {
-                // delete all except lemon squeezy stuff (because lemon squeezy data are not auto-created on plan update as with other providers)
-                $plan->paymentProviderData()->where('payment_provider_id', '!=', PaymentProvider::where('slug', PaymentProviderConstants::LEMON_SQUEEZY_SLUG)?->first()?->id)->delete();
+                // delete all except lemon squeezy & creem stuff (because their data are not auto-created on plan update as with other providers)
+                $manualProviderIds = PaymentProvider::whereIn('slug', [
+                    PaymentProviderConstants::LEMON_SQUEEZY_SLUG,
+                    PaymentProviderConstants::CREEM_SLUG,
+                ])->pluck('id');
+                $plan->paymentProviderData()->whereNotIn('payment_provider_id', $manualProviderIds)->delete();
                 foreach ($plan->prices as $planPrice) {
                     $planPrice->planPricePaymentProviderData()->delete();
                 }

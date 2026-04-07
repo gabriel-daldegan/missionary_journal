@@ -35,7 +35,8 @@ class PaymentService
     public function getActivePaymentProvidersForPlan(
         Plan $plan,
         bool $shouldSupportSkippingTrial = false,
-        bool $isNewPayment = false
+        bool $isNewPayment = false,
+        bool $shouldSupportSetupFees = false,
     ): array {
         $paymentProviderInterfaceMap = $this->getPaymentProviderInterfaceMap();
 
@@ -47,6 +48,11 @@ class PaymentService
                 in_array($plan->type, $paymentProviderInterfaceMap[$paymentProvider->slug]->getSupportedPlanTypes())
             ) {
                 $currentPaymentProvider = $paymentProviderInterfaceMap[$paymentProvider->slug];
+
+                if ($shouldSupportSetupFees && ! $currentPaymentProvider->supportsSetupFees()) {
+                    continue;
+                }
+
                 if ($plan->has_trial && $shouldSupportSkippingTrial) {
                     if ($currentPaymentProvider->supportsSkippingTrial()) {
                         $paymentProviders[] = $currentPaymentProvider;
@@ -55,6 +61,20 @@ class PaymentService
                     $paymentProviders[] = $currentPaymentProvider;
                 }
             }
+        }
+
+        return $paymentProviders;
+    }
+
+    public function getActivePaymentProvidersForOneTimePurchase(bool $requireQuantitySupport = false, bool $isNewPayment = false): array
+    {
+        $paymentProviders = $this->getActivePaymentProviders($isNewPayment);
+
+        if ($requireQuantitySupport) {
+            $paymentProviders = array_values(array_filter(
+                $paymentProviders,
+                fn (PaymentProviderInterface $p) => $p->supportsOneTimePurchaseProductQuantity(),
+            ));
         }
 
         return $paymentProviders;

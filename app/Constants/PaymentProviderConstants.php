@@ -10,5 +10,7 @@ class PaymentProviderConstants
 
     public const LEMON_SQUEEZY_SLUG = 'lemon-squeezy';
 
+    public const CREEM_SLUG = 'creem';
+
     public const OFFLINE_SLUG = 'offline';
 }

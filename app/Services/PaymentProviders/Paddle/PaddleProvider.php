@@ -490,4 +490,14 @@ class PaddleProvider implements PaymentProviderInterface
     {
         return true;
     }
+
+    public function supportsOneTimePurchaseProductQuantity(): bool
+    {
+        return true;
+    }
+
+    public function supportsSetupFees(): bool
+    {
+        return true;
+    }
 }

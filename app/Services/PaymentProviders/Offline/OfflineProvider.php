@@ -137,4 +137,14 @@ class OfflineProvider implements PaymentProviderInterface
     {
         return false;
     }
+
+    public function supportsOneTimePurchaseProductQuantity(): bool
+    {
+        return true;
+    }
+
+    public function supportsSetupFees(): bool
+    {
+        return true;
+    }
 }

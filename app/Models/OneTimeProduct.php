@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\PaymentProviderConstants;
 use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,7 +40,12 @@ class OneTimeProduct extends Model
             if ($oneTimeProduct->isDirty([
                 'max_quantity',
             ])) {
-                $oneTimeProduct->paymentProviderData()->delete();
+                // delete all except lemon squeezy & creem stuff (because their data are not auto-created on update as with other providers)
+                $manualProviderIds = PaymentProvider::whereIn('slug', [
+                    PaymentProviderConstants::LEMON_SQUEEZY_SLUG,
+                    PaymentProviderConstants::CREEM_SLUG,
+                ])->pluck('id');
+                $oneTimeProduct->paymentProviderData()->whereNotIn('payment_provider_id', $manualProviderIds)->delete();
                 foreach ($oneTimeProduct->prices as $price) {
                     $price->pricePaymentProviderData()->delete();
                 }
