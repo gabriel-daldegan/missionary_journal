@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\OneTimeProducts\RelationManagers;
 
 use App\Constants\PaymentProviderConstants;
 use App\Models\PaymentProvider;
+use App\Services\PaymentProviders\Creem\CreemProductValidator;
 use App\Services\PaymentProviders\LemonSqueezy\LemonSqueezyProductValidator;
 use Exception;
 use Filament\Actions\Action;
@@ -41,7 +42,8 @@ class PaymentProviderDataRelationManager extends RelationManager
                 Select::make('payment_provider_id')
                     ->label(__('Payment Provider'))
                     ->options(
-                        PaymentProvider::all()
+                        PaymentProvider::where('slug', '!=', PaymentProviderConstants::OFFLINE_SLUG)
+                            ->get()
                             ->mapWithKeys(function ($paymentProvider) {
                                 return [$paymentProvider->id => $paymentProvider->name];
                             })
@@ -51,6 +53,7 @@ class PaymentProviderDataRelationManager extends RelationManager
                     ->unique(modifyRuleUsing: function ($rule, Get $get, RelationManager $livewire) {
                         return $rule->where('one_time_product_id', $livewire->ownerRecord->id)->ignore($get('id'));
                     })
+                    ->live()
                     ->preload()
                     ->required(),
                 TextInput::make('payment_provider_product_id')
@@ -63,7 +66,7 @@ class PaymentProviderDataRelationManager extends RelationManager
                         ->label(__('Validate Product (Lemon Squeezy)'))
                         ->color('success')
                         ->outlined()
-                        ->disabled(fn ($get) => $get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::LEMON_SQUEEZY_SLUG)?->first()?->id)
+                        ->visible(fn ($get) => $get('payment_provider_id') == PaymentProvider::where('slug', PaymentProviderConstants::LEMON_SQUEEZY_SLUG)?->first()?->id)
                         ->action(function (LemonSqueezyProductValidator $validator, $get) {
                             if ($get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::LEMON_SQUEEZY_SLUG)?->first()?->id) {
                                 Notification::make()
@@ -98,6 +101,45 @@ class PaymentProviderDataRelationManager extends RelationManager
                                 ->persistent()
                                 ->send();
                         }),
+                    Action::make('validate_creem')
+                        ->label(__('Validate Product (Creem)'))
+                        ->color('success')
+                        ->outlined()
+                        ->visible(fn ($get) => $get('payment_provider_id') == PaymentProvider::where('slug', PaymentProviderConstants::CREEM_SLUG)?->first()?->id)
+                        ->action(function (CreemProductValidator $validator, $get) {
+                            if ($get('payment_provider_id') != PaymentProvider::where('slug', PaymentProviderConstants::CREEM_SLUG)?->first()?->id) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('Invalid Payment Provider'))
+                                    ->body(__('The selected payment provider is not Creem.'))
+                                    ->persistent()
+                                    ->send();
+
+                                return;
+                            }
+
+                            $productId = $get('payment_provider_product_id');
+
+                            try {
+                                $validator->validateOneTimeProduct($productId, $this->ownerRecord);
+                            } catch (Exception $e) {
+                                Notification::make()
+                                    ->danger()
+                                    ->title(__('Problem validating product'))
+                                    ->body(__($e->getMessage()))
+                                    ->persistent()
+                                    ->send();
+
+                                return;
+                            }
+
+                            Notification::make()
+                                ->success()
+                                ->title(__('Product found'))
+                                ->body(__('The product with the ID :productId was found and is matching your product details.', ['productId' => $productId]))
+                                ->persistent()
+                                ->send();
+                        }),
                 ]),
             ]);
     }
@@ -105,7 +147,7 @@ class PaymentProviderDataRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->description(new HtmlString('⚠️ Advanced settings, these records are created automatically when a product is created. You <b>SHOULD NOT</b> need to create or edit these records manually unless you use "Lemon Squeezy" as your payment provider because it does not support product creation via the API.'))
+            ->description(new HtmlString('⚠️ Advanced settings, these records are created automatically when a product is created. You <b>SHOULD NOT</b> need to create or edit these records manually unless you use "Lemon Squeezy" or "Creem" as your payment provider because they do not support product creation via the API.'))
             ->recordTitleAttribute('Payment Provider Product/Variant ID')
             ->columns([
                 TextColumn::make('payment_provider_id')

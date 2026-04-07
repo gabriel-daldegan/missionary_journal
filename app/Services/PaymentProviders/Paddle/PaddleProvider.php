@@ -649,4 +649,14 @@ class PaddleProvider implements PaymentProviderInterface
 
         return $paddleExtraSeatPrice;
     }
+
+    public function supportsOneTimePurchaseProductQuantity(): bool
+    {
+        return true;
+    }
+
+    public function supportsSetupFees(): bool
+    {
+        return true;
+    }
 }

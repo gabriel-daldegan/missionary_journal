@@ -169,12 +169,14 @@ class SubscriptionCheckoutForm extends CheckoutForm
         $plan = $this->planService->getActivePlanBySlug($planSlug);
 
         $planPrice = $this->calculationService->getPlanPrice($plan);
+        $shouldSupportSetupFees = ! empty($planPrice->setup_fee);
 
         $this->paymentProviders = $paymentService->getActivePaymentProvidersForPlan(
             $plan,
             $shouldSupportSkippingTrial,
             true,
             $planPrice->type === PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value,
+            $shouldSupportSetupFees,
         );
 
         if (empty($this->paymentProviders)) {

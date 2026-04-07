@@ -185,6 +185,9 @@ class ProductCheckoutFormTest extends FeatureTest
 
         $mock->shouldNotReceive('isOverlayProvider');
 
+        $mock->shouldReceive('supportsOneTimePurchaseProductQuantity')
+            ->andReturn(true);
+
         $this->app->instance(PaymentProviderInterface::class, $mock);
 
         $this->app->bind(PaymentService::class, function () use ($mock) {
@@ -225,6 +228,14 @@ class ProductCheckoutFormTest extends FeatureTest
 
         $this->assertEquals($tenantsBefore + 1, Tenant::count());
 
+        $mock->shouldReceive('supportsOneTimePurchaseProductQuantity')
+            ->andReturn(true);
+
+        $this->app->instance(PaymentProviderInterface::class, $mock);
+
+        $this->app->bind(PaymentService::class, function () use ($mock) {
+            return new PaymentService($mock);
+        });
     }
 
     private function addOfflinePaymentProvider()
@@ -254,6 +265,9 @@ class ProductCheckoutFormTest extends FeatureTest
 
         $mock->shouldReceive('isOverlayProvider')
             ->andReturn(false);
+
+        $mock->shouldReceive('supportsOneTimePurchaseProductQuantity')
+            ->andReturn(true);
 
         $this->app->instance(PaymentProviderInterface::class, $mock);
 
@@ -873,6 +887,8 @@ class ProductCheckoutFormTest extends FeatureTest
             ->andReturn('Paymore');
         $mock->shouldReceive('isOverlayProvider')
             ->andReturn(false);
+        $mock->shouldReceive('supportsOneTimePurchaseProductQuantity')
+            ->andReturn(true);
         $this->app->instance(PaymentProviderInterface::class, $mock);
         $this->app->bind(PaymentService::class, function () use ($mock) {
             return new PaymentService($mock);

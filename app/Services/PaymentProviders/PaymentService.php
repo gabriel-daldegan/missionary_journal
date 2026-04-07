@@ -37,6 +37,7 @@ class PaymentService
         bool $shouldSupportSkippingTrial = false,
         bool $isNewPayment = false,
         bool $shouldSupportSeatBasedWithIncludedSeats = false,
+        bool $shouldSupportSetupFees = false,
     ): array {
         $paymentProviderInterfaceMap = $this->getPaymentProviderInterfaceMap();
 
@@ -49,6 +50,10 @@ class PaymentService
             ) {
                 $currentPaymentProvider = $paymentProviderInterfaceMap[$paymentProvider->slug];
 
+                if ($shouldSupportSetupFees && ! $currentPaymentProvider->supportsSetupFees()) {
+                    continue;
+                }
+
                 if ($plan->has_trial && $shouldSupportSkippingTrial && ! $currentPaymentProvider->supportsSkippingTrial()) {
                     continue;
                 }
@@ -59,6 +64,20 @@ class PaymentService
 
                 $paymentProviders[] = $currentPaymentProvider;
             }
+        }
+
+        return $paymentProviders;
+    }
+
+    public function getActivePaymentProvidersForOneTimePurchase(bool $requireQuantitySupport = false, bool $isNewPayment = false): array
+    {
+        $paymentProviders = $this->getActivePaymentProviders($isNewPayment);
+
+        if ($requireQuantitySupport) {
+            $paymentProviders = array_values(array_filter(
+                $paymentProviders,
+                fn (PaymentProviderInterface $p) => $p->supportsOneTimePurchaseProductQuantity(),
+            ));
         }
 
         return $paymentProviders;
