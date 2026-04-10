@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\PaymentProviders\Pages\EditPaymentProvider;
 use App\Filament\Admin\Resources\PaymentProviders\Pages\LemonSqueezySettings;
 use App\Filament\Admin\Resources\PaymentProviders\Pages\ListPaymentProviders;
 use App\Filament\Admin\Resources\PaymentProviders\Pages\PaddleSettings;
+use App\Filament\Admin\Resources\PaymentProviders\Pages\PolarSettings;
 use App\Filament\Admin\Resources\PaymentProviders\Pages\StripeSettings;
 use App\Models\PaymentProvider;
 use Filament\Actions\EditAction;
@@ -112,6 +113,7 @@ class PaymentProviderResource extends Resource
             'paddle-settings' => PaddleSettings::route('/paddle-settings'),
             'lemon-squeezy-settings' => LemonSqueezySettings::route('/lemon-squeezy-settings'),
             'creem-settings' => CreemSettings::route('/creem-settings'),
+            'polar-settings' => PolarSettings::route('/polar-settings'),
         ];
     }
 

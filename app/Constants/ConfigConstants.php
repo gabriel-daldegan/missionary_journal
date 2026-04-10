@@ -25,6 +25,8 @@ class ConfigConstants
         'services.postmark.token',
         'services.resend.key',
         'recaptcha.api_secret_key',
+        'services.polar.access_token',
+        'services.polar.webhook_secret',
         'services.twilio.sid',
         'services.twilio.token',
     ];
@@ -77,6 +79,9 @@ class ConfigConstants
         'services.creem.api_key',
         'services.creem.webhook_secret',
         'services.creem.is_test_mode',
+        'services.polar.access_token',
+        'services.polar.webhook_secret',
+        'services.polar.is_sandbox',
 
         'services.postmark.token',
         'services.resend.key',

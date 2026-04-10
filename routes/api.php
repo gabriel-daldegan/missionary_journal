@@ -3,6 +3,7 @@
 use App\Http\Controllers\PaymentProviders\CreemController;
 use App\Http\Controllers\PaymentProviders\LemonSqueezyController;
 use App\Http\Controllers\PaymentProviders\PaddleController;
+use App\Http\Controllers\PaymentProviders\PolarController;
 use App\Http\Controllers\PaymentProviders\StripeController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,3 +37,8 @@ Route::post('/payments-providers/creem/webhook', [
     CreemController::class,
     'handleWebhook',
 ])->name('payments-providers.creem.webhook');
+
+Route::post('/payments-providers/polar/webhook', [
+    PolarController::class,
+    'handleWebhook',
+])->name('payments-providers.polar.webhook');
