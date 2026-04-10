@@ -53,7 +53,7 @@ class PolarProvider implements PaymentProviderInterface
         $params = [
             'products' => [$productId],
             'customer_email' => $user->email,
-            'return_url' => $this->getSubscriptionCheckoutSuccessUrl($subscription),
+            'success_url' => $this->getSubscriptionCheckoutSuccessUrl($subscription),
             'metadata' => [
                 'subscription_uuid' => $subscription->uuid,
             ],
@@ -102,7 +102,7 @@ class PolarProvider implements PaymentProviderInterface
         $params = [
             'products' => [$productId],
             'customer_email' => $user->email,
-            'return_url' => route('checkout.product.success'),
+            'success_url' => route('checkout.product.success'),
             'metadata' => [
                 'order_uuid' => $order->uuid,
             ],
