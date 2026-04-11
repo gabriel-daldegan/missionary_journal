@@ -403,14 +403,10 @@ class PolarWebhookHandler
 
         $secret = config('services.polar.webhook_secret');
 
-        // Standard Webhooks uses base64-encoded secret with "whsec_" prefix
-        if (str_starts_with($secret, 'whsec_')) {
-            $secret = substr($secret, 6);
-        }
-        $secretBytes = base64_decode($secret);
-
+        // Polar provides a raw secret string (not base64-encoded).
+        // Use it directly as the HMAC key per Polar docs.
         $signedContent = $webhookId.'.'.$webhookTimestamp.'.'.$payload;
-        $expectedSignature = base64_encode(hash_hmac('sha256', $signedContent, $secretBytes, true));
+        $expectedSignature = base64_encode(hash_hmac('sha256', $signedContent, $secret, true));
 
         // The webhook-signature header can contain multiple signatures separated by spaces
         $signatures = explode(' ', $webhookSignature);
