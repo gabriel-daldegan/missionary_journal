@@ -97,7 +97,10 @@ class PolarWebhookHandler
                 'payment_provider_id' => $paymentProvider->id,
                 'extra_payment_provider_data' => $extraData,
             ]);
-        } elseif ($eventType === 'subscription.updated') {
+        } elseif ($eventType === 'subscription.updated' ||
+            $eventType === 'subscription.canceled' ||
+            $eventType === 'subscription.uncanceled'
+        ) {
             $subscription = $this->findSubscription($subscriptionUuid, $providerSubscriptionId, $paymentProvider);
 
             $endsAt = isset($data['current_period_end']) ? Carbon::parse($data['current_period_end'])->toDateTimeString() : null;
@@ -129,22 +132,6 @@ class PolarWebhookHandler
             }
 
             $this->subscriptionService->updateSubscription($subscription, $updateData);
-        } elseif ($eventType === 'subscription.canceled') {
-            $subscription = $this->findSubscription($subscriptionUuid, $providerSubscriptionId, $paymentProvider);
-
-            $this->subscriptionService->updateSubscription($subscription, [
-                'status' => SubscriptionStatus::INACTIVE,
-                'payment_provider_status' => $providerStatus ?? 'canceled',
-            ]);
-        } elseif ($eventType === 'subscription.uncanceled') {
-            $subscription = $this->findSubscription($subscriptionUuid, $providerSubscriptionId, $paymentProvider);
-
-            $this->subscriptionService->updateSubscription($subscription, [
-                'status' => SubscriptionStatus::ACTIVE,
-                'payment_provider_status' => $providerStatus ?? 'active',
-                'is_canceled_at_end_of_cycle' => false,
-                'cancelled_at' => null,
-            ]);
         } elseif ($eventType === 'subscription.revoked') {
             $subscription = $this->findSubscription($subscriptionUuid, $providerSubscriptionId, $paymentProvider);
 
