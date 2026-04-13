@@ -193,7 +193,12 @@ class PolarProvider implements PaymentProviderInterface
         $this->assertProviderIsActive();
 
         try {
-            $response = $this->client->cancelSubscription($subscription->payment_provider_subscription_id);
+            $response = $this->client->updateSubscription(
+                $subscription->payment_provider_subscription_id,
+                [
+                    'cancel_at_period_end' => true,
+                ],
+            );
 
             if (! $response->successful()) {
                 throw new Exception('Failed to cancel Polar subscription');
