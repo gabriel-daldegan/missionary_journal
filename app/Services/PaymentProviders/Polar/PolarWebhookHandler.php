@@ -148,7 +148,7 @@ class PolarWebhookHandler
         $orderUuid = $metadata['order_uuid'] ?? null;
         $subscriptionUuid = $metadata['subscription_uuid'] ?? null;
 
-        if ($eventType === 'order.paid') {
+        if ($eventType === 'order.paid' || $eventType === 'order.updated') {
             if ($orderUuid) {
                 $this->handleOneTimeOrderPaid($data, $orderUuid, $paymentProvider);
             } elseif ($subscriptionUuid) {
@@ -172,6 +172,7 @@ class PolarWebhookHandler
         $amount = $data['net_amount'] ?? 0;
         $tax = $data['tax_amount'] ?? 0;
         $discountAmount = $data['discount_amount'] ?? 0;
+        $totalFees = $data['platform_fee_amount'] ?? 0;
         $currencyCode = strtoupper($data['currency'] ?? 'usd');
         $currency = Currency::where('code', $currencyCode)->firstOrFail();
 
@@ -180,8 +181,9 @@ class PolarWebhookHandler
         if ($transaction) {
             $this->transactionService->updateTransactionByPaymentProviderTxId(
                 $transactionId,
-                'paid',
+                $data['status'] ?? 'unknown',
                 TransactionStatus::SUCCESS,
+                newFees: $totalFees,
             );
         } else {
             $this->transactionService->createForOrder(
@@ -189,11 +191,11 @@ class PolarWebhookHandler
                 $data['total_amount'] ?? $amount,
                 $tax,
                 $discountAmount,
-                0,
+                $totalFees,
                 $currency,
                 $paymentProvider,
                 $transactionId,
-                'paid',
+                $data['status'] ?? 'unknown',
                 TransactionStatus::SUCCESS,
             );
         }
@@ -237,6 +239,7 @@ class PolarWebhookHandler
         $amount = $data['total_amount'] ?? 0;
         $tax = $data['tax_amount'] ?? 0;
         $discountAmount = $data['discount_amount'] ?? 0;
+        $totalFees = $data['platform_fee_amount'] ?? 0;
         $currencyCode = strtoupper($data['currency'] ?? 'usd');
         $currency = Currency::where('code', $currencyCode)->firstOrFail();
 
@@ -245,8 +248,9 @@ class PolarWebhookHandler
         if ($transaction) {
             $this->transactionService->updateTransactionByPaymentProviderTxId(
                 $transactionId,
-                'paid',
+                $data['status'] ?? 'unknown',
                 TransactionStatus::SUCCESS,
+                newFees: $totalFees,
             );
         } else {
             $this->transactionService->createForSubscription(
@@ -254,11 +258,11 @@ class PolarWebhookHandler
                 $amount,
                 $tax,
                 $discountAmount,
-                0,
+                $totalFees,
                 $currency,
                 $paymentProvider,
                 $transactionId,
-                'paid',
+                $data['status'] ?? 'unknown',
                 TransactionStatus::SUCCESS,
             );
         }
