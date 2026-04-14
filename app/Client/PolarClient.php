@@ -73,6 +73,11 @@ class PolarClient
         return $this->request()->get($this->getApiUrl('/v1/products/'.$id));
     }
 
+    public function createDiscount(array $params): Response
+    {
+        return $this->request()->post($this->getApiUrl('/v1/discounts/'), $params);
+    }
+
     private function request(): PendingRequest
     {
         return Http::withHeaders([

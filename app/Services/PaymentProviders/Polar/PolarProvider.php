@@ -3,6 +3,7 @@
 namespace App\Services\PaymentProviders\Polar;
 
 use App\Client\PolarClient;
+use App\Constants\DiscountConstants;
 use App\Constants\PaymentProviderConstants;
 use App\Constants\PlanType;
 use App\Constants\SubscriptionType;
@@ -14,12 +15,15 @@ use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Services\CalculationService;
+use App\Services\DiscountService;
 use App\Services\OneTimeProductService;
 use App\Services\PaymentProviders\PaymentProviderInterface;
 use App\Services\PlanService;
 use App\Services\SubscriptionService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class PolarProvider implements PaymentProviderInterface
 {
@@ -29,6 +33,7 @@ class PolarProvider implements PaymentProviderInterface
         private CalculationService $calculationService,
         private PlanService $planService,
         private OneTimeProductService $oneTimeProductService,
+        private DiscountService $discountService,
     ) {}
 
     public function getSlug(): string
@@ -60,7 +65,7 @@ class PolarProvider implements PaymentProviderInterface
         ];
 
         if ($discount) {
-            $discountId = $this->getDiscountPaymentProviderId($discount, $paymentProvider);
+            $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider, $productId);
             if ($discountId) {
                 $params['discount_id'] = $discountId;
             }
@@ -109,7 +114,7 @@ class PolarProvider implements PaymentProviderInterface
         ];
 
         if ($discount) {
-            $discountId = $this->getDiscountPaymentProviderId($discount, $paymentProvider);
+            $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider, $productId);
             if ($discountId) {
                 $params['discount_id'] = $discountId;
             }
@@ -267,10 +272,11 @@ class PolarProvider implements PaymentProviderInterface
 
     public function addDiscountToSubscription(Subscription $subscription, Discount $discount): bool
     {
-        $this->assertProviderIsActive();
+        $paymentProvider = $this->assertProviderIsActive();
 
-        $paymentProvider = PaymentProvider::where('slug', $this->getSlug())->firstOrFail();
-        $discountId = $this->getDiscountPaymentProviderId($discount, $paymentProvider);
+        $plan = $subscription->plan()->firstOrFail();
+        $productId = $this->findOrCreateSubscriptionProduct($plan, $paymentProvider);
+        $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider, $productId);
 
         if (! $discountId) {
             throw new Exception('Failed to find Polar discount ID');
@@ -428,13 +434,66 @@ class PolarProvider implements PaymentProviderInterface
         return $polarProductId;
     }
 
-    private function getDiscountPaymentProviderId(Discount $discount, PaymentProvider $paymentProvider): ?string
+    private function findOrCreatePolarDiscount(Discount $discount, PaymentProvider $paymentProvider, string $productId): string
     {
-        $discountData = $discount->discountPaymentProviderData()
-            ->where('payment_provider_id', $paymentProvider->id)
-            ->first();
+        $existingDiscountId = $this->discountService->getPaymentProviderDiscountId($discount, $paymentProvider);
 
-        return $discountData?->payment_provider_discount_id;
+        if ($existingDiscountId !== null) {
+            return $existingDiscountId;
+        }
+
+        $discountCode = $discount->codes()->first()->code ?? '';
+        $discountCode = preg_replace('/[^A-Za-z0-9]/', '', $discountCode);
+        $code = strtoupper($discountCode.Str::random(16));
+
+        $duration = 'once';
+        if ($discount->duration_in_months !== null) {
+            $duration = 'repeating';
+        } elseif ($discount->is_recurring) {
+            $duration = 'forever';
+        }
+
+        $params = [
+            'name' => $discount->name,
+            'code' => $code,
+            'type' => $discount->type === DiscountConstants::TYPE_FIXED ? 'fixed' : 'percentage',
+            'duration' => $duration,
+            'products' => [$productId],
+        ];
+
+        if ($discount->type === DiscountConstants::TYPE_FIXED) {
+            $params['amount'] = intval($discount->amount);
+            $params['currency'] = strtolower(config('app.default_currency', 'USD'));
+        } else {
+            // Polar expects basis points for percentage discounts (1 basis point = 0.01%).
+            $params['basis_points'] = intval($discount->amount) * 100;
+        }
+
+        if ($duration === 'repeating' && $discount->duration_in_months !== null) {
+            $params['duration_in_months'] = intval($discount->duration_in_months);
+        }
+
+        if ($discount->valid_until !== null) {
+            $params['ends_at'] = Carbon::parse($discount->valid_until)->toIso8601String();
+        }
+
+        $response = $this->client->createDiscount($params);
+
+        if (! $response->successful()) {
+            Log::error('Failed to create Polar discount: '.$response->body());
+            throw new Exception('Failed to create Polar discount');
+        }
+
+        $polarDiscountId = $response->json()['id'] ?? null;
+
+        if ($polarDiscountId === null) {
+            Log::error('Failed to get Polar discount ID from response: '.$response->body());
+            throw new Exception('Failed to create Polar discount');
+        }
+
+        $this->discountService->addPaymentProviderDiscountId($discount, $paymentProvider, $polarDiscountId);
+
+        return $polarDiscountId;
     }
 
     private function assertProviderIsActive(): PaymentProvider
