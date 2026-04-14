@@ -56,6 +56,7 @@ class PolarProvider implements PaymentProviderInterface
         $productId = $this->findOrCreateSubscriptionProduct($plan, $paymentProvider);
 
         $params = [
+            'allow_discount_codes' => false,
             'products' => [$productId],
             'customer_email' => $user->email,
             'success_url' => $this->getSubscriptionCheckoutSuccessUrl($subscription),
@@ -65,7 +66,7 @@ class PolarProvider implements PaymentProviderInterface
         ];
 
         if ($discount) {
-            $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider, $productId);
+            $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider);
             if ($discountId) {
                 $params['discount_id'] = $discountId;
             }
@@ -105,6 +106,7 @@ class PolarProvider implements PaymentProviderInterface
         $productId = $this->findOrCreateOneTimeProduct($product, $paymentProvider);
 
         $params = [
+            'allow_discount_codes' => false,
             'products' => [$productId],
             'customer_email' => $user->email,
             'success_url' => route('checkout.product.success'),
@@ -114,7 +116,7 @@ class PolarProvider implements PaymentProviderInterface
         ];
 
         if ($discount) {
-            $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider, $productId);
+            $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider);
             if ($discountId) {
                 $params['discount_id'] = $discountId;
             }
@@ -275,8 +277,8 @@ class PolarProvider implements PaymentProviderInterface
         $paymentProvider = $this->assertProviderIsActive();
 
         $plan = $subscription->plan()->firstOrFail();
-        $productId = $this->findOrCreateSubscriptionProduct($plan, $paymentProvider);
-        $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider, $productId);
+        $this->findOrCreateSubscriptionProduct($plan, $paymentProvider);
+        $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider);
 
         if (! $discountId) {
             throw new Exception('Failed to find Polar discount ID');
@@ -434,7 +436,7 @@ class PolarProvider implements PaymentProviderInterface
         return $polarProductId;
     }
 
-    private function findOrCreatePolarDiscount(Discount $discount, PaymentProvider $paymentProvider, string $productId): string
+    private function findOrCreatePolarDiscount(Discount $discount, PaymentProvider $paymentProvider): string
     {
         $existingDiscountId = $this->discountService->getPaymentProviderDiscountId($discount, $paymentProvider);
 
@@ -458,7 +460,6 @@ class PolarProvider implements PaymentProviderInterface
             'code' => $code,
             'type' => $discount->type === DiscountConstants::TYPE_FIXED ? 'fixed' : 'percentage',
             'duration' => $duration,
-            'products' => [$productId],
         ];
 
         if ($discount->type === DiscountConstants::TYPE_FIXED) {
