@@ -170,6 +170,7 @@ class PolarProvider implements PaymentProviderInterface
                 $subscription->payment_provider_subscription_id,
                 [
                     'product_id' => $productId,
+                    'proration_behavior' => $withProration ? 'invoice' : 'prorate',
                 ],
             );
 
