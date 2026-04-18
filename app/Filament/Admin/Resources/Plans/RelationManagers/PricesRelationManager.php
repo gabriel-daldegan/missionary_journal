@@ -94,7 +94,7 @@ class PricesRelationManager extends RelationManager
                                     );
                                 } else {
                                     return new HtmlString(
-                                        '<strong>'.__('Important: Fixed fee is available only for Stripe.').'</strong>'
+                                        '<strong>'.__('Important: Fixed fee is available only for Stripe & Polar.').'</strong>'
                                         .'<br/><br/>'.__('A fixed fee is an amount that your customer will be charged every billing cycle in addition to any usage-based amount. Enter fixed fee in lowest denomination for a currency (cents). E.g. 1000 = $10.00')
                                         .'<br/><br/>'.__('It is highly recommended that you set up a fixed fee for your usage-based billing plans if you are dealing with low-trust customers, as customers can keep using your service and then disable their credit card to avoid being charged for usage.')
                                     );
