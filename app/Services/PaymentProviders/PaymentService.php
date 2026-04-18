@@ -45,25 +45,29 @@ class PaymentService
 
         $paymentProviders = [];
         foreach ($activePaymentProviders as $paymentProvider) {
-            if (isset($paymentProviderInterfaceMap[$paymentProvider->slug]) &&
-                in_array($plan->type, $paymentProviderInterfaceMap[$paymentProvider->slug]->getSupportedPlanTypes())
-            ) {
-                $currentPaymentProvider = $paymentProviderInterfaceMap[$paymentProvider->slug];
-
-                if ($shouldSupportSetupFees && ! $currentPaymentProvider->supportsSetupFees()) {
-                    continue;
-                }
-
-                if ($plan->has_trial && $shouldSupportSkippingTrial && ! $currentPaymentProvider->supportsSkippingTrial()) {
-                    continue;
-                }
-
-                if ($shouldSupportSeatBasedWithIncludedSeats && ! $currentPaymentProvider->supportsSeatBasedWithIncludedSeats()) {
-                    continue;
-                }
-
-                $paymentProviders[] = $currentPaymentProvider;
+            if (! isset($paymentProviderInterfaceMap[$paymentProvider->slug])) {
+                continue;
             }
+
+            $currentPaymentProvider = $paymentProviderInterfaceMap[$paymentProvider->slug];
+
+            if (! $currentPaymentProvider->supportsPlan($plan)) {
+                continue;
+            }
+
+            if ($shouldSupportSetupFees && ! $currentPaymentProvider->supportsSetupFees()) {
+                continue;
+            }
+
+            if ($plan->has_trial && $shouldSupportSkippingTrial && ! $currentPaymentProvider->supportsSkippingTrial()) {
+                continue;
+            }
+
+            if ($shouldSupportSeatBasedWithIncludedSeats && ! $currentPaymentProvider->supportsSeatBasedWithIncludedSeats()) {
+                continue;
+            }
+
+            $paymentProviders[] = $currentPaymentProvider;
         }
 
         return $paymentProviders;

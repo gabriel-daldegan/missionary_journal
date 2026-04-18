@@ -57,11 +57,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::USAGE_BASED->value,
-                PlanType::FLAT_RATE->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('initSubscriptionCheckout')
             ->once()
@@ -122,11 +119,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::USAGE_BASED->value,
-                PlanType::FLAT_RATE->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('initSubscriptionCheckout')
             ->once()
@@ -388,10 +382,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::FLAT_RATE->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(false);
 
         $paymentProvider->shouldNotReceive('initSubscriptionCheckout');
 
@@ -437,10 +429,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::USAGE_BASED->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('initSubscriptionCheckout')
             ->once()
@@ -493,11 +483,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider(false);
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::USAGE_BASED->value,
-                PlanType::FLAT_RATE->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('initSubscriptionCheckout')
             ->once()
@@ -551,10 +538,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addOfflinePaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::FLAT_RATE->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('initSubscriptionCheckout')
             ->once()
@@ -606,8 +591,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
         $user = User::factory()->create(['email' => $email]);
 
         $paymentProvider = $this->addPaymentProvider();
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([PlanType::FLAT_RATE->value]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $mockUserService = Mockery::mock(UserService::class);
         $mockUserService->shouldReceive('findByEmail')
@@ -659,8 +644,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
         $newUser = User::factory()->make(['email' => $email, 'name' => $name]);
 
         $paymentProvider = $this->addPaymentProvider();
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([PlanType::FLAT_RATE->value]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $mockUserService = Mockery::mock(UserService::class);
         $mockUserService->shouldReceive('findByEmail')
@@ -715,8 +700,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
         $user = User::factory()->create(['email' => $email]);
 
         $paymentProvider = $this->addPaymentProvider();
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([PlanType::FLAT_RATE->value]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $mockUserService = Mockery::mock(UserService::class);
         $mockUserService->shouldReceive('findByEmail')
@@ -768,8 +753,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
         $user = User::factory()->create(['email' => $email]);
 
         $paymentProvider = $this->addPaymentProvider();
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([PlanType::FLAT_RATE->value]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $mockUserService = Mockery::mock(UserService::class);
         $mockUserService->shouldReceive('findByEmail')
@@ -823,8 +808,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
         ]);
 
         $paymentProvider = $this->addPaymentProvider();
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([PlanType::FLAT_RATE->value]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $mockUserService = Mockery::mock(UserService::class);
         $mockUserService->shouldReceive('findByEmail')
@@ -857,8 +842,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
         ]);
 
         $paymentProvider = $this->addPaymentProvider();
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([PlanType::FLAT_RATE->value]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         // Test when not showing OTP form
         $component = Livewire::test(SubscriptionCheckoutForm::class);
@@ -897,8 +882,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
         $user = User::factory()->create(['email' => $email]);
 
         $paymentProvider = $this->addPaymentProvider();
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([PlanType::FLAT_RATE->value]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $mockUserService = Mockery::mock(UserService::class);
         $mockUserService->shouldReceive('findByEmail')
@@ -953,8 +938,8 @@ class SubscriptionCheckoutFormTest extends FeatureTest
         $newUser = User::factory()->make(['email' => $email, 'name' => $name]);
 
         $paymentProvider = $this->addPaymentProvider();
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([PlanType::FLAT_RATE->value]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $mockUserService = Mockery::mock(UserService::class);
         $mockUserService->shouldReceive('findByEmail')

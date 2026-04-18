@@ -37,7 +37,7 @@ interface PaymentProviderInterface
 
     public function updateSubscriptionQuantity(Subscription $subscription, int $quantity, bool $isProrated = true): bool;
 
-    public function getSupportedPlanTypes(): array;
+    public function supportsPlan(Plan $plan): bool;
 
     public function reportUsage(Subscription $subscription, int $unitCount): bool;
 
