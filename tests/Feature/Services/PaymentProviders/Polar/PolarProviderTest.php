@@ -332,7 +332,8 @@ class PolarProviderTest extends FeatureTest
 
     public function test_create_subscription_checkout_disables_trial_when_skip_trial_is_true(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $this->actingAs($user);
 
         $plan = Plan::factory()->create([
@@ -344,6 +345,7 @@ class PolarProviderTest extends FeatureTest
 
         $subscription = Subscription::factory()->create([
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'plan_id' => $plan->id,
             'type' => SubscriptionType::LOCALLY_MANAGED,
         ]);
@@ -385,7 +387,8 @@ class PolarProviderTest extends FeatureTest
 
     public function test_create_subscription_checkout_omits_allow_trial_when_trial_should_not_be_skipped(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $this->actingAs($user);
 
         $plan = Plan::factory()->create([
@@ -397,6 +400,7 @@ class PolarProviderTest extends FeatureTest
 
         $subscription = Subscription::factory()->create([
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'plan_id' => $plan->id,
             'type' => SubscriptionType::PAYMENT_PROVIDER_MANAGED,
         ]);
