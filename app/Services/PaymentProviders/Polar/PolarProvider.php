@@ -72,6 +72,10 @@ class PolarProvider implements PaymentProviderInterface
             $params['seats'] = $quantity;
         }
 
+        if ($plan->has_trial && $this->subscriptionService->shouldSkipTrial($subscription)) {
+            $params['allow_trial'] = false;
+        }
+
         if ($discount) {
             $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider);
             if ($discountId) {
@@ -399,7 +403,7 @@ class PolarProvider implements PaymentProviderInterface
 
     public function supportsSkippingTrial(): bool
     {
-        return false;
+        return true;
     }
 
     public function supportsOneTimePurchaseProductQuantity(): bool
