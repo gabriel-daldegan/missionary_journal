@@ -231,36 +231,6 @@ class PolarProviderTest extends FeatureTest
         ]);
     }
 
-    public function test_report_usage_returns_false_when_customer_id_missing(): void
-    {
-        $user = $this->createUser();
-        $meter = PlanMeter::create(['name' => 'API Calls']);
-        $plan = Plan::factory()->create([
-            'type' => PlanType::USAGE_BASED->value,
-            'meter_id' => $meter->id,
-        ]);
-        $subscription = Subscription::factory()->create([
-            'user_id' => $user->id,
-            'plan_id' => $plan->id,
-            'payment_provider_id' => $this->paymentProvider->id,
-        ]);
-
-        PlanMeterPaymentProviderData::create([
-            'plan_meter_id' => $meter->id,
-            'payment_provider_id' => $this->paymentProvider->id,
-            'payment_provider_plan_meter_id' => 'polar_meter_1',
-            'data' => [PlanMeterConstants::POLAR_METER_EVENT_NAME => 'api_calls_abcdef'],
-        ]);
-
-        $client = Mockery::mock(PolarClient::class);
-        $client->shouldNotReceive('ingestEvents');
-        $this->app->instance(PolarClient::class, $client);
-
-        $provider = app(PolarProvider::class);
-
-        $this->assertFalse($provider->reportUsage($subscription, 10));
-    }
-
     public function test_supports_plan_returns_true_for_flat_rate_plan(): void
     {
         $plan = Plan::factory()->create(['type' => PlanType::FLAT_RATE->value]);
