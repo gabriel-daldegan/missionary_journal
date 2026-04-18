@@ -78,6 +78,21 @@ class PolarClient
         return $this->request()->post($this->getApiUrl('/v1/discounts/'), $params);
     }
 
+    public function getDiscount(string $id): Response
+    {
+        return $this->request()->get($this->getApiUrl('/v1/discounts/'.$id));
+    }
+
+    public function createMeter(array $params): Response
+    {
+        return $this->request()->post($this->getApiUrl('/v1/meters/'), $params);
+    }
+
+    public function ingestEvents(array $params): Response
+    {
+        return $this->request()->post($this->getApiUrl('/v1/events/ingest'), $params);
+    }
+
     private function request(): PendingRequest
     {
         return Http::withHeaders([

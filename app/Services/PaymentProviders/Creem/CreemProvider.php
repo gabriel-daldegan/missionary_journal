@@ -283,11 +283,9 @@ class CreemProvider implements PaymentProviderInterface
         throw new Exception('It is not possible to add a discount to an existing Creem subscription');
     }
 
-    public function getSupportedPlanTypes(): array
+    public function supportsPlan(Plan $plan): bool
     {
-        return [
-            PlanType::FLAT_RATE->value,
-        ];
+        return $plan->type === PlanType::FLAT_RATE->value;
     }
 
     public function reportUsage(Subscription $subscription, int $unitCount): bool

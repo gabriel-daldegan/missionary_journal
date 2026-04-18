@@ -474,11 +474,9 @@ class PaddleProvider implements PaymentProviderInterface
         return true;
     }
 
-    public function getSupportedPlanTypes(): array
+    public function supportsPlan(Plan $plan): bool
     {
-        return [
-            PlanType::FLAT_RATE->value,
-        ];
+        return $plan->type === PlanType::FLAT_RATE->value;
     }
 
     public function reportUsage(Subscription $subscription, int $unitCount): bool

@@ -5,6 +5,8 @@ namespace App\Services\PaymentProviders\Polar;
 use App\Client\PolarClient;
 use App\Constants\DiscountConstants;
 use App\Constants\PaymentProviderConstants;
+use App\Constants\PlanMeterConstants;
+use App\Constants\PlanPriceType;
 use App\Constants\PlanType;
 use App\Constants\SubscriptionType;
 use App\Models\Discount;
@@ -12,6 +14,7 @@ use App\Models\OneTimeProduct;
 use App\Models\Order;
 use App\Models\PaymentProvider;
 use App\Models\Plan;
+use App\Models\PlanPrice;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Services\CalculationService;
@@ -305,16 +308,85 @@ class PolarProvider implements PaymentProviderInterface
         return true;
     }
 
-    public function getSupportedPlanTypes(): array
+    public function supportsPlan(Plan $plan): bool
     {
-        return [
-            PlanType::FLAT_RATE->value,
-        ];
+        if ($plan->type === PlanType::FLAT_RATE->value) {
+            return true;
+        }
+
+        if ($plan->type !== PlanType::USAGE_BASED->value) {
+            return false;
+        }
+
+        $planPrice = $this->calculationService->getPlanPrice($plan);
+
+        return $planPrice->type === PlanPriceType::USAGE_BASED_PER_UNIT->value;
     }
 
     public function reportUsage(Subscription $subscription, int $unitCount): bool
     {
-        return false;
+        $paymentProvider = $this->assertProviderIsActive();
+
+        $plan = $subscription->plan()->firstOrFail();
+        $meter = $plan->meter()->first();
+
+        if (! $meter) {
+            Log::error('Polar reportUsage called for plan without a meter: '.$plan->id);
+
+            return false;
+        }
+
+        try {
+            $this->findOrCreatePolarMeter($plan, $paymentProvider);
+        } catch (Exception $e) {
+            Log::error('Failed to ensure Polar meter exists: '.$e->getMessage());
+
+            return false;
+        }
+
+        $paymentProviderMeter = $this->planService->getPaymentProviderMeter($meter, $paymentProvider);
+
+        $eventName = $paymentProviderMeter->data[PlanMeterConstants::POLAR_METER_EVENT_NAME] ?? null;
+
+        if (! $eventName) {
+            Log::error('Polar event name not found for meter: '.$meter->name);
+
+            return false;
+        }
+
+        $customerId = $subscription->extra_payment_provider_data['customer_id'] ?? null;
+
+        if (! $customerId) {
+            Log::error('Polar customer ID not found for subscription: '.$subscription->id);
+
+            return false;
+        }
+
+        try {
+            $response = $this->client->ingestEvents([
+                'events' => [
+                    [
+                        'name' => $eventName,
+                        'customer_id' => $customerId,
+                        'metadata' => [
+                            'value' => $unitCount,
+                        ],
+                    ],
+                ],
+            ]);
+
+            if (! $response->successful()) {
+                Log::error('Failed to ingest Polar usage event: '.$response->body());
+
+                return false;
+            }
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+
+            return false;
+        }
+
+        return true;
     }
 
     public function supportsSkippingTrial(): bool
@@ -348,13 +420,7 @@ class PolarProvider implements PaymentProviderInterface
             'name' => $plan->name,
             'recurring_interval' => $interval->date_identifier,
             'recurring_interval_count' => $plan->interval_count,
-            'prices' => [
-                [
-                    'amount_type' => 'fixed',
-                    'price_amount' => $planPrice->price,
-                    'price_currency' => $currencyCode,
-                ],
-            ],
+            'prices' => $this->buildPolarProductPrices($plan, $planPrice, $currencyCode, $paymentProvider),
         ];
 
         if ($plan->has_trial) {
@@ -387,6 +453,89 @@ class PolarProvider implements PaymentProviderInterface
         $this->planService->addPaymentProviderProductId($plan, $paymentProvider, $polarProductId);
 
         return $polarProductId;
+    }
+
+    private function buildPolarProductPrices(Plan $plan, PlanPrice $planPrice, string $currencyCode, PaymentProvider $paymentProvider): array
+    {
+        if ($plan->type === PlanType::USAGE_BASED->value) {
+            $meterId = $this->findOrCreatePolarMeter($plan, $paymentProvider);
+
+            $prices = [];
+
+            if ($planPrice->price > 0) {
+                $prices[] = [
+                    'amount_type' => 'fixed',
+                    'price_amount' => $planPrice->price,
+                    'price_currency' => $currencyCode,
+                ];
+            }
+
+            $prices[] = [
+                'amount_type' => 'metered_unit',
+                'price_currency' => $currencyCode,
+                'unit_amount' => $planPrice->price_per_unit,
+                'meter_id' => $meterId,
+            ];
+
+            return $prices;
+        }
+
+        return [
+            [
+                'amount_type' => 'fixed',
+                'price_amount' => $planPrice->price,
+                'price_currency' => $currencyCode,
+            ],
+        ];
+    }
+
+    private function findOrCreatePolarMeter(Plan $plan, PaymentProvider $paymentProvider): string
+    {
+        $meter = $plan->meter()->firstOrFail();
+
+        $existingMeterId = $this->planService->getPaymentProviderMeterId($meter, $paymentProvider);
+
+        if ($existingMeterId !== null) {
+            return $existingMeterId;
+        }
+
+        $eventName = Str::slug($meter->name).'-'.Str::lower(Str::random(6));
+
+        $response = $this->client->createMeter([
+            'name' => $meter->name,
+            'filter' => [
+                'conjunction' => 'and',
+                'clauses' => [
+                    [
+                        'property' => 'name',
+                        'operator' => 'eq',
+                        'value' => $eventName,
+                    ],
+                ],
+            ],
+            'aggregation' => [
+                'func' => 'sum',
+                'property' => 'value',
+            ],
+        ]);
+
+        if (! $response->successful()) {
+            Log::error('Failed to create Polar meter: '.$response->body());
+            throw new Exception('Failed to create Polar meter');
+        }
+
+        $polarMeterId = $response->json()['id'] ?? null;
+
+        if ($polarMeterId === null) {
+            Log::error('Failed to get Polar meter ID from response: '.$response->body());
+            throw new Exception('Failed to create Polar meter');
+        }
+
+        $this->planService->addPaymentProviderMeterId($meter, $paymentProvider, $polarMeterId, [
+            PlanMeterConstants::POLAR_METER_EVENT_NAME => $eventName,
+        ]);
+
+        return $polarMeterId;
     }
 
     private function findOrCreateOneTimeProduct(OneTimeProduct $product, PaymentProvider $paymentProvider): string
