@@ -139,10 +139,8 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::SEAT_BASED->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('initSubscriptionCheckout')
             ->once()

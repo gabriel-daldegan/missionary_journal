@@ -32,6 +32,14 @@ class PolarControllerTest extends FeatureTest
         return PaymentProvider::where('slug', PaymentProviderConstants::POLAR_SLUG)->firstOrFail();
     }
 
+    private function createTenantAndUser(): array
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+
+        return [$tenant, $user];
+    }
+
     private function postPolarWebhook(array $payload, ?int $timestamp = null, ?string $secret = null): TestResponse
     {
         $secret = $secret ?? config('services.polar.webhook_secret');
@@ -102,10 +110,13 @@ class PolarControllerTest extends FeatureTest
 
     public function test_subscription_created_webhook_updates_existing_subscription(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 4200,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -133,10 +144,13 @@ class PolarControllerTest extends FeatureTest
 
     public function test_subscription_active_webhook(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 4200,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -168,12 +182,15 @@ class PolarControllerTest extends FeatureTest
 
     public function test_subscription_updated_webhook(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $polarProvider = $this->getPolarPaymentProvider();
 
         Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 4200,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -201,12 +218,15 @@ class PolarControllerTest extends FeatureTest
 
     public function test_subscription_updated_with_cancel_at_period_end_marks_cancellation(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $polarProvider = $this->getPolarPaymentProvider();
 
         Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 4200,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -239,12 +259,15 @@ class PolarControllerTest extends FeatureTest
 
     public function test_subscription_revoked_webhook(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $polarProvider = $this->getPolarPaymentProvider();
 
         Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 4200,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -276,12 +299,15 @@ class PolarControllerTest extends FeatureTest
 
     public function test_order_paid_webhook_creates_subscription_transaction(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $transactionId = 'polar_order_'.Str::random(10);
 
         $subscription = Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 4200,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -308,6 +334,8 @@ class PolarControllerTest extends FeatureTest
 
     public function test_order_paid_webhook_updates_existing_subscription_transaction(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $transactionId = 'polar_order_update_'.Str::random(10);
         $polarProvider = $this->getPolarPaymentProvider();
@@ -315,7 +343,8 @@ class PolarControllerTest extends FeatureTest
 
         $subscription = Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 4200,
             'currency_id' => $currency->id,
             'plan_id' => 1,
@@ -327,6 +356,7 @@ class PolarControllerTest extends FeatureTest
         $transaction = $subscription->transactions()->create([
             'uuid' => (string) Str::uuid(),
             'user_id' => $subscription->user_id,
+            'tenant_id' => $tenant->id,
             'currency_id' => $currency->id,
             'amount' => 4200,
             'status' => TransactionStatus::NOT_STARTED->value,
@@ -351,6 +381,8 @@ class PolarControllerTest extends FeatureTest
 
     public function test_order_paid_webhook_resolves_subscription_by_provider_id_when_uuid_missing(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $transactionId = 'polar_order_byid_'.Str::random(10);
         $providerSubscriptionId = 'sub_byid_'.Str::random(12);
@@ -358,7 +390,8 @@ class PolarControllerTest extends FeatureTest
 
         $subscription = Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 4200,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -390,7 +423,7 @@ class PolarControllerTest extends FeatureTest
 
     public function test_order_paid_webhook_creates_transaction_for_one_time_order(): void
     {
-        $user = $this->createUser();
+        [$tenant, $user] = $this->createTenantAndUser();
         $currency = Currency::where('code', 'USD')->firstOrFail();
         $polarProvider = $this->getPolarPaymentProvider();
         $transactionId = 'polar_onetime_'.Str::random(10);
@@ -398,6 +431,7 @@ class PolarControllerTest extends FeatureTest
         $orderUuid = (string) Str::uuid();
         $order = Order::create([
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'uuid' => $orderUuid,
             'status' => OrderStatus::NEW,
             'currency_id' => $currency->id,
@@ -433,12 +467,15 @@ class PolarControllerTest extends FeatureTest
 
     public function test_order_updated_webhook_creates_subscription_transaction(): void
     {
+        [$tenant, $user] = $this->createTenantAndUser();
+
         $uuid = (string) Str::uuid();
         $transactionId = 'polar_updated_'.Str::random(10);
 
         $subscription = Subscription::create([
             'uuid' => $uuid,
-            'user_id' => 1,
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'price' => 4200,
             'currency_id' => 1,
             'plan_id' => 1,
@@ -467,7 +504,7 @@ class PolarControllerTest extends FeatureTest
 
     public function test_order_refunded_webhook_marks_transaction_and_order_refunded(): void
     {
-        $user = $this->createUser();
+        [$tenant, $user] = $this->createTenantAndUser();
         $currency = Currency::where('code', 'USD')->firstOrFail();
         $polarProvider = $this->getPolarPaymentProvider();
         $transactionId = 'polar_refund_'.Str::random(10);
@@ -475,6 +512,7 @@ class PolarControllerTest extends FeatureTest
         $orderUuid = (string) Str::uuid();
         $order = Order::create([
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'uuid' => $orderUuid,
             'status' => OrderStatus::SUCCESS,
             'currency_id' => $currency->id,
@@ -484,6 +522,7 @@ class PolarControllerTest extends FeatureTest
         $transaction = $order->transactions()->create([
             'uuid' => (string) Str::uuid(),
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'currency_id' => $currency->id,
             'amount' => 10000,
             'status' => TransactionStatus::SUCCESS->value,

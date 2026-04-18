@@ -146,7 +146,8 @@ class PolarProviderTest extends FeatureTest
 
     public function test_report_usage_ingests_polar_event_with_customer_and_value(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $meter = PlanMeter::create(['name' => 'API Calls']);
         $plan = Plan::factory()->create([
             'type' => PlanType::USAGE_BASED->value,
@@ -156,6 +157,7 @@ class PolarProviderTest extends FeatureTest
             'user_id' => $user->id,
             'plan_id' => $plan->id,
             'payment_provider_id' => $this->paymentProvider->id,
+            'tenant_id' => $tenant->id,
             'extra_payment_provider_data' => ['customer_id' => 'polar_cust_1'],
         ]);
 
@@ -193,7 +195,8 @@ class PolarProviderTest extends FeatureTest
 
     public function test_report_usage_creates_polar_meter_on_demand_when_missing(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $meter = PlanMeter::create(['name' => 'API Calls']);
         $plan = Plan::factory()->create([
             'type' => PlanType::USAGE_BASED->value,
@@ -203,6 +206,7 @@ class PolarProviderTest extends FeatureTest
             'user_id' => $user->id,
             'plan_id' => $plan->id,
             'payment_provider_id' => $this->paymentProvider->id,
+            'tenant_id' => $tenant->id,
             'extra_payment_provider_data' => ['customer_id' => 'polar_cust_2'],
         ]);
 

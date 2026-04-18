@@ -32,9 +32,11 @@ class PolarWebhookHandlerTest extends FeatureTest
 
     public function test_one_time_order_paid_sets_total_fees_from_platform_fee_amount(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $order = Order::factory()->create([
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'currency_id' => $this->currency->id,
             'payment_provider_id' => $this->paymentProvider->id,
         ]);
@@ -69,10 +71,12 @@ class PolarWebhookHandlerTest extends FeatureTest
 
     public function test_subscription_order_paid_sets_total_fees_from_platform_fee_amount(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $plan = Plan::first();
         $subscription = Subscription::factory()->create([
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'plan_id' => $plan->id,
             'payment_provider_id' => $this->paymentProvider->id,
         ]);
@@ -99,9 +103,11 @@ class PolarWebhookHandlerTest extends FeatureTest
 
     public function test_order_paid_defaults_total_fees_to_zero_when_platform_fee_amount_missing(): void
     {
-        $user = $this->createUser();
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
         $order = Order::factory()->create([
             'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
             'currency_id' => $this->currency->id,
             'payment_provider_id' => $this->paymentProvider->id,
         ]);
