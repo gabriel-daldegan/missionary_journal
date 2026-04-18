@@ -49,14 +49,14 @@ class PolarProvider implements PaymentProviderInterface
         return PaymentProvider::where('slug', $this->getSlug())->firstOrFail()->name;
     }
 
-    public function createSubscriptionCheckoutRedirectLink(Plan $plan, Subscription $subscription, ?Discount $discount = null): string
+    public function createSubscriptionCheckoutRedirectLink(Plan $plan, Subscription $subscription, ?Discount $discount = null, int $quantity = 1): string
     {
         $paymentProvider = $this->assertProviderIsActive();
 
         /** @var User $user */
         $user = auth()->user();
 
-        $productId = $this->findOrCreateSubscriptionProduct($plan, $paymentProvider);
+        $productId = $this->findOrCreateSubscriptionProduct($plan, $paymentProvider, $quantity);
 
         $params = [
             'allow_discount_codes' => false,
@@ -67,6 +67,10 @@ class PolarProvider implements PaymentProviderInterface
                 'subscription_uuid' => $subscription->uuid,
             ],
         ];
+
+        if ($plan->type === PlanType::SEAT_BASED->value) {
+            $params['seats'] = $quantity;
+        }
 
         if ($discount) {
             $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider);
@@ -142,7 +146,7 @@ class PolarProvider implements PaymentProviderInterface
         return $redirectLink;
     }
 
-    public function initSubscriptionCheckout(Plan $plan, Subscription $subscription, ?Discount $discount = null): array
+    public function initSubscriptionCheckout(Plan $plan, Subscription $subscription, ?Discount $discount = null, int $quantity = 1): array
     {
         return [];
     }
@@ -167,7 +171,7 @@ class PolarProvider implements PaymentProviderInterface
         $paymentProvider = $this->assertProviderIsActive();
 
         try {
-            $productId = $this->findOrCreateSubscriptionProduct($newPlan, $paymentProvider);
+            $productId = $this->findOrCreateSubscriptionProduct($newPlan, $paymentProvider, $subscription->quantity);
 
             $response = $this->client->updateSubscription(
                 $subscription->payment_provider_subscription_id,
@@ -281,7 +285,7 @@ class PolarProvider implements PaymentProviderInterface
         $paymentProvider = $this->assertProviderIsActive();
 
         $plan = $subscription->plan()->firstOrFail();
-        $this->findOrCreateSubscriptionProduct($plan, $paymentProvider);
+        $this->findOrCreateSubscriptionProduct($plan, $paymentProvider, $subscription->quantity);
         $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider);
 
         if (! $discountId) {
@@ -310,17 +314,21 @@ class PolarProvider implements PaymentProviderInterface
 
     public function supportsPlan(Plan $plan): bool
     {
-        if ($plan->type === PlanType::FLAT_RATE->value) {
+        if (in_array($plan->type, [
+            PlanType::FLAT_RATE->value,
+            PlanType::SEAT_BASED->value,
+        ])
+        ) {
             return true;
         }
 
-        if ($plan->type !== PlanType::USAGE_BASED->value) {
-            return false;
+        if ($plan->type == PlanType::USAGE_BASED->value) {
+            $planPrice = $this->calculationService->getPlanPrice($plan);
+
+            return $planPrice->type === PlanPriceType::USAGE_BASED_PER_UNIT->value;
         }
 
-        $planPrice = $this->calculationService->getPlanPrice($plan);
-
-        return $planPrice->type === PlanPriceType::USAGE_BASED_PER_UNIT->value;
+        return false;
     }
 
     public function reportUsage(Subscription $subscription, int $unitCount): bool
@@ -404,7 +412,7 @@ class PolarProvider implements PaymentProviderInterface
         return false;
     }
 
-    private function findOrCreateSubscriptionProduct(Plan $plan, PaymentProvider $paymentProvider): string
+    private function findOrCreateSubscriptionProduct(Plan $plan, PaymentProvider $paymentProvider, int $quantity = 1): string
     {
         $productId = $this->planService->getPaymentProviderProductId($plan, $paymentProvider);
 
@@ -420,7 +428,7 @@ class PolarProvider implements PaymentProviderInterface
             'name' => $plan->name,
             'recurring_interval' => $interval->date_identifier,
             'recurring_interval_count' => $plan->interval_count,
-            'prices' => $this->buildPolarProductPrices($plan, $planPrice, $currencyCode, $paymentProvider),
+            'prices' => $this->buildPolarProductPrices($plan, $planPrice, $currencyCode, $paymentProvider, $quantity),
         ];
 
         if ($plan->has_trial) {
@@ -455,8 +463,13 @@ class PolarProvider implements PaymentProviderInterface
         return $polarProductId;
     }
 
-    private function buildPolarProductPrices(Plan $plan, PlanPrice $planPrice, string $currencyCode, PaymentProvider $paymentProvider): array
-    {
+    private function buildPolarProductPrices(
+        Plan $plan,
+        PlanPrice $planPrice,
+        string $currencyCode,
+        PaymentProvider $paymentProvider,
+        int $quantity = 1,
+    ): array {
         if ($plan->type === PlanType::USAGE_BASED->value) {
             $meterId = $this->findOrCreatePolarMeter($plan, $paymentProvider);
 
@@ -478,6 +491,25 @@ class PolarProvider implements PaymentProviderInterface
             ];
 
             return $prices;
+        }
+
+        if ($plan->type === PlanType::SEAT_BASED->value) {
+            return [
+                [
+                    'amount_type' => 'seat_based',
+                    'price_currency' => $currencyCode,
+                    'seat_tiers' => [
+                        'seat_tier_type' => 'volume',
+                        'tiers' => [
+                            [
+                                'min_seats' => $quantity,
+                                'max_seats' => null,
+                                'price_per_seat' => $planPrice->price,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
         }
 
         return [
@@ -665,5 +697,39 @@ class PolarProvider implements PaymentProviderInterface
         }
 
         return route('checkout.subscription.success');
+    }
+
+    public function updateSubscriptionQuantity(Subscription $subscription, int $quantity, bool $isProrated = true): bool
+    {
+        $this->assertProviderIsActive();
+
+        try {
+            $response = $this->client->updateSubscription(
+                $subscription->payment_provider_subscription_id,
+                [
+                    'seats' => $quantity,
+                    'proration_behavior' => $isProrated ? 'invoice' : 'prorate',
+                ],
+            );
+
+            if (! $response->successful()) {
+                throw new Exception('Failed to update Polar subscription seats: '.$response->body());
+            }
+
+            $this->subscriptionService->updateSubscription($subscription, [
+                'quantity' => $quantity,
+            ]);
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public function supportsSeatBasedWithIncludedSeats(): bool
+    {
+        return false;
     }
 }

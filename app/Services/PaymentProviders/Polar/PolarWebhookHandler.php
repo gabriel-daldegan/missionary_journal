@@ -88,7 +88,7 @@ class PolarWebhookHandler
                 $extraData['customer_id'] = $customerId;
             }
 
-            $this->subscriptionService->updateSubscription($subscription, [
+            $updateData = [
                 'type' => SubscriptionType::PAYMENT_PROVIDER_MANAGED,
                 'status' => $subscriptionStatus,
                 'ends_at' => $endsAt,
@@ -96,7 +96,13 @@ class PolarWebhookHandler
                 'payment_provider_status' => $providerStatus,
                 'payment_provider_id' => $paymentProvider->id,
                 'extra_payment_provider_data' => $extraData,
-            ]);
+            ];
+
+            if (isset($data['seats'])) {
+                $updateData['quantity'] = $data['seats'];
+            }
+
+            $this->subscriptionService->updateSubscription($subscription, $updateData);
         } elseif ($eventType === 'subscription.updated' ||
             $eventType === 'subscription.canceled' ||
             $eventType === 'subscription.uncanceled'
@@ -122,6 +128,10 @@ class PolarWebhookHandler
                 'extra_payment_provider_data' => $extraData,
                 'is_canceled_at_end_of_cycle' => $cancelAtPeriodEnd,
             ];
+
+            if (isset($data['seats'])) {
+                $updateData['quantity'] = $data['seats'];
+            }
 
             if ($endsAt) {
                 $updateData['ends_at'] = $endsAt;
