@@ -8,13 +8,16 @@ use App\Constants\PaymentProviderConstants;
 use App\Constants\PlanMeterConstants;
 use App\Constants\PlanPriceType;
 use App\Constants\PlanType;
+use App\Constants\SubscriptionType;
 use App\Models\Currency;
 use App\Models\Discount;
 use App\Models\DiscountPaymentProviderData;
+use App\Models\Interval;
 use App\Models\PaymentProvider;
 use App\Models\Plan;
 use App\Models\PlanMeter;
 use App\Models\PlanMeterPaymentProviderData;
+use App\Models\PlanPaymentProviderData;
 use App\Models\PlanPrice;
 use App\Models\Subscription;
 use App\Services\PaymentProviders\PaymentService;
@@ -321,6 +324,110 @@ class PolarProviderTest extends FeatureTest
 
         $slugs = array_map(fn ($p) => $p->getSlug(), $providers);
         $this->assertNotContains($this->paymentProvider->slug, $slugs);
+    }
+
+    public function test_create_subscription_checkout_disables_trial_when_skip_trial_is_true(): void
+    {
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        $plan = Plan::factory()->create([
+            'type' => PlanType::FLAT_RATE->value,
+            'has_trial' => true,
+            'trial_interval_id' => Interval::where('slug', 'day')->first()->id,
+            'trial_interval_count' => 7,
+        ]);
+
+        $subscription = Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'type' => SubscriptionType::LOCALLY_MANAGED,
+        ]);
+
+        PlanPaymentProviderData::create([
+            'plan_id' => $plan->id,
+            'payment_provider_id' => $this->paymentProvider->id,
+            'payment_provider_product_id' => 'polar_prod_existing',
+        ]);
+
+        $response = Mockery::mock(Response::class);
+        $response->shouldReceive('successful')->andReturn(true);
+        $response->shouldReceive('json')->andReturn(['url' => 'https://checkout.polar.sh/session']);
+        $response->shouldReceive('body')->andReturn('');
+
+        $capturedParams = null;
+        $client = Mockery::mock(PolarClient::class);
+        $client->shouldReceive('createCheckout')
+            ->once()
+            ->with(Mockery::on(function ($params) use (&$capturedParams) {
+                $capturedParams = $params;
+
+                return true;
+            }))
+            ->andReturn($response);
+
+        $this->app->instance(PolarClient::class, $client);
+
+        $this->paymentProvider->update(['is_active' => true]);
+
+        $provider = app(PolarProvider::class);
+
+        $result = $provider->createSubscriptionCheckoutRedirectLink($plan, $subscription);
+
+        $this->assertEquals('https://checkout.polar.sh/session', $result);
+        $this->assertArrayHasKey('allow_trial', $capturedParams);
+        $this->assertFalse($capturedParams['allow_trial']);
+    }
+
+    public function test_create_subscription_checkout_omits_allow_trial_when_trial_should_not_be_skipped(): void
+    {
+        $user = $this->createUser();
+        $this->actingAs($user);
+
+        $plan = Plan::factory()->create([
+            'type' => PlanType::FLAT_RATE->value,
+            'has_trial' => true,
+            'trial_interval_id' => Interval::where('slug', 'day')->first()->id,
+            'trial_interval_count' => 7,
+        ]);
+
+        $subscription = Subscription::factory()->create([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'type' => SubscriptionType::PAYMENT_PROVIDER_MANAGED,
+        ]);
+
+        PlanPaymentProviderData::create([
+            'plan_id' => $plan->id,
+            'payment_provider_id' => $this->paymentProvider->id,
+            'payment_provider_product_id' => 'polar_prod_existing',
+        ]);
+
+        $response = Mockery::mock(Response::class);
+        $response->shouldReceive('successful')->andReturn(true);
+        $response->shouldReceive('json')->andReturn(['url' => 'https://checkout.polar.sh/session']);
+        $response->shouldReceive('body')->andReturn('');
+
+        $capturedParams = null;
+        $client = Mockery::mock(PolarClient::class);
+        $client->shouldReceive('createCheckout')
+            ->once()
+            ->with(Mockery::on(function ($params) use (&$capturedParams) {
+                $capturedParams = $params;
+
+                return true;
+            }))
+            ->andReturn($response);
+
+        $this->app->instance(PolarClient::class, $client);
+
+        $this->paymentProvider->update(['is_active' => true]);
+
+        $provider = app(PolarProvider::class);
+
+        $provider->createSubscriptionCheckoutRedirectLink($plan, $subscription);
+
+        $this->assertArrayNotHasKey('allow_trial', $capturedParams);
     }
 
     private function invokeFindOrCreate(PolarProvider $provider, Discount $discount, PaymentProvider $paymentProvider): string
