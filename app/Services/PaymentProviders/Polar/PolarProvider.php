@@ -77,7 +77,8 @@ class PolarProvider implements PaymentProviderInterface
         }
 
         if ($discount) {
-            $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider);
+            $currency = $subscription->currency()->firstOrFail();
+            $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider, $currency->code);
             if ($discountId) {
                 $params['discount_id'] = $discountId;
             }
@@ -127,7 +128,8 @@ class PolarProvider implements PaymentProviderInterface
         ];
 
         if ($discount) {
-            $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider);
+            $currency = $order->currency()->firstOrFail();
+            $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider, $currency->code);
             if ($discountId) {
                 $params['discount_id'] = $discountId;
             }
@@ -290,7 +292,9 @@ class PolarProvider implements PaymentProviderInterface
 
         $plan = $subscription->plan()->firstOrFail();
         $this->findOrCreateSubscriptionProduct($plan, $paymentProvider, $subscription->quantity);
-        $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider);
+
+        $currency = $subscription->currency()->firstOrFail();
+        $discountId = $this->findOrCreatePolarDiscount($discount, $paymentProvider, $currency->code);
 
         if (! $discountId) {
             throw new Exception('Failed to find Polar discount ID');
@@ -622,7 +626,7 @@ class PolarProvider implements PaymentProviderInterface
         return $polarProductId;
     }
 
-    private function findOrCreatePolarDiscount(Discount $discount, PaymentProvider $paymentProvider): string
+    private function findOrCreatePolarDiscount(Discount $discount, PaymentProvider $paymentProvider, string $currency): string
     {
         $existingDiscountId = $this->discountService->getPaymentProviderDiscountId($discount, $paymentProvider);
 
@@ -650,7 +654,7 @@ class PolarProvider implements PaymentProviderInterface
 
         if ($discount->type === DiscountConstants::TYPE_FIXED) {
             $params['amount'] = intval($discount->amount);
-            $params['currency'] = strtolower(config('app.default_currency', 'USD'));
+            $params['currency'] = strtolower($currency);
         } else {
             // Polar expects basis points for percentage discounts (1 basis point = 0.01%).
             $params['basis_points'] = intval($discount->amount) * 100;
