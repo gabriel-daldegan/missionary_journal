@@ -43,11 +43,18 @@ class PaymentProvidersSeeder extends Seeder
                 'sort' => 4,
             ],
             [
+                'name' => 'Polar',
+                'slug' => PaymentProviderConstants::POLAR_SLUG,
+                'type' => 'multi',
+                'is_active' => false,
+                'sort' => 5,
+            ],
+            [
                 'name' => 'Offline',
                 'slug' => PaymentProviderConstants::OFFLINE_SLUG,
                 'type' => 'multi',
                 'is_active' => false,
-                'sort' => 5,
+                'sort' => 6,
             ],
         ];
 

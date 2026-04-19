@@ -135,7 +135,7 @@ class DiscountResource extends Resource
                     TextInput::make('duration_in_months')
                         ->label(__('Duration in Months'))
                         ->integer()
-                        ->helperText(__('This allows you to define how many months the discount should apply. Only works with payment providers that support this feature. (like Stripe, Lemon Squeezy & Creem)'))
+                        ->helperText(__('This allows you to define how many months the discount should apply. Only works with payment providers that support this feature. (like Stripe, Lemon Squeezy, Polar & Creem)'))
                         ->default(null),
                     TextInput::make('maximum_recurring_intervals')
                         ->label(__('Maximum Recurring Intervals'))

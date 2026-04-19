@@ -35,7 +35,7 @@ interface PaymentProviderInterface
 
     public function addDiscountToSubscription(Subscription $subscription, Discount $discount): bool;
 
-    public function getSupportedPlanTypes(): array;
+    public function supportsPlan(Plan $plan): bool;
 
     public function reportUsage(Subscription $subscription, int $unitCount): bool;
 

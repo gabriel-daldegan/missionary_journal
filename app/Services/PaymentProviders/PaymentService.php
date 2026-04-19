@@ -44,22 +44,26 @@ class PaymentService
 
         $paymentProviders = [];
         foreach ($activePaymentProviders as $paymentProvider) {
-            if (isset($paymentProviderInterfaceMap[$paymentProvider->slug]) &&
-                in_array($plan->type, $paymentProviderInterfaceMap[$paymentProvider->slug]->getSupportedPlanTypes())
-            ) {
-                $currentPaymentProvider = $paymentProviderInterfaceMap[$paymentProvider->slug];
+            if (! isset($paymentProviderInterfaceMap[$paymentProvider->slug])) {
+                continue;
+            }
 
-                if ($shouldSupportSetupFees && ! $currentPaymentProvider->supportsSetupFees()) {
-                    continue;
-                }
+            $currentPaymentProvider = $paymentProviderInterfaceMap[$paymentProvider->slug];
 
-                if ($plan->has_trial && $shouldSupportSkippingTrial) {
-                    if ($currentPaymentProvider->supportsSkippingTrial()) {
-                        $paymentProviders[] = $currentPaymentProvider;
-                    }
-                } else {
+            if (! $currentPaymentProvider->supportsPlan($plan)) {
+                continue;
+            }
+
+            if ($shouldSupportSetupFees && ! $currentPaymentProvider->supportsSetupFees()) {
+                continue;
+            }
+
+            if ($plan->has_trial && $shouldSupportSkippingTrial) {
+                if ($currentPaymentProvider->supportsSkippingTrial()) {
                     $paymentProviders[] = $currentPaymentProvider;
                 }
+            } else {
+                $paymentProviders[] = $currentPaymentProvider;
             }
         }
 
