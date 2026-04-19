@@ -7,6 +7,7 @@ use App\Services\PaymentProviders\LemonSqueezy\LemonSqueezyProvider;
 use App\Services\PaymentProviders\Offline\OfflineProvider;
 use App\Services\PaymentProviders\Paddle\PaddleProvider;
 use App\Services\PaymentProviders\PaymentService;
+use App\Services\PaymentProviders\Polar\PolarProvider;
 use App\Services\PaymentProviders\Stripe\StripeProvider;
 use App\Services\UserVerificationService;
 use App\Services\VerificationProviders\TwilioProvider;
@@ -32,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
             PaddleProvider::class,
             LemonSqueezyProvider::class,
             CreemProvider::class,
+            PolarProvider::class,
             OfflineProvider::class,
         ], 'payment-providers');
 

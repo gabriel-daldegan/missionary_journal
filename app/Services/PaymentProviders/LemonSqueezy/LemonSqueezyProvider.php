@@ -424,13 +424,13 @@ class LemonSqueezyProvider implements PaymentProviderInterface
         return $paymentProvider;
     }
 
-    public function getSupportedPlanTypes(): array
+    public function supportsPlan(Plan $plan): bool
     {
-        return [
+        return in_array($plan->type, [
             PlanType::FLAT_RATE->value,
             PlanType::USAGE_BASED->value,
             PlanType::SEAT_BASED->value,
-        ];
+        ]);
     }
 
     public function reportUsage(Subscription $subscription, int $unitCount): bool

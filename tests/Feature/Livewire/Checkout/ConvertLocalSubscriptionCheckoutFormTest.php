@@ -72,11 +72,8 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::USAGE_BASED->value,
-                PlanType::FLAT_RATE->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('initSubscriptionCheckout')
             ->once()
@@ -142,10 +139,8 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::SEAT_BASED->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('initSubscriptionCheckout')
             ->once()
@@ -207,10 +202,8 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::FLAT_RATE->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(false);
 
         $paymentProvider->shouldNotReceive('initSubscriptionCheckout');
 
@@ -277,10 +270,8 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::USAGE_BASED->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldNotReceive('initSubscriptionCheckout');
 
@@ -340,10 +331,8 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::FLAT_RATE->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('supportsSkippingTrial')
             ->andReturn(false);
@@ -405,10 +394,8 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider();
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::USAGE_BASED->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('initSubscriptionCheckout')
             ->once()
@@ -472,11 +459,8 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
 
         $paymentProvider = $this->addPaymentProvider(false);
 
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([
-                PlanType::USAGE_BASED->value,
-                PlanType::FLAT_RATE->value,
-            ]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $paymentProvider->shouldReceive('initSubscriptionCheckout')
             ->once()
@@ -564,8 +548,8 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
         ]);
 
         $paymentProvider = $this->addPaymentProvider();
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([PlanType::FLAT_RATE->value]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         PlanPrice::create([
             'plan_id' => $plan->id,
@@ -638,8 +622,8 @@ class ConvertLocalSubscriptionCheckoutFormTest extends FeatureTest
         ]);
 
         $paymentProvider = $this->addPaymentProvider();
-        $paymentProvider->shouldReceive('getSupportedPlanTypes')
-            ->andReturn([PlanType::FLAT_RATE->value]);
+        $paymentProvider->shouldReceive('supportsPlan')
+            ->andReturn(true);
 
         $email = 'existing'.rand(1, 10000).'@example.com';
         $existingUser = User::factory()->create(['email' => $email]);

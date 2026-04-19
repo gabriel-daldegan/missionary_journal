@@ -12,5 +12,7 @@ class PaymentProviderConstants
 
     public const CREEM_SLUG = 'creem';
 
+    public const POLAR_SLUG = 'polar';
+
     public const OFFLINE_SLUG = 'offline';
 }

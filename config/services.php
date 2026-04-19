@@ -105,6 +105,12 @@ return [
         'is_test_mode' => env('CREEM_IS_TEST_MODE', false),
     ],
 
+    'polar' => [
+        'access_token' => env('POLAR_ACCESS_TOKEN'),
+        'webhook_secret' => env('POLAR_WEBHOOK_SECRET'),
+        'is_sandbox' => env('POLAR_IS_SANDBOX', false),
+    ],
+
     'twilio' => [
         'sid' => env('TWILIO_SID'),
         'token' => env('TWILIO_TOKEN'),
