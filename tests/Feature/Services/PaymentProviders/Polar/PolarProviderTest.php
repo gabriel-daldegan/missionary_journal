@@ -60,7 +60,7 @@ class PolarProviderTest extends FeatureTest
 
         $provider = app(PolarProvider::class);
 
-        $result = $this->invokeFindOrCreate($provider, $discount, $this->paymentProvider);
+        $result = $this->invokeFindOrCreate($provider, $discount, $this->paymentProvider, 'USD');
 
         $this->assertEquals('polar_existing_id', $result);
     }
@@ -95,7 +95,7 @@ class PolarProviderTest extends FeatureTest
 
         $provider = app(PolarProvider::class);
 
-        $result = $this->invokeFindOrCreate($provider, $discount, $this->paymentProvider);
+        $result = $this->invokeFindOrCreate($provider, $discount, $this->paymentProvider, 'USD');
 
         $this->assertEquals('polar_new_percent_id', $result);
         $this->assertEquals('percentage', $capturedParams['type']);
@@ -138,7 +138,7 @@ class PolarProviderTest extends FeatureTest
 
         $provider = app(PolarProvider::class);
 
-        $result = $this->invokeFindOrCreate($provider, $discount, $this->paymentProvider);
+        $result = $this->invokeFindOrCreate($provider, $discount, $this->paymentProvider, 'USD');
 
         $this->assertEquals('polar_new_fixed_id', $result);
         $this->assertEquals('fixed', $capturedParams['type']);
@@ -438,10 +438,10 @@ class PolarProviderTest extends FeatureTest
         $this->assertArrayNotHasKey('allow_trial', $capturedParams);
     }
 
-    private function invokeFindOrCreate(PolarProvider $provider, Discount $discount, PaymentProvider $paymentProvider): string
+    private function invokeFindOrCreate(PolarProvider $provider, Discount $discount, PaymentProvider $paymentProvider, string $currency): string
     {
         $method = new ReflectionMethod($provider, 'findOrCreatePolarDiscount');
 
-        return $method->invoke($provider, $discount, $paymentProvider);
+        return $method->invoke($provider, $discount, $paymentProvider, $currency);
     }
 }
