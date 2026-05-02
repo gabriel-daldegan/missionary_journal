@@ -1,0 +1,13 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+@import '../../colors.css';
+
+@plugin "daisyui" {
+    themes: light --default;
+}
+
+@source '../../../../app/Filament';
+@source '../../../../resources/views/filament';
+@source '../../../../resources/views/livewire';
+@source '../../../../resources/views/components';
+@source '../../../../app/Livewire';
+@source '../../../../vendor/**/*.blade.php';
