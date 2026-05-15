@@ -1,0 +1,19 @@
+status:
+  branch: feature/pre-configuration
+  modifiedFiles:
+    - .env.example
+    - .gitignore
+    - AGENTS.md
+    - package-lock.json
+    - package.json
+  modifiedFilesTotalCount: 30
+  recentCommits:
+    - Merge remote-tracking branch 'upstream/main' into update-framework
+    - Adjusts
+  currentEpic: null
+  currentStory: null
+  lastUpdate: '2026-05-15T20:21:53.443Z'
+  isGitRepo: true
+timestamp: 1778876513449
+ttl: 60
+gitFingerprint: null

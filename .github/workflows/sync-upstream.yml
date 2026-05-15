@@ -1,0 +1,31 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # todo dia 3h
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add upstream
+        run: |
+          git remote add upstream https://github.com/joseferrao/saasykit-tenancy.git
+
+      - name: Fetch upstream
+        run: git fetch upstream
+
+      - name: Create update branch
+        run: |
+          git checkout -B update-framework
+          git merge upstream/main --allow-unrelated-histories || true
+
+      - name: Push branch
+        run: git push origin update-framework --force
