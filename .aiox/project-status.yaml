@@ -1,19 +1,19 @@
 status:
   branch: feature/pre-configuration
   modifiedFiles:
-    - .env.example
-    - .gitignore
-    - AGENTS.md
-    - package-lock.json
-    - package.json
-  modifiedFilesTotalCount: 30
+    - .aiox/project-status.yaml
+    - .aiox-core/development/agents/skill-standardizer.md
+    - .aiox-core/development/checklists/skill-standardization-checklist.md
+    - .aiox-core/development/scripts/skill-standards-auditor.js
+    - .aiox-core/development/scripts/skill-standards-normalizer.js
+  modifiedFilesTotalCount: 12
   recentCommits:
+    - 'chore: add AIOX pre-configuration'
     - Merge remote-tracking branch 'upstream/main' into update-framework
-    - Adjusts
   currentEpic: null
   currentStory: null
-  lastUpdate: '2026-05-15T20:21:53.443Z'
+  lastUpdate: '2026-05-16T00:19:36.254Z'
   isGitRepo: true
-timestamp: 1778876513449
+timestamp: 1778890776256
 ttl: 60
-gitFingerprint: null
+gitFingerprint: 1777701432242.818:1778890692010.583

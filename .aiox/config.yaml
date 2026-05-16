@@ -1,0 +1,24 @@
+# AIOX Project Configuration
+version: 2.1.0
+project:
+  name: missionary_journal
+  type: existing-repo
+  path: /home/jose/projects/missionary_journal
+  repository: https://github.com/gabriel-daldegan/missionary_journal
+  upstream: https://github.com/joseferrao/saasykit-tenancy
+
+environment:
+  bootstrapped: true
+  bootstrap_date: 2026-05-15T21:27:54-03:00
+  bootstrap_mode: existing-repo
+
+workflow:
+  current: existing-repo-maintenance
+  phase: bootstrap-complete
+
+permissions:
+  mode: ask
+
+settings:
+  auto_update_status: true
+  quality_gates_enabled: true
