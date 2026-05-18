@@ -1,0 +1,98 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-17T16:58:14-03:00"
+  from_agent: "pm"
+  to_agent: "architect"
+  consumed: true
+  last_command: "create-prd"
+
+  story_context:
+    story_id: ""
+    story_path: ""
+    story_status: "No active story found"
+    current_task: "Create architecture from completed Life Memory Timeline PRD"
+    branch: "feature/pre-configuration"
+
+  source_artifacts:
+    primary:
+      - "docs/prd.md"
+    supporting:
+      - "docs/brief.md"
+
+  product_context:
+    product_name: "Life Memory Timeline"
+    product_name_status: "Working name; still open whether this is product-facing for validation."
+    first_validation_niche: "Missionaries and their families."
+    product_boundary: "The long-term product is a private personal/family memory timeline, not a mission-only journal."
+    core_aha: "Timeline-first home after profile setup; the product must not open as an admin table."
+
+  mvp_scope:
+    in_scope:
+      - "Authentication and secure access."
+      - "Lightweight personal profile setup before timeline access."
+      - "Timeline-first home ordered by experience date, not creation date."
+      - "Diary records with body text, experience date, optional location, tags, photos, and optional Memory Highlights."
+      - "Trip/period records with title, location, start date, end date, people, photos, and notes."
+      - "Individual record detail view."
+      - "Timeline filters by date, tag, and location."
+      - "Photo uploads connected to records."
+      - "Manual copy/paste from mission emails into diary records."
+      - "Email-sourced record tracking for validation."
+      - "Simple Memory Highlights as a list or textarea; no technical metadata classification in MVP."
+      - "UI localization for English, Portuguese, and Spanish."
+    out_of_scope:
+      - "Per-record missionary-only vs family-visible access."
+      - "Granular missionary-vs-family record visibility; backlog-only and outside active roadmap."
+      - "Automated inbound email capture."
+      - "AI-assisted metadata extraction."
+      - "Public feeds, social-follow behavior, friend access, visitor access, and external-recipient access."
+      - "Full album generation, print-ready album layout, second-brain behavior, advanced life graph, and additional record types."
+
+  decisions:
+    - "MVP access model is tenant/workspace private. Records are private to the tenant/workspace by default and are not public or social."
+    - "Family workspace membership is fixed for MVP validation at two users: one owner and one collaborator."
+    - "The owner can invite one collaborator. Architect must verify whether SaaSykit tenancy already provides the required invite and membership controls before custom behavior is proposed."
+    - "No per-record missionary-only vs family-visible controls should be included in MVP architecture, UX, or stories."
+    - "Media privacy is an architecture criterion: attached photos must follow tenant/workspace boundaries and parent-record access."
+    - "The MVP validation metric is at least three tenants/workspaces active for more than two weeks each."
+    - "Each missionary should create records from at least two weekly contact moments, such as weekly family contact or weekly mission email updates."
+    - "Validation should track whether copied mission email content becomes real diary records."
+    - "Family members or collaborators should report whether centralized access makes the mission easier to follow, revisit, and preserve."
+    - "UI must remain modern, clean, elegant, memory-first, and must not use visible album-creation language."
+
+  architecture_focus:
+    - "Analyze existing SaaSykit tenancy membership/invitation capabilities before designing custom collaborator invite behavior."
+    - "Define the timeline record model for diary and trip/period records, including experience date/period ordering."
+    - "Define tenant/workspace scoping for records, tags, photos, highlights, and source markers."
+    - "Define policies/gates and service-layer boundaries for workspace-private access."
+    - "Define private media access with Spatie Media Library so photos cannot leak across tenants/workspaces."
+    - "Define minimal validation reporting for three active tenants/workspaces over more than two weeks without heavy analytics infrastructure."
+    - "Define storage/upload/retention assumptions before paid launch."
+    - "Define Laravel localization approach for EN/PT/ES UI strings without user-generated content translation."
+    - "Sequence implementation for a realistic three-week MVP, with cuts if needed."
+
+  risks_and_open_items:
+    - "Confirm SaaSykit tenancy already supports owner-to-collaborator invitation and membership limits for the two-user MVP workspace."
+    - "Private media access needs concrete architecture; this is not a PM/product decision."
+    - "Three-week scope may be tight with trip/period records, photos, filters, localization, and workspace collaborator access."
+    - "Upload limits, storage limits, and retention expectations are not yet defined."
+    - "Minimum validation reporting needs a lightweight implementation approach."
+    - "Working name Life Memory Timeline may or may not be product-facing during validation."
+
+  recommended_command:
+    agent: "/agent aiox-architect"
+    command: "*create-brownfield-architecture"
+    reason: "This is an existing Laravel/SaaSykit app, so architecture should fit the brownfield codebase instead of assuming a greenfield build."
+
+  architect_prompt: "Create the architecture plan for Life Memory Timeline using docs/prd.md as source. Focus on Laravel/SaaSykit tenancy, timeline record modeling for diary and trip/period records, tenant/workspace scoping, the two-user family workspace model with owner invitation of one collaborator, private media access with Spatie Media Library, UI localization, service-layer organization, and a delivery sequence that keeps the three-week MVP realistic. First verify whether SaaSykit tenancy already provides the needed invitation and membership controls. Do not include per-record missionary-only vs family-visible access in the MVP architecture; keep social/friend/visitor access as roadmap."
+
+  files_modified:
+    - "docs/prd.md"
+    - ".aiox/handoffs/20260517T165814-0300-pm-to-architect.yaml"
+
+  blockers:
+    - "No active story exists yet; architecture should precede executable story creation."
+    - "docs/prd.md is currently untracked in git."
+    - "There are unrelated dirty files in the working tree; do not revert them."
+
+  next_action: "Switch to Architect and run *create-brownfield-architecture using docs/prd.md and this handoff. Start by inspecting existing SaaSykit tenancy invitation/membership support, then design the MVP architecture and implementation sequence."

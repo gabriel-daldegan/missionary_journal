@@ -1,0 +1,115 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-18T11:53:29-03:00"
+  from_agent: "ux-design-expert"
+  to_agent: "architect"
+  consumed: false
+  last_command: "create-front-end-spec"
+
+  story_context:
+    story_id: ""
+    story_path: ""
+    story_status: "No active story found"
+    current_task: "Create front-end architecture from completed memory product UX specification"
+    branch: "feature/pre-configuration"
+
+  source_artifacts:
+    primary:
+      - "docs/front-end-spec.md"
+      - "docs/architecture.md"
+      - "docs/prd.md"
+    supporting:
+      - "docs/brief.md"
+      - ".aiox/handoffs/20260518T102416-0300-pm-to-ux-design-expert.yaml"
+      - ".aiox/handoffs/20260517T235140-0300-architect-to-pm.yaml"
+
+  ux_status:
+    readiness: "Ready for front-end architecture and SM story preparation"
+    summary: "The UX specification defines the dedicated authenticated memory product surface for Life Memory Timeline for Missionaries. It locks the timeline-first flow, non-admin UI boundaries, writing-first record capture, private media states, responsive behavior, accessibility expectations, and EN/PT/ES layout tolerance."
+
+  product_context:
+    product_name: "Life Memory Timeline for Missionaries"
+    broader_platform_direction: "Life Memory Timeline"
+    first_validation_niche: "Missionaries and their families"
+    product_boundary: "The long-term product is a private personal/family memory timeline, not a mission-only journal."
+    core_aha: "After profile setup, the first meaningful product screen is a private vertical month-grouped memory timeline."
+
+  ux_decisions:
+    - "The memory product must use a dedicated authenticated memory layout under /memories/{tenant:uuid}, not Filament Dashboard chrome."
+    - "The timeline is the primary product hub and remains a vertical month-grouped list ordered by experience date or period start date."
+    - "Timeline cards show date or period, optional location, excerpt/title, tags, photo count, primary media state, and a clear open action."
+    - "Diary capture is writing-first: body and experience date lead; location, tags, photos, and Memory Highlights are supportive."
+    - "Trip/period capture is structured around title, location, start/end dates, people, notes, photos, and Memory Highlights."
+    - "Memory Highlights are a simple optional dynamic list with add/remove/reorder behavior, not AI classification, inline annotation, or technical metadata."
+    - "Private workspace cues are global and calm; the MVP must not expose per-record missionary-only versus family-visible controls."
+    - "Private media UI must never imply public URLs, public sharing, or public albums."
+    - "The product surface should tone down existing SaaS purple, heavy shadows, hover scaling, rounded-pill treatments, public hero composition, and blog-card patterns."
+    - "The memory-specific visual direction uses restrained teal/blue-gray accents, neutral surfaces, subtle borders, compact navigation, and reading/writing-friendly spacing."
+    - "All customer-facing memory UI must tolerate English, Portuguese, and Spanish strings, including mobile checks at 375px width."
+    - "Any story that creates or changes UI should include a screen-specific accessibility check."
+
+  screens_to_architect:
+    - "Dedicated memory layout shell"
+    - "Memory profile setup"
+    - "Timeline home with empty, loading, populated, filtered, and no-results states"
+    - "Diary record create/edit"
+    - "Trip/period record create/edit"
+    - "Record detail"
+    - "Timeline filters by date, tag, and location"
+    - "Private media upload/display/protected states"
+    - "Profile/language controls"
+    - "Access-denied and generic error states"
+
+  component_guidance:
+    - "Memory layout shell"
+    - "Timeline month group"
+    - "Memory card"
+    - "Record editor form"
+    - "Memory Highlights list"
+    - "Timeline filter bar"
+    - "Private media uploader and gallery"
+    - "Record detail header and memory reading view"
+    - "Empty and error state panel"
+
+  architecture_focus:
+    - "Translate docs/front-end-spec.md into implementation-ready front-end architecture for Blade, Livewire, Tailwind CSS 4, DaisyUI 5, Alpine.js, and Laravel localization."
+    - "Define Livewire component boundaries and view composition for resources/views/components/layouts/memory.blade.php and resources/views/livewire/memory/*."
+    - "Confirm route/layout integration under /memories/{tenant:uuid} with tenant membership enforcement and profile setup gating."
+    - "Define state ownership between Livewire components and services for timeline filters, editor state, highlights, uploads, language preference, and access-denied behavior."
+    - "Specify private media UI integration with authorized media delivery and protected/unavailable states."
+    - "Define responsive layout strategy, accessibility implementation notes, and EN/PT/ES localization file organization."
+    - "Preserve existing Filament Dashboard responsibilities for billing, account, workspace settings, users, roles, teams, and invitations."
+    - "Keep architecture MVP-realistic for the three-week validation build and avoid new dependencies unless clearly required."
+
+  acceptance_criteria_to_feed_stories:
+    - "The memory route opens in the dedicated memory layout, not public marketing or Filament Dashboard layout."
+    - "Profile setup gates timeline access for users without completed memory profiles."
+    - "The populated timeline is vertical, month-grouped, and ordered by experience date or period start date."
+    - "Timeline empty and no-results states provide direct create/reset actions without album-generation language."
+    - "Record editors prioritize capture speed and keep optional metadata visually secondary."
+    - "Memory Highlights are implemented as an optional list with accessible add/remove/reorder behavior."
+    - "Private media components expose upload, limit, protected, unavailable, and unauthorized states without public URL assumptions."
+    - "Filters remain a lightweight timeline refinement layer, not an admin search/table surface."
+    - "Access-denied states are generic and do not leak record titles, body excerpts, media descriptions, filenames, or tenant-private metadata."
+    - "Customer-facing UI remains usable in English, Portuguese, and Spanish on mobile, tablet, and desktop."
+
+  recommended_command:
+    agent: "/agent aiox-architect"
+    command: "*create-front-end-architecture"
+    reason: "The UX specification is complete; Architect should convert it into front-end architecture and implementation guidance before SM slices stories."
+    alternate_command: "*analyze-project-structure"
+    alternate_reason: "Use first if Architect wants to refresh codebase structure and existing UI patterns before writing the front-end architecture."
+
+  architect_prompt: "Create a front-end architecture for Life Memory Timeline for Missionaries using docs/front-end-spec.md, docs/architecture.md, docs/prd.md, and docs/brief.md as source. Focus on the dedicated authenticated memory layout, Livewire component boundaries, Blade view composition, Tailwind/DaisyUI styling strategy, responsive behavior, accessibility, localization, private media UI states, route/layout integration, profile setup gating, timeline filtering, record editor state, Memory Highlights behavior, and MVP implementation sequence. Do not design Filament CRUD/table screens, public marketing pages, blog-card UI, album-generation UI, social feeds, public sharing, maps, masonry, complex animation, or AI extraction. Preserve tenant/workspace privacy and keep the build realistic for a three-week validation MVP."
+
+  blockers:
+    - "No active story exists yet; front-end architecture should precede SM story slicing."
+    - "docs/front-end-spec.md, docs/prd.md, docs/architecture.md, and related handoffs are untracked or modified in the current worktree."
+    - "The current branch has unrelated dirty files; do not revert them."
+    - "Visual design frames are still TBD; docs/front-end-spec.md is the current low-to-mid fidelity source."
+
+  updated_artifacts:
+    - "docs/front-end-spec.md"
+    - ".aiox/handoffs/20260518T115329-0300-ux-design-expert-to-architect.yaml"
+
+  next_action: "Switch to Architect and run *create-front-end-architecture, or run *analyze-project-structure first if implementation structure needs a fresh architectural scan."
