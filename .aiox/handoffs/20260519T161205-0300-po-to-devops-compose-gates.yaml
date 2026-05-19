@@ -1,0 +1,63 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-19T16:12:05-03:00"
+  from_agent: "po"
+  to_agent: "devops"
+  consumed: true
+  last_command: "po-master-checklist"
+
+  correction_context:
+    correction_id: "PO-CORR-001"
+    priority: "P0"
+    status: "Blocking before Dev implementation"
+    title: "Restore Docker Compose validity so quality gates can run"
+    branch: "feature/pre-configuration"
+
+  source_artifacts:
+    primary:
+      - "compose.yml"
+      - "package.json"
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    supporting:
+      - ".aiox/handoffs/20260519T111826-0300-sm-to-po.yaml"
+
+  finding:
+    summary: "PO master validation found the local Docker Compose project is invalid because laravel.test depends on ngrok while the ngrok service is commented out."
+    evidence:
+      - "Command failed: docker compose -f compose.yml config --quiet"
+      - "Error: service \"laravel.test\" depends on undefined service \"ngrok\": invalid compose project"
+      - "package.json gates lint, typecheck, test depend on docker compose -f compose.yml"
+
+  correction_plan:
+    owner: "@devops"
+    steps:
+      - "Decide whether ngrok is required for the current local/Sail profile."
+      - "If ngrok is optional, remove it from laravel.test depends_on or convert it to a valid optional Compose profile without breaking default gates."
+      - "If ngrok is required, restore the service definition in a way that works without mandatory secrets for normal lint/typecheck/test gates."
+      - "Run docker compose -f compose.yml config --quiet."
+      - "Run the minimum affected gate smoke check after Compose validates."
+      - "Report whether full npm run lint, npm run typecheck, and npm test are ready to run."
+
+  acceptance_criteria:
+    - "docker compose -f compose.yml config --quiet exits 0."
+    - "npm run sail:up --silent can start mysql, redis, and mailpit without requiring ngrok."
+    - "The fix does not introduce a new required external account, secret, or network tunnel for standard local gates."
+    - "No unrelated dirty files are reverted."
+
+  verification_commands:
+    - "docker compose -f compose.yml config --quiet"
+    - "npm run sail:up --silent"
+    - "npm run lint"
+
+  recommended_command:
+    agent: "/agent aiox-devops"
+    command: "Fix PO-CORR-001 from .aiox/handoffs/20260519T161205-0300-po-to-devops-compose-gates.yaml"
+    reason: "DevOps owns local gate readiness and environment/config corrections before implementation starts."
+    alternate_command: "*push"
+    alternate_reason: "Use only after corrections are committed and PO revalidation passes."
+
+  blockers:
+    - "Story 1.1 should not enter Dev until local quality gates can run."
+    - "Current worktree has unrelated dirty files; do not revert changes outside the Compose/gate correction scope."
+
+  next_action: "Switch to DevOps and restore Compose/gate readiness, then return to PO for Story 1.1 revalidation."

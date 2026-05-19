@@ -1,0 +1,65 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-19T16:12:07-03:00"
+  from_agent: "po"
+  to_agent: "architect"
+  consumed: false
+  last_command: "po-master-checklist"
+
+  correction_context:
+    correction_id: "PO-CORR-003"
+    priority: "P1"
+    status: "Should fix before private media, deployment, or validation reporting stories"
+    title: "Harden brownfield rollback, monitoring, and release-readiness guidance"
+    branch: "feature/pre-configuration"
+
+  source_artifacts:
+    primary:
+      - "docs/prd.md"
+      - "docs/architecture.md"
+      - "docs/ui-architecture.md"
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    supporting:
+      - ".aiox/handoffs/20260518T145653-0300-architect-to-sm.yaml"
+
+  finding:
+    summary: "PO master validation found strong brownfield risk identification, but rollback triggers, monitoring detail, and operations readiness remain light for later private media and validation reporting work."
+    current_strengths:
+      - "Tenant/workspace privacy and authorized private media are explicitly required."
+      - "Implementation sequence starts with tenant-safe routing and cross-tenant tests."
+      - "Validation reporting is admin-only and must not expose private record content."
+    gaps:
+      - "Rollback procedures are not defined per risky integration point."
+      - "Monitoring/logging expectations are high-level and not tied to release thresholds."
+      - "Private media and validation reporting stories will need clearer operational checks before tester use."
+
+  correction_plan:
+    owner: "@architect"
+    steps:
+      - "Add concise architecture guidance for rollback and release-readiness by integration area: route shell, migrations, private media, locale, and validation reporting."
+      - "Define monitoring/logging expectations that avoid storing private record content."
+      - "Define minimum rollback triggers or stop conditions for tenant-access failures, media leakage, migration errors, and reporting exposure."
+      - "Keep this as architecture/story guidance only; do not introduce new infrastructure or dependencies without explicit approval."
+      - "Hand updated guidance back to SM so later stories include the relevant checks."
+
+  acceptance_criteria:
+    - "Architecture guidance includes rollback/stop conditions for tenant boundary, media, and reporting risks."
+    - "Monitoring guidance preserves privacy and avoids private record body/title/media leakage."
+    - "No new deployment architecture is introduced for the MVP."
+    - "Later stories can copy concise acceptance or integration verification checks from the guidance."
+
+  verification_commands:
+    - "rg -n \"rollback|stop condition|monitor|logging|private record content|media leakage|tenant boundary\" docs/architecture.md docs/ui-architecture.md"
+
+  recommended_command:
+    agent: "/agent aiox-architect"
+    command: "Address PO-CORR-003 from .aiox/handoffs/20260519T161207-0300-po-to-architect-risk-hardening.yaml"
+    reason: "Architect owns brownfield integration risk, rollback, and operational architecture guidance."
+    alternate_command: "/agent aiox-sm"
+    alternate_reason: "Use after Architect updates guidance so SM can fold the checks into future stories."
+
+  blockers:
+    - "Not blocking Story 1.1 route/layout implementation after P0 corrections pass."
+    - "Should be resolved before private media, reporting, or tester validation stories begin."
+
+  next_action: "Switch to Architect after P0 corrections or in parallel if available; add rollback and monitoring guidance for later MVP stories."

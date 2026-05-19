@@ -26,7 +26,6 @@ services:
             - mysql
             - mailpit
             - redis
-            - ngrok
     mysql:
         image: 'mysql:8.4'
         ports:
@@ -77,6 +76,8 @@ services:
 
     ngrok:
         image: ngrok/ngrok:alpine
+        profiles:
+            - tunnel
         environment:
             NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
         networks:

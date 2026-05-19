@@ -3,7 +3,7 @@ handoff:
   timestamp: "2026-05-18T11:53:29-03:00"
   from_agent: "ux-design-expert"
   to_agent: "architect"
-  consumed: false
+  consumed: true
   last_command: "create-front-end-spec"
 
   story_context:

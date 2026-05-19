@@ -1,0 +1,60 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-19T16:12:08-03:00"
+  from_agent: "po"
+  to_agent: "ux-design-expert"
+  consumed: false
+  last_command: "po-master-checklist"
+
+  correction_context:
+    correction_id: "PO-CORR-004"
+    priority: "P2"
+    status: "Non-blocking for Story 1.1; should complete before rich UI stories"
+    title: "Create low-fidelity visual frames for memory product screens"
+    branch: "feature/pre-configuration"
+
+  source_artifacts:
+    primary:
+      - "docs/front-end-spec.md"
+      - "docs/ui-architecture.md"
+      - "docs/prd.md"
+    supporting:
+      - ".aiox/handoffs/20260518T115329-0300-ux-design-expert-to-architect.yaml"
+
+  finding:
+    summary: "The UX specification is implementation-ready, but the design handoff checklist still has visual design frames marked as TBD."
+    current_strengths:
+      - "User flows are documented."
+      - "Component inventory, accessibility requirements, responsive strategy, performance goals, and design constraints are defined."
+    gap:
+      - "Low-fidelity visual frames are not yet created for the key memory screens."
+
+  correction_plan:
+    owner: "@ux-design-expert"
+    steps:
+      - "Create low-fidelity visual frames for the dedicated memory layout, profile setup, timeline home, diary editor, trip/period editor, record detail, filters, private media states, and denied states."
+      - "Preserve the existing UX constraints: no public marketing hero, no Filament CRUD, no blog-card timeline, no album language, no social feed, no maps, no masonry, and no complex animation."
+      - "Keep frames EN/PT/ES tolerant and compatible with the Livewire/Blade architecture."
+      - "Update the UX handoff/checklist state after frames are available."
+
+  acceptance_criteria:
+    - "Frames map to the screens already listed in docs/front-end-spec.md."
+    - "Frames preserve memory-first, private-first, writing-first UX."
+    - "Frames do not expand MVP scope or imply post-MVP capabilities."
+    - "Frames are usable by SM/Dev for later UI-rich stories."
+
+  verification_commands:
+    - "rg -n \"Visual design frames created|Design file reference|low-fidelity visual frames|TBD\" docs/front-end-spec.md"
+
+  recommended_command:
+    agent: "/agent aiox-ux-design-expert"
+    command: "Address PO-CORR-004 from .aiox/handoffs/20260519T161208-0300-po-to-ux-visual-frames.yaml"
+    reason: "UX owns visual frames and design handoff readiness before richer UI stories."
+    alternate_command: "/agent aiox-sm"
+    alternate_reason: "Use if SM needs to continue with Story 1.1 first; frames are not blocking the route/layout shell."
+
+  blockers:
+    - "Not blocking Story 1.1 because the shell can use the written UX/UI architecture guidance."
+    - "Should be completed before detailed timeline/editor/media UI implementation stories."
+
+  next_action: "Schedule UX visual frames after P0 corrections or before Story 1.3+ UI-heavy work."

@@ -2,18 +2,18 @@ status:
   branch: feature/pre-configuration
   modifiedFiles:
     - .aiox/project-status.yaml
-    - .aiox-core/development/agents/skill-standardizer.md
-    - .aiox-core/development/checklists/skill-standardization-checklist.md
-    - .aiox-core/development/scripts/skill-standards-auditor.js
-    - .aiox-core/development/scripts/skill-standards-normalizer.js
-  modifiedFilesTotalCount: 12
+    - .mcp.json
+    - compose.yml
+    - composer.lock
+    - docker/8.4/Dockerfile
+  modifiedFilesTotalCount: 15
   recentCommits:
-    - 'chore: add AIOX pre-configuration'
-    - Merge remote-tracking branch 'upstream/main' into update-framework
+    - 'docs: add missionary journal project brief draft'
+    - 'chore: add AIOX skill standardizer setup'
   currentEpic: null
   currentStory: null
-  lastUpdate: '2026-05-16T00:19:36.254Z'
+  lastUpdate: '2026-05-18T13:28:09.179Z'
   isGitRepo: true
-timestamp: 1778890776256
+timestamp: 1779110889186
 ttl: 60
-gitFingerprint: 1777701432242.818:1778890692010.583
+gitFingerprint: null

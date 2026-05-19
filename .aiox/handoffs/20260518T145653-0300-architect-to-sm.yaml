@@ -1,0 +1,85 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-18T14:56:53-03:00"
+  from_agent: "architect"
+  to_agent: "sm"
+  consumed: true
+  last_command: "create-front-end-architecture"
+
+  story_context:
+    story_id: ""
+    story_path: ""
+    story_status: "No active story found"
+    current_task: "Create implementation stories from completed PRD, brownfield architecture, UX specification, and frontend architecture"
+    branch: "feature/pre-configuration"
+
+  source_artifacts:
+    primary:
+      - "docs/prd.md"
+      - "docs/architecture.md"
+      - "docs/front-end-spec.md"
+      - "docs/ui-architecture.md"
+    supporting:
+      - "docs/brief.md"
+      - ".aiox/handoffs/20260518T115329-0300-ux-design-expert-to-architect.yaml"
+
+  architecture_status:
+    readiness: "Ready for SM story preparation"
+    summary: "The frontend architecture defines the dedicated authenticated memory product surface under /memories/{tenant:uuid}, using Laravel routes, Livewire 4 class-based components, Blade views, Tailwind CSS 4, DaisyUI 5, Laravel localization, server-side state, authorized media delivery, PHPUnit/Livewire tests, and clear no-admin-table/no-marketing-layout customer UI boundaries."
+
+  key_decisions:
+    - "No new frontend starter, SPA, JSON API client, or JavaScript state store should be introduced for the MVP."
+    - "Memory customer UI uses resources/views/components/layouts/memory.blade.php and custom app/Livewire/Memory components."
+    - "Filament remains for billing, account, workspace settings, users, roles, teams, invitations, security, and admin/reporting surfaces only."
+    - "Tenant, record, tag, highlight, and media access must be re-scoped server-side after route binding."
+    - "Private memory photos must use authorized media delivery, not public storage paths."
+    - "Location filters and private free-text state should not be URL-persisted by default."
+    - "UI strings support English, Portuguese, and Spanish, while user-generated content is never translated."
+    - "The memory visual layer should use neutral hierarchy with restrained teal/blue-gray accents and no dominant SaaS purple, marketing hero, blog-card, album, or admin-table treatment."
+    - "Accessibility checks are required story acceptance checks; they are manual or browser-assisted unless a story adds automation."
+
+  recommended_story_sequence:
+    - "Tenant-safe memory route group and dedicated memory layout shell."
+    - "Memory profile setup gate with preferred locale."
+    - "Timeline shell with empty state and tenant boundary tests."
+    - "Diary record creation and editing without photo complexity."
+    - "Record detail and month-grouped timeline cards."
+    - "Trip/period record editor."
+    - "Private media upload and authorized media delivery."
+    - "Timeline filters by date, tag, and location."
+    - "EN/PT/ES UI localization and mobile layout tolerance."
+    - "Admin-only validation reporting or runbook support."
+
+  acceptance_criteria_to_feed_stories:
+    - "The memory route opens in the dedicated memory layout, not public marketing or Filament Dashboard chrome."
+    - "A user without completed memory profile sees setup before timeline access."
+    - "Timeline/editor/detail screens are custom Livewire/Blade UI, not Filament Resources or admin tables."
+    - "Tenant membership and policies prevent cross-tenant record, media, tag, and highlight access before private content reaches views."
+    - "Timeline remains vertical, month-grouped, and ordered by experience date or period start date."
+    - "Record editors remain writing-first and keep optional metadata visually secondary."
+    - "Memory Highlights are an optional ordered dynamic list, not AI classification or inline annotation."
+    - "Private media states never imply public URLs, public albums, or public sharing."
+    - "Denied states do not leak private record titles, body excerpts, media descriptions, filenames, tenant-private metadata, or storage details."
+    - "Every UI story includes EN/PT/ES layout tolerance and a screen-specific accessibility check."
+    - "Every record/media/story route includes direct URL tests for authorization and cross-tenant denial where relevant."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*draft"
+    reason: "Frontend architecture is complete; SM should turn the PRD, brownfield architecture, UX spec, and frontend architecture into executable implementation stories."
+    alternate_command: "*create-next-story"
+    alternate_reason: "Use if the local SM workflow names story drafting through create-next-story instead of draft."
+
+  sm_prompt: "Create the first implementation stories for Life Memory Timeline for Missionaries using docs/prd.md, docs/architecture.md, docs/front-end-spec.md, and docs/ui-architecture.md. Start with tenant-safe /memories/{tenant:uuid} routing and the dedicated memory layout shell, then profile setup, timeline shell, diary record creation/editing, and tenant boundary tests before private media, filters, localization, or reporting. Preserve custom Livewire/Blade memory UI, no Filament customer CRUD, no public marketing/blog-card UI, no album language, tenant-scoped privacy, authorized private media delivery, EN/PT/ES UI tolerance, and screen-specific accessibility checks."
+
+  blockers:
+    - "No active story exists yet; SM story preparation is the next required step."
+    - "Visual design frames are still TBD; docs/front-end-spec.md and docs/ui-architecture.md are the current implementation sources."
+    - "The current worktree has unrelated dirty files; do not revert them."
+
+  updated_artifacts:
+    - "docs/ui-architecture.md"
+    - ".aiox/handoffs/20260518T115329-0300-ux-design-expert-to-architect.yaml"
+    - ".aiox/handoffs/20260518T145653-0300-architect-to-sm.yaml"
+
+  next_action: "Switch to Scrum Master and draft the first implementation story for tenant-safe memory routing and the dedicated memory layout shell."

@@ -2,6 +2,10 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "lint": "vendor/bin/sail up -d laravel.test && vendor/bin/sail pint --dirty --format=agent",
+        "typecheck": "vendor/bin/sail up -d laravel.test && vendor/bin/sail bin phpstan analyse --memory-limit=1G",
+        "test": "vendor/bin/sail up -d laravel.test && vendor/bin/sail exec -T -e APP_ENV=testing -e DB_HOST=mysql laravel.test php artisan test --compact",
+        "sail:up": "vendor/bin/sail up -d mysql redis mailpit",
         "dev": "vite",
         "build": "vite build"
     },

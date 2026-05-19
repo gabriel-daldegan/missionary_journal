@@ -1,0 +1,73 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-19T16:12:06-03:00"
+  from_agent: "po"
+  to_agent: "sm"
+  consumed: false
+  last_command: "po-master-checklist"
+
+  correction_context:
+    correction_id: "PO-CORR-002"
+    priority: "P0"
+    status: "Blocking before Dev implementation"
+    story_id: "1.1"
+    story_path: "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    title: "Fix Story 1.1 source traceability anchors"
+    branch: "feature/pre-configuration"
+
+  source_artifacts:
+    primary:
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+      - "docs/prd.md"
+      - "docs/architecture.md"
+      - "docs/ui-architecture.md"
+      - "docs/front-end-spec.md"
+    supporting:
+      - ".aiox/handoffs/20260519T111826-0300-sm-to-po.yaml"
+
+  finding:
+    summary: "Story 1.1 is actionable, but several source references use anchors that do not exist in the current documents."
+    broken_reference_examples:
+      - "docs/architecture.md#memory-domain-routing"
+      - "docs/ui-architecture.md#route-structure"
+      - "docs/ui-architecture.md#testing-matrix"
+      - "docs/ui-architecture.md#non-negotiable-implementation-rules"
+      - "docs/ui-architecture.md#component-boundaries"
+      - "docs/architecture.md#ui-architecture-rules"
+      - "docs/ui-architecture.md#blade-tailwind-and-daisyui-implementation-standards"
+      - "docs/ui-architecture.md#technology-stack"
+      - "docs/ui-architecture.md#quick-reference"
+      - "docs/ui-architecture.md#testing-best-practices"
+
+  correction_plan:
+    owner: "@sm"
+    steps:
+      - "Update Story 1.1 source references to match real headings or stable file/section labels in the current docs."
+      - "Preserve the story scope: route shell, tenant membership, dedicated layout, minimal Livewire shell, existing SaaSykit surface preservation, and focused PHPUnit coverage."
+      - "Do not add profile setup, records, media, filters, localization tables, social access, or album behavior."
+      - "Keep Jira metadata MIS-1/MIS-2 unchanged unless PM-tool sync requires a refresh."
+      - "Run a targeted grep check for remaining nonexistent anchor labels."
+      - "Return to PO for *validate-story-draft after corrections."
+
+  acceptance_criteria:
+    - "Story 1.1 references only real current source sections or explicit file paths."
+    - "Acceptance Criteria and Integration Verification remain unchanged in substance."
+    - "Tasks remain implementation-ready and bounded to Story 1.1."
+    - "CodeRabbit disabled status remains explicit because core-config disables it."
+
+  verification_commands:
+    - "rg -n \"#memory-domain-routing|#route-structure|#testing-matrix|#non-negotiable-implementation-rules|#component-boundaries|#ui-architecture-rules|#blade-tailwind-and-daisyui-implementation-standards|#technology-stack|#quick-reference|#testing-best-practices\" docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    - "rg -n \"\\[Source:\" docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "Fix PO-CORR-002 from .aiox/handoffs/20260519T161206-0300-po-to-sm-story-traceability.yaml"
+    reason: "SM owns story draft quality and story-source traceability before Dev starts."
+    alternate_command: "*validate-story-draft docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    alternate_reason: "Use after SM fixes references, when control returns to PO."
+
+  blockers:
+    - "Story 1.1 should not be assigned to Dev while source traceability points to nonexistent anchors."
+    - "The story file is untracked in the current worktree; keep the correction focused and do not bundle unrelated changes."
+
+  next_action: "Switch to SM and repair Story 1.1 source traceability, then return to PO validation."
