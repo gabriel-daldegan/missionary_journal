@@ -3,7 +3,7 @@ handoff:
   timestamp: "2026-05-19T16:12:06-03:00"
   from_agent: "po"
   to_agent: "sm"
-  consumed: false
+  consumed: true
   last_command: "po-master-checklist"
 
   correction_context:
