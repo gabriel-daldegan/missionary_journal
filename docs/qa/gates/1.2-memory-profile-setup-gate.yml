@@ -1,0 +1,61 @@
+schema: 1
+story: '1.2'
+story_title: 'Memory Profile Setup Gate'
+gate: CONCERNS
+status_reason: 'Story-scoped implementation, focused tests, auth regression tests, lint, route inspection, and focused PHPStan passed. Repository-wide `npm run typecheck`, remaining global `npm test` failure, and local config/doc findings are outside Story 1.2 and explicitly owner-waived for this publication while permanent DevOps repair remains tracked.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-05-23T19:35:10-03:00'
+quality_score: 90
+expires: '2026-06-06T14:18:07-03:00'
+
+top_issues:
+  - id: ENV-001
+    severity: medium
+    finding: 'Repository-wide quality scripts are not fully reliable: `npm run typecheck` fails on legacy PHPStan issues outside Story 1.2 after the transient cache permissions are repaired, and the global `npm test -- --stop-on-failure` run now reaches application tests but fails outside Story 1.2 when the public pricing plan component renders a usage-based plan without a meter.'
+    suggested_action: 'Repair the PHPStan baseline/scope policy and harden or isolate the public pricing plan test data path; until then, use the approved temporary workaround documented in this gate for Story 1.2 publication only.'
+    suggested_owner: devops
+
+waiver:
+  active: true
+  approved_by: project_owner
+  approved_at: '2026-05-23T17:36:34-03:00'
+  reason: 'Owner approved waiving blockers that are outside Stories 1.1 and 1.2. In-scope Story 1.2 CodeRabbit findings were fixed before recording this waiver.'
+  scope:
+    - 'Repository-wide PHPStan debt outside Story 1.2 files.'
+    - 'Global npm test failure in public pricing plan rendering outside Story 1.2 implementation.'
+    - 'Local MCP/Codex config and synchronized skill/documentation findings outside Story 1.2 behavior.'
+
+evidence:
+  tests_reviewed: 23
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5]
+    ac_gaps: []
+    integration_covered: [1, 2, 3]
+    integration_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Memory product access remains behind auth, verified email, tenant UUID route binding, and tenant membership checks; non-members receive generic not-found responses and Livewire save re-checks tenant access.'
+  performance:
+    status: PASS
+    notes: 'The profile gate adds a small profile completion check to memory timeline routes and does not introduce broad queries, media work, or client-side stores.'
+  reliability:
+    status: CONCERNS
+    notes: 'Story-focused tests pass, but repo-wide typecheck and test scripts are still unreliable in the default environment.'
+  maintainability:
+    status: PASS
+    notes: 'Implementation follows existing Laravel/SaaSykit structure with a service-owned profile transition, class-based Livewire screen, middleware alias, translations, and PHPUnit feature coverage.'
+
+recommendations:
+  immediate:
+    - action: 'Fix or formally waive repository-wide `npm run typecheck` and `npm test` failures before PR/release enforcement.'
+      refs:
+        - 'package.json'
+        - 'phpstan.neon'
+        - 'app/Services/PaymentProviders/Stripe/StripeProvider.php'
+  future:
+    - action: 'Consider adding a small service-level test for MemoryProfileService normalization and completion semantics when additional profile settings are introduced.'
+      refs:
+        - 'app/Services/MemoryProfileService.php'

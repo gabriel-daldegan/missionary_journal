@@ -1,0 +1,55 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T10:53:04-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "*draft"
+
+  execution_context:
+    source_handoff: ".aiox/handoffs/20260523T094742-0300-devops-to-sm-story-1-2-ready-to-draft.yaml"
+    branch: "feature/story-1-2-memory-profile-setup-gate-draft"
+    base: "main"
+    note: "Primary checkout is now clean and on a fresh Story 1.2 draft branch, so SM drafted locally instead of using the stale /tmp worktree from the older handoff."
+
+  created_story:
+    story_id: "1.2"
+    title: "Memory Profile Setup Gate"
+    path: "docs/stories/1.2.memory-profile-setup-gate.story.md"
+    status: "Draft"
+    jira:
+      project_key: "MIS"
+      parent_epic: "MIS-1"
+      previous_story: "MIS-2"
+      issue_key: ""
+      sync_note: "Local draft only; Jira child story was not created or synced during SM drafting."
+
+  source_artifacts:
+    - "docs/prd.md#story-12-memory-profile-setup-gate"
+    - "docs/architecture.md#memory_profiles"
+    - "docs/architecture.md#service-architecture"
+    - "docs/architecture.md#localization-architecture"
+    - "docs/ui-architecture.md#route-configuration"
+    - "docs/ui-architecture.md#route-responsibilities"
+    - "docs/ui-architecture.md#redirect-and-denial-behavior"
+    - "docs/framework/coding-standards.md"
+    - "docs/framework/source-tree.md"
+    - "docs/framework/tech-stack.md"
+    - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    - "docs/qa/gates/1.1-tenant-safe-memory-route-and-layout-shell.yml"
+
+  validation_summary:
+    story_draft_checklist: "READY"
+    coderabbit_integration: "disabled in core-config.yaml"
+    code_intelligence: "unavailable"
+    notes:
+      - "Story 1.1 file remains Ready for Review, but DevOps handoff records Story 1.1 as merged and Story 1.2 as ready to draft."
+      - "Story 1.2 is scoped to memory profile setup, locale preference, route gating, and focused tests."
+      - "No implementation code was created by SM."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.2.memory-profile-setup-gate.story.md"
+    reason: "PO should validate the Story 1.2 draft before Dev implementation starts."
+
+  next_action: "Switch to PO and validate the Story 1.2 draft."

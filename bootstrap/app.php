@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\BlockedUser;
+use App\Http\Middleware\EnsureMemoryProfileComplete;
 use App\Http\Middleware\EnsureTenantMember;
 use App\Http\Middleware\Sitemapped;
 use App\Http\Middleware\TrackCouponCode;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
+            'memory.profile.complete' => EnsureMemoryProfileComplete::class,
             'sitemapped' => Sitemapped::class,
             'tenant.member' => EnsureTenantMember::class,
             'role' => RoleMiddleware::class,

@@ -9,12 +9,17 @@ use App\Http\Controllers\ProductCheckoutController;
 use App\Http\Controllers\RoadmapController;
 use App\Http\Controllers\SubscriptionCheckoutController;
 use App\Http\Controllers\SubscriptionController;
+use App\Livewire\Memory\MemoryProfileSetup;
 use App\Livewire\Memory\MemoryTimeline;
+use App\Models\Tenant;
+use App\Models\User;
+use App\Services\MemoryProfileService;
 use App\Services\PlanService;
 use App\Services\SessionService;
 use App\Services\TenantCreationService;
 use App\Services\UserDashboardService;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -44,7 +49,30 @@ Route::middleware(['auth', 'verified', 'tenant.member'])
     ->prefix('/memories/{tenant:uuid}')
     ->name('memories.')
     ->group(function () {
-        Route::livewire('/', MemoryTimeline::class)->name('timeline');
+        Route::get('/', function (Tenant $tenant, MemoryProfileService $memoryProfileService): RedirectResponse {
+            /** @var User|null $user */
+            $user = Auth::user();
+
+            if ($user === null) {
+                abort(404);
+            }
+
+            if ($memoryProfileService->isComplete($user)) {
+                return redirect()->route('memories.timeline', [
+                    'tenant' => $tenant,
+                ]);
+            }
+
+            return redirect()->route('memories.profile.setup', [
+                'tenant' => $tenant,
+            ]);
+        })->name('entry');
+
+        Route::livewire('/profile/setup', MemoryProfileSetup::class)->name('profile.setup');
+
+        Route::middleware('memory.profile.complete')->group(function () {
+            Route::livewire('/timeline', MemoryTimeline::class)->name('timeline');
+        });
     });
 
 Auth::routes();
