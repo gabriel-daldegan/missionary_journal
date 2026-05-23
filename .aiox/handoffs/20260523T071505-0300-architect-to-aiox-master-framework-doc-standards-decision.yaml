@@ -1,0 +1,121 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T07:15:05-03:00"
+  from_agent: "architect"
+  to_agent: "aiox-master"
+  consumed: true
+  last_command: "analyze-handoff-AIOX-DOCS-001A"
+
+  correction_context:
+    correction_id: "AIOX-DOCS-001A"
+    priority: "P1"
+    status: "Architecture decision complete; ready for AIOX Master implementation"
+    title: "Canonical Dev context standard for framework docs"
+    branch: "feature/story-1-1-tenant-safe-memory-route-layout-shell"
+
+  consumed_handoffs:
+    - ".aiox/handoffs/20260523T070954-0300-dev-to-architect-framework-doc-standards.yaml"
+
+  source_artifacts:
+    primary:
+      - ".aiox-core/core-config.yaml"
+      - ".aiox-core/data/agent-config-requirements.yaml"
+      - "docs/architecture.md"
+      - "docs/ui-architecture.md"
+    supporting:
+      - ".aiox-core/development/tasks/shard-doc.md"
+      - ".aiox-core/development/tasks/setup-project-docs.md"
+      - ".aiox/handoffs/20260523T070953-0300-dev-to-aiox-master-framework-docs-correction.yaml"
+
+  architecture_decision:
+    decision: "Use docs/framework/*.md as the canonical lightweight Dev context layer."
+    rationale:
+      - ".aiox-core/core-config.yaml already declares frameworkDocsLocation as docs/framework and devLoadAlwaysFiles as docs/framework/coding-standards.md, tech-stack.md, and source-tree.md."
+      - ".aiox-core/data/agent-config-requirements.yaml treats those three files as high-priority, non-lazy context for Dev and related agents."
+      - "Loading full docs/architecture.md and docs/ui-architecture.md on every Dev activation would be heavier and would violate the intended lightweight Dev context boundary."
+      - "The existing monolithic docs remain the richer architecture/product record; framework shards should summarize and point back to their source sections."
+    rejected_alternative:
+      option: "Point devLoadAlwaysFiles directly to docs/architecture.md and docs/ui-architecture.md."
+      reason: "This would make Dev activation too broad and less stable, and it would diverge from the active frameworkDocsLocation and agent-config-requirements contracts."
+
+  canonical_content_contract:
+    docs/framework/tech-stack.md:
+      purpose: "Concise runtime, framework, UI, build, testing, and local-development stack for implementation agents."
+      required_sources:
+        - "docs/ui-architecture.md#frontend-tech-stack"
+        - "docs/architecture.md#existing-project-analysis"
+        - "composer.json"
+        - "package.json"
+      required_content:
+        - "Laravel 13, PHP 8.4, Livewire 4, Blade, Alpine.js 3, Tailwind CSS 4, DaisyUI 5, Filament 5, Vite 7."
+        - "SaaSykit tenancy reuse, Spatie Media Library, Spatie Permission, PHPUnit 11, Larastan/PHPStan, Pint, Sail/Docker Compose."
+        - "Explicit no-SPA, no client-side domain store, and no new frontend runtime unless a future architecture decision approves it."
+
+    docs/framework/coding-standards.md:
+      purpose: "Implementation rules Dev must load before touching stories."
+      required_sources:
+        - "docs/ui-architecture.md#critical-coding-rules"
+        - "docs/ui-architecture.md#component-boundary-rules"
+        - "docs/ui-architecture.md#tailwind-patterns"
+        - "docs/architecture.md#architecture-decision-summary"
+        - "AGENTS.md Laravel Boost guidelines from the workspace prompt"
+      required_content:
+        - "Use dedicated memory layout for memory routes."
+        - "Keep Filament out of customer-facing memory workflows."
+        - "Enforce tenant membership and policy/service scopes before rendering private content."
+        - "Re-scope nested route-bound models to the route tenant."
+        - "Use Livewire/Blade server-driven UI, Laravel named routes, translation keys, Form Requests where controllers validate, policies/gates for authorization, PHPUnit tests, and Pint for PHP formatting."
+        - "Do not introduce album/admin-table/marketing-page framing for the memory product."
+
+    docs/framework/source-tree.md:
+      purpose: "Stable file ownership and expected locations for Dev and SM story traceability."
+      required_sources:
+        - "docs/ui-architecture.md#project-structure"
+        - "docs/ui-architecture.md#primary-files-and-directories"
+        - "docs/architecture.md#product-routing-and-ui-architecture"
+      required_content:
+        - "Existing Laravel/SaaSykit directories that remain reused: app/Models, app/Services, app/Policies, app/Filament, app/Livewire, resources/views, routes, tests."
+        - "Memory route and UI locations: routes/web.php, app/Http/Middleware/EnsureTenantMember.php, app/Livewire/Memory, resources/views/components/layouts/memory.blade.php, resources/views/livewire/memory."
+        - "Memory service, policy, translation, and test locations."
+        - "A short governance note: docs/framework shards are Dev-context summaries derived from docs/architecture.md and docs/ui-architecture.md; update source docs and shards together when architecture changes."
+
+  implementation_plan:
+    owner: "@aiox-master"
+    steps:
+      - "Create docs/framework/ if missing."
+      - "Create docs/framework/tech-stack.md, docs/framework/coding-standards.md, and docs/framework/source-tree.md from the required sources above."
+      - "Keep each shard concise and implementation-focused; do not copy the full architecture documents."
+      - "Keep .aiox-core/core-config.yaml devLoadAlwaysFiles pointing to docs/framework/*.md."
+      - "Optionally revise devLoadAlwaysFilesFallback to useful live fallbacks only if the current Portuguese fallback files remain absent."
+      - "Do not alter current Story 1.1 implementation files."
+      - "After implementation, hand off to SM only if story source anchors need reconciliation."
+
+  acceptance_criteria:
+    - "The three docs/framework files exist and parse as Markdown."
+    - "Dev activation no longer reports missing docs/framework/coding-standards.md, docs/framework/tech-stack.md, or docs/framework/source-tree.md."
+    - "The shards preserve the brownfield Laravel/SaaSykit/Livewire/Blade/Tailwind/Filament decisions without adding product scope."
+    - "The root architecture docs remain the richer source of architectural decisions."
+    - "Current Story 1.1 implementation files are not mixed into this correction."
+
+  verification_commands:
+    - "test -f docs/framework/coding-standards.md"
+    - "test -f docs/framework/tech-stack.md"
+    - "test -f docs/framework/source-tree.md"
+    - "node .aiox-core/development/scripts/generate-greeting.js dev"
+    - "npm run validate:agents"
+    - "npm run validate:structure"
+    - "git diff --check .aiox-core/core-config.yaml docs .aiox/handoffs"
+
+  recommended_command:
+    agent: "/agent aiox-master"
+    command: "Execute AIOX-DOCS-001B using .aiox/handoffs/20260523T071505-0300-architect-to-aiox-master-framework-doc-standards-decision.yaml"
+    reason: "AIOX Master owns framework workflow/config corrections and should apply the decided docs/framework standard."
+    alternate_command: "/agent aiox-sm"
+    alternate_reason: "Use after AIOX Master if Story 1.1 citations need traceability repair."
+
+  blockers:
+    - "Do not switch Dev context to monolithic docs unless this architecture decision is explicitly superseded."
+    - "Do not create new Laravel dependencies or product requirements during docs/framework extraction."
+    - "Current branch has active Story 1.1 implementation changes; keep this correction scoped to docs/config/handoffs."
+
+  next_action: "Switch to AIOX Master and create the docs/framework shards from the existing architecture sources, then validate Dev activation."

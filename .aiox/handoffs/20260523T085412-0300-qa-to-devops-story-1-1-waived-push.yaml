@@ -1,0 +1,43 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T08:54:12-03:00"
+  from_agent: "qa"
+  to_agent: "devops"
+  consumed: true
+  last_command: "qa-review-story"
+
+  story_context:
+    story_id: "1.1"
+    story_path: "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    status: "Ready for Review"
+    title: "Tenant-Safe Memory Route and Layout Shell"
+    branch: "feature/story-1-1-tenant-safe-memory-route-layout-shell"
+    jira_issue: "MIS-2"
+    parent_epic: "MIS-1"
+
+  decision:
+    gate: "WAIVED"
+    summary: "Story 1.1 is functionally complete and the remaining repo-wide typecheck/test failures were explicitly approved as external to the story."
+    approver: "User"
+
+  qa_findings:
+    - "Tenant-scoped `/memories/{tenant:uuid}` route group uses auth, verified, and tenant.member middleware."
+    - "Dedicated memory layout avoids public marketing footer/hero treatment and Filament dashboard chrome."
+    - "Focused PHPUnit coverage passes in Sail with 5 tests and 23 assertions."
+    - "Repository-wide `npm run typecheck` timed out in PHPStan parallel execution."
+    - "Repository-wide `npm test` emitted repeated failures and was terminated after confirming the suite was already red."
+
+  files_touched_by_qa:
+    - "bootstrap/app.php"
+    - "docs/qa/gates/1.1-tenant-safe-memory-route-and-layout-shell.yml"
+    - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+
+  recommended_command:
+    agent: "/agent aiox-devops"
+    command: "*push"
+    reason: "QA gate is waived by approver and the story is ready for publication workflow."
+    alternate_command: "*create-pr"
+    alternate_reason: "Use if the branch is not yet published and DevOps should open the PR instead."
+
+  blockers: []
+  next_action: "Switch to DevOps and publish the waived Story 1.1 branch."

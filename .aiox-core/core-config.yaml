@@ -41,9 +41,8 @@ devLoadAlwaysFiles:
   - docs/framework/tech-stack.md
   - docs/framework/source-tree.md
 devLoadAlwaysFilesFallback:
-  - docs/architecture/padroes-de-codigo.md
-  - docs/architecture/pilha-tecnologica.md
-  - docs/architecture/arvore-de-origem.md
+  - docs/architecture.md
+  - docs/ui-architecture.md
 devDebugLog: .ai/debug-log.md
 devStoryLocation: docs/stories
 slashPrefix: AIOX

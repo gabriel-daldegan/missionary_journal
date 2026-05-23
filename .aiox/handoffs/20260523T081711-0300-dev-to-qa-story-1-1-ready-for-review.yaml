@@ -1,0 +1,75 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T08:17:11-03:00"
+  from_agent: "dev"
+  to_agent: "qa"
+  consumed: true
+  last_command: "story-1-1-dev-completion"
+
+  story_context:
+    story_id: "1.1"
+    story_path: "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    status: "Ready for Review"
+    title: "Tenant-Safe Memory Route and Layout Shell"
+    branch: "feature/story-1-1-tenant-safe-memory-route-layout-shell"
+    jira_issue: "MIS-2"
+    parent_epic: "MIS-1"
+
+  handoff_reason:
+    summary: "Story 1.1 development is complete and ready for quality review. All story tasks/subtasks are checked, implementation artifacts are listed in the Dev Agent Record, and focused story validation passed in the Sail-backed environment."
+    qa_status: "QA Results is intentionally empty and should be populated by the reviewing agent."
+    quality_gate_note: "The story executor assignment lists @architect as quality gate; this QA handoff is created because the user requested Dev-to-QA handoff for the completed development task."
+
+  implementation_result:
+    summary: "Implemented tenant-scoped memory route shell, membership middleware, dedicated memory layout, minimal Livewire shell, and focused feature coverage without adding out-of-scope profile persistence, records, media, filters, localization tables, SPA router, JSON API client, or JavaScript store."
+    completed_scope:
+      - "Authenticated `/memories/{tenant:uuid}` route group with `memories.timeline` route name."
+      - "Tenant membership enforcement via `EnsureTenantMember` and existing `User::canAccessTenant()` SaaSykit primitive."
+      - "Dedicated authenticated memory layout with workspace context, memory navigation, profile/language access placeholder, and dashboard escape path."
+      - "Minimal class-based Livewire memory shell rendered through `components.layouts.memory`."
+      - "Focused PHPUnit coverage for guest redirect, member access, non-member denial, layout/chrome boundaries, and existing surface regressions."
+
+  changed_artifacts:
+    implementation:
+      - "app/Http/Middleware/EnsureTenantMember.php"
+      - "app/Livewire/Memory/MemoryTimeline.php"
+      - "bootstrap/app.php"
+      - "resources/views/components/layouts/memory.blade.php"
+      - "resources/views/livewire/memory/memory-timeline.blade.php"
+      - "routes/web.php"
+      - "tests/Feature/Memory/MemoryRouteAccessTest.php"
+    story_record:
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    supporting_context:
+      - "docs/framework/coding-standards.md"
+      - "docs/framework/source-tree.md"
+      - "docs/framework/tech-stack.md"
+
+  verification:
+    passed:
+      - "docker compose exec -u sail -e DB_CONNECTION=mysql -e DB_HOST=mysql -e DB_DATABASE=testing -e DB_USERNAME=sail_missionaryjournal -e DB_PASSWORD=password_missionaryjournal laravel.test php artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php"
+      - "vendor/bin/pint --dirty --format agent"
+      - "php artisan route:list --name=memories"
+      - "docker compose exec -u sail laravel.test ./vendor/bin/phpstan analyse app/Http/Middleware/EnsureTenantMember.php app/Livewire/Memory/MemoryTimeline.php tests/Feature/Memory/MemoryRouteAccessTest.php --memory-limit=1G"
+      - "npm run lint"
+      - "git diff --check"
+    known_non_blocking_failures:
+      - "`npm run typecheck` failed on existing global PHPStan issues outside Story 1.1 scope: 387 errors across Filament resources/services."
+      - "`npm test` failed on existing test environment configuration: MySQL rejected `root` without password for `saasykit_tenancy_test`."
+
+  qa_review_focus:
+    - "Confirm the memory route is tenant-safe and cannot leak tenant-private details to non-members."
+    - "Confirm the dedicated memory layout avoids public marketing footer/hero treatment, Filament chrome, and table-first dashboard structure."
+    - "Confirm existing SaaSykit public, auth, dashboard, account, billing, users, roles, teams, and invitation surfaces remain preserved."
+    - "Confirm Story 1.1 did not introduce out-of-scope profile setup persistence, timeline records, media handling, filters, localization tables, social access, or album-facing behavior."
+    - "Decide whether the non-blocking global gate failures require separate backlog/devops follow-up before merge."
+
+  recommended_command:
+    agent: "/agent aiox-qa"
+    command: "Review Story 1.1 from .aiox/handoffs/20260523T081711-0300-dev-to-qa-story-1-1-ready-for-review.yaml"
+    reason: "QA should review the completed implementation and populate the story QA Results section."
+    alternate_agent: "/agent aiox-architect"
+    alternate_reason: "Use if enforcing the story's declared @architect quality gate before QA signoff."
+
+  blockers: []
+  next_action: "Switch to QA, consume this handoff, review Story 1.1, and populate QA Results."
