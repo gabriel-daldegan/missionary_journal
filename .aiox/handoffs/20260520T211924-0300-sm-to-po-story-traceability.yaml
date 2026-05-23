@@ -1,0 +1,72 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-20T21:19:24-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "fix-po-corr-002"
+
+  correction_context:
+    correction_id: "PO-CORR-002"
+    priority: "P0"
+    status: "Completed by SM"
+    story_id: "1.1"
+    story_path: "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    title: "Tenant-Safe Memory Route and Layout Shell"
+    branch: "feature/pre-configuration"
+
+  source_artifacts:
+    primary:
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+      - "docs/prd.md"
+      - "docs/architecture.md"
+      - "docs/ui-architecture.md"
+      - "docs/front-end-spec.md"
+    supporting:
+      - ".aiox/handoffs/20260519T161206-0300-po-to-sm-story-traceability.yaml"
+
+  correction_result:
+    summary: "Story 1.1 source traceability anchors were updated to current document headings while preserving acceptance criteria, integration verification, scope boundaries, Jira metadata, and CodeRabbit disabled status."
+    preserved_scope:
+      - "Route shell, tenant membership, dedicated layout, minimal Livewire shell, existing SaaSykit surface preservation, and focused PHPUnit coverage remain unchanged."
+      - "No profile setup, records, media, filters, localization tables, social access, or album behavior was added."
+      - "Jira metadata MIS-1/MIS-2 remains unchanged."
+    updated_references:
+      - "docs/architecture.md#product-routing-and-ui-architecture"
+      - "docs/ui-architecture.md#route-configuration"
+      - "docs/ui-architecture.md#route-responsibilities"
+      - "docs/ui-architecture.md#required-coverage-by-story-type"
+      - "docs/ui-architecture.md#critical-coding-rules"
+      - "docs/ui-architecture.md#component-boundary-rules"
+      - "docs/ui-architecture.md#tailwind-patterns"
+      - "docs/ui-architecture.md#frontend-tech-stack"
+      - "docs/ui-architecture.md#primary-files-and-directories"
+      - "docs/ui-architecture.md#testing-requirements"
+
+  verification:
+    commands:
+      - "rg -n \"#memory-domain-routing|#route-structure|#testing-matrix|#non-negotiable-implementation-rules|#component-boundaries|#ui-architecture-rules|#blade-tailwind-and-daisyui-implementation-standards|#technology-stack|#quick-reference|#testing-best-practices\" docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+      - "rg -n \"\\[Source:\" docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+      - "git diff --check"
+    results:
+      - "Legacy/nonexistent-anchor grep returned no matches."
+      - "Source reference grep lists the corrected source references."
+      - "git diff --check passed with no output."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    reason: "PO should re-run story draft validation now that P0 source traceability is repaired."
+    alternate_command: "*backlog-summary"
+    alternate_reason: "Use after validation if PO wants a quick backlog status view before development starts."
+
+  blockers:
+    - "No known SM blockers remain for PO-CORR-002."
+    - "The worktree still contains unrelated .aiox/project-status.yaml changes that were not touched by this correction."
+
+  updated_artifacts:
+    - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    - ".aiox/handoffs/20260519T161206-0300-po-to-sm-story-traceability.yaml"
+    - ".aiox/handoffs/20260520T211924-0300-sm-to-po-story-traceability.yaml"
+
+  next_action: "Switch to Product Owner and run *validate-story-draft for Story 1.1."

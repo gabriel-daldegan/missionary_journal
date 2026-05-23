@@ -1,0 +1,145 @@
+# AIOX PM Tool Configuration
+#
+# Jira is configured as the project management target for this repo.
+# Codex interactive Jira operations should use the Atlassian MCP OAuth server
+# with the metadata below. The bundled AIOX Jira REST adapter may also require
+# JIRA_EMAIL and JIRA_API_TOKEN if used outside the MCP flow.
+pm_tool:
+  type: jira
+  config:
+    base_url: "https://vulpelabs.atlassian.net"
+    cloud_id: "287a75f4-4fb2-497a-986e-82a5e566d271"
+    project_key: "MIS"
+    project_id: "10148"
+    project_name: "MissionaryJournal"
+    project_type: "software"
+    board_type: "kanban"
+    auth_mode: "atlassian-mcp-oauth"
+    mcp_server: "atlassian"
+    issue_types:
+      epic: "Epic"
+      story: "História"
+      task: "Tarefa"
+      bug: "Erro"
+      subtask: "Subtarefa"
+    issue_type_ids:
+      task: "10113"
+      epic: "10114"
+      subtask: "10115"
+      story: "10116"
+      bug: "10117"
+    issue_type_hierarchy:
+      epic: 1
+      story: 0
+      task: 0
+      bug: 0
+      subtask: -1
+    field_mappings:
+      summary: "summary"
+      description: "description"
+      project: "project"
+      issue_type: "issuetype"
+      parent: "parent"
+      assignee: "assignee"
+      reporter: "reporter"
+      due_date: "duedate"
+      labels: "labels"
+      category: "customfield_10053"
+      tag: "customfield_10246"
+      start_date: "customfield_10015"
+      rank: "customfield_10019"
+      flagged: "customfield_10021"
+      team: "customfield_10001"
+      development: "customfield_10000"
+      design: "customfield_10061"
+      vulnerability: "customfield_10087"
+      fixed_versions: "fixVersions"
+      issue_color: "customfield_10017"
+      goals: "customfield_10092"
+    required_fields:
+      epic:
+        - "project"
+        - "summary"
+        - "reporter"
+      story:
+        - "project"
+        - "summary"
+        - "reporter"
+      task:
+        - "project"
+        - "summary"
+        - "reporter"
+      bug:
+        - "project"
+        - "summary"
+        - "reporter"
+      subtask:
+        - "project"
+        - "summary"
+        - "reporter"
+        - "parent"
+    classification:
+      category:
+        required: true
+        jira_field: "customfield_10053"
+        jira_field_name: "Category"
+        jira_field_type: "option"
+        jira_allowed_values_status: "empty-from-metadata"
+        mirror_as_label: true
+        label_prefix: "category-"
+        default: "memory"
+        allowed:
+          - "memory"
+          - "workspace"
+          - "auth"
+          - "billing"
+          - "rules"
+          - "infrastructure"
+          - "devops"
+          - "docs"
+          - "qa"
+          - "ux"
+      tags:
+        required: true
+        jira_field: "customfield_10246"
+        jira_field_name: "Tag"
+        jira_field_type: "labels"
+        naming: "lowercase-kebab-case"
+        defaults_for_story:
+          - "story"
+          - "project-missionary-journal"
+        defaults_for_bug:
+          - "bug"
+          - "project-missionary-journal"
+        allowed:
+          - "backend"
+          - "frontend"
+          - "fullstack"
+          - "memory"
+          - "database"
+          - "rules"
+          - "infrastructure"
+          - "devops"
+          - "docs"
+          - "qa"
+          - "ux"
+          - "tenant-scope"
+          - "routing"
+          - "layout-shell"
+          - "privacy"
+          - "media"
+          - "localization"
+          - "validation-reporting"
+      labels:
+        jira_field: "labels"
+        jira_field_name: "Categorias"
+        jira_field_type: "system-labels"
+        mirror_from:
+          - "category"
+          - "tags"
+        defaults_for_story:
+          - "story"
+          - "project-missionary-journal"
+        defaults_for_bug:
+          - "bug"
+          - "project-missionary-journal"

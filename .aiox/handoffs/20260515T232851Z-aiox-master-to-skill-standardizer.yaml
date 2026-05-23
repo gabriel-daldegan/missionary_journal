@@ -1,0 +1,34 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-15T23:28:51Z"
+  from_agent: "aiox-master"
+  to_agent: "skill-standardizer"
+  consumed: true
+  last_command: "create-agent"
+
+  story_context:
+    story_id: ""
+    story_path: ""
+    story_status: "No active story found"
+    current_task: "Create specialist to audit and standardize installed Codex/OpenAI skills"
+    branch: "feature/pre-configuration"
+
+  decisions:
+    - "Created skill-standardizer as preservation-first specialist for oversized/non-compliant SKILL.md files."
+    - "Codex/OpenAI baseline: required name/description frontmatter, description <= 1024 chars, body <= 500 lines."
+    - "Global ~/.codex/skills writes require explicit approval; default behavior is read-only audit."
+
+  files_modified:
+    - ".aiox-core/development/agents/skill-standardizer.md"
+    - ".aiox-core/development/tasks/skill-audit.md"
+    - ".aiox-core/development/tasks/skill-normalize.md"
+    - ".aiox-core/development/tasks/skill-validate.md"
+    - ".aiox-core/development/checklists/skill-standardization-checklist.md"
+    - ".aiox-core/development/scripts/skill-standards-auditor.js"
+    - ".codex/agents/skill-standardizer.md"
+    - ".codex/skills/aiox-skill-standardizer/SKILL.md"
+
+  blockers:
+    - "No active blocker. Global ~/.codex/skills normalization still requires explicit approval before writes."
+
+  next_action: "Activate skill-standardizer and run *audit all. Existing audit found global skills with oversized descriptions and bloated bodies; local repo skills are clean."

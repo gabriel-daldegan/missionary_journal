@@ -1,0 +1,84 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-19T11:18:26-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "draft-story-and-jira-sync"
+
+  story_context:
+    story_id: "1.1"
+    story_path: "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    story_status: "Draft"
+    current_task: "PO validation of the first implementation story after Jira Epic/Story creation"
+    branch: "feature/pre-configuration"
+
+  source_artifacts:
+    primary:
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+      - "docs/prd.md"
+      - "docs/architecture.md"
+      - "docs/front-end-spec.md"
+      - "docs/ui-architecture.md"
+    supporting:
+      - ".aiox/handoffs/20260518T145653-0300-architect-to-sm.yaml"
+
+  jira_context:
+    site_url: "https://vulpelabs.atlassian.net"
+    project_key: "MIS"
+    project_id: "10148"
+    cloud_id: "287a75f4-4fb2-497a-986e-82a5e566d271"
+    epic:
+      key: "MIS-1"
+      issue_type: "Epic"
+      summary: "Epic 1: Tenant-Scoped Memory Timeline MVP"
+      url: "https://vulpelabs.atlassian.net/browse/MIS-1"
+    story:
+      key: "MIS-2"
+      issue_type: "História"
+      summary: "Story 1.1: Tenant-Safe Memory Route and Layout Shell"
+      url: "https://vulpelabs.atlassian.net/browse/MIS-2"
+      parent_key: "MIS-1"
+    field_mapping:
+      tags: "customfield_10246"
+      labels: "labels"
+      category: "customfield_10053"
+      category_note: "Category field is tracked in story metadata; functional/area mapping is currently represented through tags and labels, including category-memory."
+
+  story_readiness:
+    readiness: "Ready for PO validation before development"
+    summary: "Story 1.1 is drafted from the PRD, architecture, frontend specification, and UI architecture. Jira Epic MIS-1 and child História MIS-2 exist and are linked. The story remains Draft until PO validates completeness, sequence, acceptance criteria, integration verification, and implementation readiness."
+
+  po_validation_focus:
+    - "Validate that Story 1.1 is actionable and bounded to route shell, tenant membership enforcement, dedicated memory layout, minimal Livewire shell, preservation of existing SaaSykit surfaces, and focused PHPUnit coverage."
+    - "Confirm acceptance criteria and integration verification preserve the brownfield boundaries: custom Livewire/Blade memory UI, no Filament customer CRUD, no public marketing layout, no admin-table product surface."
+    - "Confirm the Jira-backed story metadata is coherent: MIS-2 as História, parent MIS-1 as Epic, tags/labels for category and functional area mapping."
+    - "Confirm the story does not add profile setup, timeline records, media streaming, filters, localization tables, social access, or album-facing behavior."
+    - "Confirm quality planning is explicit despite CodeRabbit CLI being disabled in core-config.yaml."
+
+  key_constraints:
+    - "Development must start from a valid story and keep checkboxes, file list, and test evidence updated."
+    - "The first implementation increment should keep the memory product under /memories/{tenant:uuid} with server-side tenant authorization."
+    - "Filament remains for billing, account, workspace settings, users, roles, teams, invitations, security, and admin/reporting."
+    - "Tenant membership and denial behavior must avoid leaking tenant-private details."
+    - "The current worktree has unrelated dirty files; do not revert them."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    reason: "PO should validate the Jira-backed draft story before handing it to Dev for implementation."
+    alternate_command: "*backlog-summary"
+    alternate_reason: "Use after validation if PO wants a quick backlog status view before development starts."
+
+  po_prompt: "Validate Story 1.1 using docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md plus docs/prd.md, docs/architecture.md, docs/front-end-spec.md, docs/ui-architecture.md, and the Jira context MIS-1/MIS-2. Confirm the story is complete, sequenced, bounded, testable, and ready for Dev, preserving tenant-scoped privacy, custom Livewire/Blade UI, no Filament customer CRUD, no public marketing layout, no album language, and no features outside the first route/layout shell increment."
+
+  blockers:
+    - "No implementation has started yet; this is a pre-development validation handoff."
+    - "CodeRabbit Integration is disabled in core-config.yaml, so manual/standard quality validation applies."
+    - "Story file is currently untracked in the local worktree."
+
+  updated_artifacts:
+    - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    - ".aiox/handoffs/20260519T111826-0300-sm-to-po.yaml"
+
+  next_action: "Switch to Product Owner and run *validate-story-draft for Story 1.1 before assigning implementation to Dev."

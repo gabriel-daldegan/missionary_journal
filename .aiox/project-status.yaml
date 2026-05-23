@@ -1,0 +1,17 @@
+status:
+  branch: feature/pre-configuration
+  modifiedFiles:
+    - .aiox/project-status.yaml
+    - .aiox/project-status.yaml.lock
+    - .aiox/project-status.yaml.tmp.2
+  modifiedFilesTotalCount: 3
+  recentCommits:
+    - 'chore: sync planning artifacts and Sail gates'
+    - 'docs: add memory timeline planning artifacts'
+  currentEpic: null
+  currentStory: null
+  lastUpdate: '2026-05-21T00:11:03.805Z'
+  isGitRepo: true
+timestamp: 1779322263808
+ttl: 60
+gitFingerprint: null

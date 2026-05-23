@@ -2,11 +2,17 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "lint": "vendor/bin/sail up -d laravel.test && vendor/bin/sail pint --dirty --format=agent",
+        "typecheck": "vendor/bin/sail up -d laravel.test && vendor/bin/sail bin phpstan analyse --memory-limit=1G",
+        "test": "vendor/bin/sail up -d laravel.test && vendor/bin/sail exec -T -e APP_ENV=testing -e DB_HOST=mysql laravel.test php artisan test --compact",
+        "sail:up": "vendor/bin/sail up -d mysql redis mailpit",
         "dev": "vite",
         "build": "vite build"
     },
     "devDependencies": {
         "@popperjs/core": "^2.11.6",
+        "@semantic-release/git": "^10.0.1",
+        "@semantic-release/github": "^12.0.6",
         "@tailwindcss/forms": "^0.5.7",
         "@tailwindcss/typography": "^0.5.10",
         "@tailwindcss/vite": "^4.1.11",
@@ -15,6 +21,7 @@
         "concurrently": "^9.0.1",
         "daisyui": "^5.0.50",
         "laravel-vite-plugin": "^2.0.0",
+        "semantic-release": "^25.0.3",
         "tailwindcss": "^4.1.11",
         "vite": "^7.1.2"
     },

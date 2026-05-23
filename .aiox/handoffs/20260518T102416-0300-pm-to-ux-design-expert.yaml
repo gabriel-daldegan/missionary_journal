@@ -1,0 +1,97 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-18T10:24:16-03:00"
+  from_agent: "pm"
+  to_agent: "ux-design-expert"
+  consumed: true
+  last_command: "create-prd"
+
+  story_context:
+    story_id: ""
+    story_path: ""
+    story_status: "No active story found"
+    current_task: "Create UX/front-end specification before SM story preparation"
+    branch: "feature/pre-configuration"
+
+  source_artifacts:
+    primary:
+      - "docs/prd.md"
+      - "docs/architecture.md"
+    supporting:
+      - "docs/brief.md"
+      - ".aiox/handoffs/20260517T235140-0300-architect-to-pm.yaml"
+
+  product_context:
+    product_name: "Life Memory Timeline for Missionaries"
+    broader_platform_direction: "Life Memory Timeline"
+    first_validation_niche: "Missionaries and their families"
+    product_boundary: "The long-term product is a private personal/family memory timeline, not a mission-only journal."
+    core_aha: "A timeline-first home after profile setup; the product must not open as an admin table, dashboard list, Filament CRUD surface, landing page, or blog-card experience."
+
+  pm_status:
+    readiness: "PRD ready for UX specification and story preparation"
+    summary: "The Brownfield PRD consolidates the brief and architecture handoff into one sequenced MVP epic. Before SM story slicing, UX should define the dedicated memory product experience so implementation stories preserve the timeline-first, private, calm, and memory-first product surface."
+
+  ux_objectives:
+    - "Create a UX/front-end specification for the authenticated memory product surface."
+    - "Define low-to-mid fidelity flows or wireframe guidance for profile setup, timeline home, record creation/editing, record detail, filters, private media states, language/profile controls, empty/loading/error states, and access-denied states."
+    - "Make the timeline the first meaningful product experience after profile setup."
+    - "Keep the experience emotionally meaningful and calm while staying realistic for a three-week MVP."
+    - "Give SM/Dev enough UI acceptance criteria to avoid accidental fallback to Filament CRUD, admin tables, public marketing layouts, or blog-card patterns."
+
+  mvp_ui_scope:
+    in_scope:
+      - "Dedicated authenticated memory layout, proposed as resources/views/components/layouts/memory.blade.php."
+      - "Memory profile setup with display name and preferred interface language."
+      - "Vertical month-grouped timeline ordered by experience date or period start date."
+      - "Simple memory cards showing date or period, optional location, primary photo, excerpt, tags, photo count, and a clear open-record action."
+      - "Diary record create/edit flow with body text, experience date, optional location, tags, photos, and Memory Highlights."
+      - "Trip/period record create/edit flow with title, location, start/end dates, people, photos, notes, and Memory Highlights."
+      - "Record detail view."
+      - "Filters by date, tag, and location."
+      - "Private media display and upload states."
+      - "Language-safe UI for English, Portuguese, and Spanish."
+      - "Tenant/workspace privacy cues without per-record missionary-vs-family visibility labels."
+    out_of_scope:
+      - "Album generation or album-facing MVP UI language."
+      - "Masonry timelines, map views, complex animation, or advanced visual grouping."
+      - "Public sharing, feeds, follower behavior, visitor access, or friend access."
+      - "Per-record missionary-only versus family-visible controls."
+      - "AI extraction, inline diary-text annotation, automated inbound email, or second-brain graph UI."
+      - "Using Filament Resources or table-first CRUD screens for timeline/editor/detail."
+
+  design_constraints:
+    - "The memory UI must feel modern, clean, calm, private, and memory-first."
+    - "Use timeline, records, memories, highlights, family workspace, and preservation language."
+    - "Do not use visible album-generation language in MVP UI."
+    - "Tone down the dominant purple SaaS landing-page palette, heavy shadows, hover scaling, and rounded-pill treatment in the product surface."
+    - "Do not reuse the public marketing home, hero, footer, feature-section composition, or blog-card patterns for authenticated memory screens."
+    - "Keep layouts safe for English, Portuguese, and Spanish text expansion."
+    - "Preserve private-by-default expectations for records and photos throughout the UX."
+
+  acceptance_criteria_to_feed_stories:
+    - "The memory product route opens into a dedicated memory layout, not Filament Dashboard chrome."
+    - "A user without completed memory profile sees setup before timeline access."
+    - "The populated timeline is vertical, grouped by month, and visibly ordered by experience date or period start date."
+    - "The empty timeline provides a direct path to create the first diary or trip/period record without using marketing-style onboarding copy."
+    - "Record forms prioritize writing and capture speed before optional metadata."
+    - "Memory Highlights appear as a simple optional dynamic list, not a technical metadata classifier or inline annotation workflow."
+    - "Private media states do not imply public URLs or public sharing."
+    - "Filters remain simple and usable on desktop, tablet, and mobile."
+    - "All key UI copy has EN/PT/ES layout tolerance."
+
+  recommended_command:
+    agent: "/agent aiox-ux-design-expert"
+    command: "*create-front-end-spec"
+    reason: "A front-end specification should lock the dedicated memory UX before SM turns the PRD into executable implementation stories."
+    alternate_command: "*wireframe low"
+    alternate_reason: "Use if the user wants to start with lower-fidelity flows before writing the full front-end specification."
+
+  ux_prompt: "Create a front-end UX specification for Life Memory Timeline for Missionaries using docs/prd.md, docs/architecture.md, and docs/brief.md as source. Focus on the dedicated authenticated memory layout, profile setup, month-grouped timeline home, diary editor, trip/period editor, record detail, filters, private media states, language/profile controls, empty/loading/error/access-denied states, and responsive EN/PT/ES-safe UI. The result should guide SM story creation and Dev implementation. Do not design Filament CRUD/table screens, public marketing pages, blog-card UI, album-generation UI, social feeds, public sharing, maps, masonry, complex animation, or AI extraction. Preserve tenant/workspace privacy and keep the MVP realistic for a three-week validation build."
+
+  blockers:
+    - "No active story exists yet; UX specification should precede SM story creation."
+    - "The current branch has unrelated dirty files; do not revert them."
+    - "docs/prd.md, docs/architecture.md, and existing handoffs may be untracked or modified in the current worktree."
+
+  next_action: "Switch to UX Design Expert and run *create-front-end-spec, or start with *wireframe low if the user wants visual flow exploration before the full front-end spec."
