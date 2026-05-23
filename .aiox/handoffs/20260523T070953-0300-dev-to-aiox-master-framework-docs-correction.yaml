@@ -1,0 +1,69 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T07:09:53-03:00"
+  from_agent: "dev"
+  to_agent: "aiox-master"
+  consumed: true
+  last_command: "framework-docs-standardization-handoff"
+
+  correction_context:
+    correction_id: "AIOX-DOCS-001B"
+    priority: "P1"
+    status: "Run after Architect defines the canonical standard"
+    title: "Apply AIOX framework docs/config correction"
+    branch: "feature/story-1-1-tenant-safe-memory-route-layout-shell"
+
+  source_artifacts:
+    primary:
+      - ".aiox-core/core-config.yaml"
+      - "docs/architecture.md"
+      - "docs/ui-architecture.md"
+    supporting:
+      - ".aiox-core/development/tasks/shard-doc.md"
+      - ".aiox-core/development/tasks/update-source-tree.md"
+      - ".aiox-core/data/agent-config-requirements.yaml"
+      - ".aiox/handoffs/20260523T070954-0300-dev-to-architect-framework-doc-standards.yaml"
+
+  finding:
+    summary: "AIOX dev activation tries to load docs/framework/coding-standards.md, docs/framework/tech-stack.md, and docs/framework/source-tree.md, but this repo currently has the technical content in docs/architecture.md and docs/ui-architecture.md."
+    evidence:
+      - ".aiox-core/core-config.yaml devLoadAlwaysFiles points to docs/framework/*.md."
+      - "The docs/framework directory is absent."
+      - "docs/ui-architecture.md contains Frontend Tech Stack, Project Structure, Testing Requirements, Critical Coding Rules, Component Boundary Rules, Tailwind Patterns, and Primary Files and Directories."
+      - "docs/architecture.md contains the brownfield Laravel/SaaSykit architecture and Product routing and UI architecture section."
+
+  correction_plan:
+    owner: "@aiox-master"
+    depends_on:
+      - "AIOX-DOCS-001A Architect decision on canonical docs standard."
+    steps:
+      - "Read the Architect decision before editing."
+      - "If the standard is docs/framework, create docs/framework/coding-standards.md, docs/framework/tech-stack.md, and docs/framework/source-tree.md by extracting from docs/architecture.md and docs/ui-architecture.md without changing product scope."
+      - "If the standard is existing monolithic docs, update devLoadAlwaysFiles and fallback config to point at the live canonical docs."
+      - "Run structure/config validation relevant to AIOX docs after the correction."
+      - "Hand back to SM only if story source references need reconciliation."
+
+  acceptance_criteria:
+    - "Running node .aiox-core/development/scripts/generate-greeting.js dev no longer reports missing docs/framework/coding-standards.md, tech-stack.md, or source-tree.md unless Architect explicitly chooses a non-framework canonical location."
+    - "devLoadAlwaysFiles resolves to live files."
+    - "The correction does not rewrite active Story 1.1 implementation files."
+    - "No new Laravel/SaaSykit product requirements are introduced."
+
+  verification_commands:
+    - "node .aiox-core/development/scripts/generate-greeting.js dev"
+    - "npm run validate:structure"
+    - "npm run validate:agents"
+    - "git diff --check .aiox-core/core-config.yaml docs"
+
+  recommended_command:
+    agent: "/agent aiox-master"
+    command: "Apply AIOX-DOCS-001B from .aiox/handoffs/20260523T070953-0300-dev-to-aiox-master-framework-docs-correction.yaml"
+    reason: "AIOX Master owns framework workflow/config corrections such as sharding docs, updating source-tree governance, and validating agent config."
+    alternate_command: "*shard-doc docs/ui-architecture.md docs/framework"
+    alternate_reason: "Use only if Architect chooses docs/framework shards as the canonical standard."
+
+  blockers:
+    - "Blocked until Architect chooses the canonical docs location and minimum content contract."
+    - "Current worktree has active Story 1.1 implementation changes; keep the correction scoped to docs/config/handoff files."
+
+  next_action: "After Architect decides the standard, switch to AIOX Master and apply the docs/config correction with validation."

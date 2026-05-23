@@ -1,0 +1,53 @@
+schema: 1
+story: '1.1'
+story_title: 'Tenant-Safe Memory Route and Layout Shell'
+gate: WAIVED
+status_reason: 'Story-scoped requirements and focused access tests pass. The remaining repository-wide typecheck and full-suite failures are externally accepted by the approver, so the story can proceed.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-05-23T08:54:12-03:00'
+quality_score: 90
+expires: '2026-06-06T08:54:12-03:00'
+
+top_issues:
+  - id: TEST-001
+    severity: medium
+    finding: 'Full project `npm run typecheck` failed with a PHPStan parallel worker timeout after 600 seconds, and `npm test` emitted repeated failures for more than three minutes before QA terminated the already-red run.'
+    suggested_action: 'Resolve the repository-wide PHPStan runtime and failing full-suite test conditions, or formally waive them before merge/release policy requires full green checks.'
+    suggested_owner: devops
+
+waiver:
+  active: true
+  reason: 'User explicitly approved the repository-wide issues as external to Story 1.1.'
+  approved_by: 'User'
+
+evidence:
+  tests_reviewed: 5
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Memory route is behind auth, verified email, route-model binding by tenant UUID, and tenant membership middleware that returns a generic 404 for non-members.'
+  performance:
+    status: PASS
+    notes: 'Story shell adds a small route and one membership existence check; no timeline queries, media work, or client-side stores were introduced.'
+  reliability:
+    status: CONCERNS
+    notes: 'Focused story coverage is present, but the repository-wide gates remain noisy and are being accepted as external debt for this story.'
+  maintainability:
+    status: PASS
+    notes: 'Implementation follows existing Laravel route, middleware, Livewire class, Blade layout, and PHPUnit feature-test structure.'
+
+recommendations:
+  immediate:
+    - action: 'Track the repository-wide PHPStan timeout and full-suite test failures so Story 1.1 is not carrying an invisible merge/release risk.'
+      refs:
+        - 'docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md'
+        - 'package.json'
+  future:
+    - action: 'Add dedicated Livewire component tests when Story 1.2 introduces interactive profile setup or stateful memory actions.'
+      refs:
+        - 'app/Livewire/Memory/MemoryTimeline.php'

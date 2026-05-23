@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductCheckoutController;
 use App\Http\Controllers\RoadmapController;
 use App\Http\Controllers\SubscriptionCheckoutController;
 use App\Http\Controllers\SubscriptionController;
+use App\Livewire\Memory\MemoryTimeline;
 use App\Services\PlanService;
 use App\Services\SessionService;
 use App\Services\TenantCreationService;
@@ -38,6 +39,13 @@ Route::get('/', function () {
 Route::get('/dashboard', function (UserDashboardService $dashboardService) {
     return redirect($dashboardService->getUserDashboardUrl(Auth::user()));
 })->name('dashboard')->middleware('auth');
+
+Route::middleware(['auth', 'verified', 'tenant.member'])
+    ->prefix('/memories/{tenant:uuid}')
+    ->name('memories.')
+    ->group(function () {
+        Route::livewire('/', MemoryTimeline::class)->name('timeline');
+    });
 
 Auth::routes();
 

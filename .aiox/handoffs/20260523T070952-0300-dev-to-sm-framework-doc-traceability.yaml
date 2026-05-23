@@ -1,0 +1,79 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T07:09:52-03:00"
+  from_agent: "dev"
+  to_agent: "sm"
+  consumed: true
+  last_command: "framework-docs-standardization-handoff"
+
+  correction_context:
+    correction_id: "AIOX-DOCS-001C"
+    priority: "P2"
+    status: "Completed by SM"
+    title: "Reconcile story source traceability after framework docs standardization"
+    branch: "feature/story-1-1-tenant-safe-memory-route-layout-shell"
+
+  source_artifacts:
+    primary:
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+      - "docs/architecture.md"
+      - "docs/ui-architecture.md"
+    supporting:
+      - ".aiox-core/core-config.yaml"
+      - ".aiox/handoffs/20260523T070954-0300-dev-to-architect-framework-doc-standards.yaml"
+      - ".aiox/handoffs/20260523T070953-0300-dev-to-aiox-master-framework-docs-correction.yaml"
+
+  finding:
+    summary: "Dev activation expects canonical technical context through devLoadAlwaysFiles, while current Story 1.1 references existing monolithic architecture docs. If the canonical standard changes to docs/framework shards, story citations may need traceability updates."
+    current_story_sources:
+      - "docs/architecture.md"
+      - "docs/ui-architecture.md"
+
+  correction_result:
+    summary: "Story 1.1 source traceability was reconciled with the canonical docs/framework Dev-context shards while preserving the richer PRD and architecture source references."
+    preserved_scope:
+      - "No product scope, acceptance criteria, implementation tasks, or Dev Agent Record behavior was expanded."
+      - "Story remains focused on tenant-safe routing, tenant membership, dedicated memory layout, minimal Livewire shell, SaaSykit surface preservation, and focused route tests."
+    updated_references:
+      - "docs/framework/coding-standards.md#memory-product-rules"
+      - "docs/framework/coding-standards.md#component-boundaries"
+      - "docs/framework/coding-standards.md#tailwind-and-ui"
+      - "docs/framework/coding-standards.md#tests"
+      - "docs/framework/source-tree.md#route-shape"
+      - "docs/framework/source-tree.md#memory-product-locations"
+      - "docs/framework/tech-stack.md#runtime"
+      - "docs/framework/tech-stack.md#memory-product-direction"
+
+  correction_plan:
+    owner: "@sm"
+    steps:
+      - "Wait until Architect defines the canonical docs standard and AIOX Master applies the docs/config correction."
+      - "Review Story 1.1 source references against the final canonical locations."
+      - "Update only source/citation metadata or Dev Agent Record traceability if needed."
+      - "Do not expand Story 1.1 scope beyond tenant-safe routing and layout shell."
+
+  acceptance_criteria:
+    - "Story 1.1 source references resolve to live headings/files after the docs/config correction."
+    - "No product scope, acceptance criteria, or implementation task expansion is introduced."
+    - "Any handoff consumed during this correction is marked consumed accurately."
+
+  verification_commands:
+    - "rg -n \"Source: docs/|docs/framework|docs/architecture|docs/ui-architecture\" docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    - "git diff --check docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "Review AIOX-DOCS-001C from .aiox/handoffs/20260523T070952-0300-dev-to-sm-framework-doc-traceability.yaml"
+    reason: "SM owns story traceability and should reconcile story source anchors after canonical documentation locations change."
+    alternate_command: "/agent aiox-po"
+    alternate_reason: "Use if the story requires approval-state validation after traceability changes."
+
+  blockers:
+    - "No known SM blockers remain for AIOX-DOCS-001C."
+    - "Do not touch current Story 1.1 implementation files outside story metadata unless explicitly requested."
+
+  updated_artifacts:
+    - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    - ".aiox/handoffs/20260523T070952-0300-dev-to-sm-framework-doc-traceability.yaml"
+
+  next_action: "Return Story 1.1 to PO or QA review if approval-state validation is needed after traceability reconciliation."

@@ -1,0 +1,73 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T07:09:54-03:00"
+  from_agent: "dev"
+  to_agent: "architect"
+  consumed: true
+  last_command: "framework-docs-standardization-handoff"
+
+  correction_context:
+    correction_id: "AIOX-DOCS-001A"
+    priority: "P1"
+    status: "First step for docs/config standardization"
+    title: "Define canonical technical documentation standard for Dev context"
+    branch: "feature/story-1-1-tenant-safe-memory-route-layout-shell"
+
+  source_artifacts:
+    primary:
+      - ".aiox-core/core-config.yaml"
+      - "docs/architecture.md"
+      - "docs/ui-architecture.md"
+    supporting:
+      - ".aiox-core/development/tasks/setup-project-docs.md"
+      - ".aiox-core/development/tasks/shard-doc.md"
+      - ".aiox-core/data/agent-config-requirements.yaml"
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+
+  finding:
+    summary: "Dev/Dex activation is configured to load docs/framework/coding-standards.md, docs/framework/tech-stack.md, and docs/framework/source-tree.md, but those files do not exist. The live technical guidance currently lives in docs/architecture.md and docs/ui-architecture.md."
+    evidence:
+      - ".aiox-core/core-config.yaml devLoadAlwaysFiles references docs/framework/*.md."
+      - "docs/framework is absent."
+      - "docs/ui-architecture.md contains the frontend tech stack, project structure, testing requirements, critical coding rules, component boundaries, Tailwind patterns, and primary files/directories."
+      - "docs/architecture.md contains the brownfield Laravel/SaaSykit decisions and product routing/UI architecture."
+
+  decision_needed:
+    owner: "@architect"
+    questions:
+      - "Should this repo standardize canonical Dev context in docs/framework/*.md shards, or should core-config.yaml point directly at docs/architecture.md and docs/ui-architecture.md?"
+      - "If docs/framework is chosen, what is the minimum content contract for coding-standards.md, tech-stack.md, and source-tree.md?"
+      - "Which sections from docs/architecture.md and docs/ui-architecture.md should remain canonical versus duplicated/extracted into framework shards?"
+
+  recommended_standard:
+    proposal: "Use docs/framework/*.md as the stable AIOX Dev context layer, extracted from the existing architecture documents, while keeping docs/architecture.md and docs/ui-architecture.md as richer source documents."
+    rationale:
+      - "It matches current .aiox-core/core-config.yaml and agent-config-requirements.yaml expectations."
+      - "It keeps Dev activation lightweight and stable."
+      - "It avoids making Dev load full architecture docs during every implementation task."
+      - "It preserves existing product architecture sources without changing MVP scope."
+
+  acceptance_criteria:
+    - "Architect records a clear canonical docs-location decision."
+    - "Architect defines the minimum section/content contract for the three Dev context files."
+    - "The decision preserves brownfield Laravel/SaaSykit reuse and does not introduce new product requirements."
+    - "The next implementation owner can apply the correction without guessing between docs/framework and existing monolithic docs."
+
+  verification_commands:
+    - "rg -n \"devLoadAlwaysFiles|frameworkDocsLocation\" .aiox-core/core-config.yaml"
+    - "rg -n \"Frontend Tech Stack|Project Structure|Testing Requirements|Critical Coding Rules|Component Boundary Rules|Tailwind Patterns|Primary Files and Directories\" docs/ui-architecture.md"
+    - "rg -n \"Product routing and UI architecture|Tenant and access architecture|Architecture decision summary\" docs/architecture.md"
+
+  recommended_command:
+    agent: "/agent aiox-architect"
+    command: "Decide AIOX-DOCS-001A from .aiox/handoffs/20260523T070954-0300-dev-to-architect-framework-doc-standards.yaml"
+    reason: "Architect owns technical documentation standards and should decide the canonical source before AIOX Master changes config or shards."
+    alternate_command: "/agent aiox-master"
+    alternate_reason: "Use only after Architect has made the docs-location/content-contract decision."
+
+  blockers:
+    - "AIOX Master should not generate or repoint Dev context until the canonical docs standard is defined."
+    - "Dev should not invent missing framework docs while implementing Story 1.1."
+    - "Current worktree has active Story 1.1 implementation changes; do not revert or mix unrelated feature edits into this standardization."
+
+  next_action: "Switch to Architect and decide the canonical Dev context standard. Then pass the decision to AIOX Master for docs/config correction."

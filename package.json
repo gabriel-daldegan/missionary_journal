@@ -5,6 +5,12 @@
         "lint": "vendor/bin/sail up -d laravel.test && vendor/bin/sail pint --dirty --format=agent",
         "typecheck": "vendor/bin/sail up -d laravel.test && vendor/bin/sail bin phpstan analyse --memory-limit=1G",
         "test": "vendor/bin/sail up -d laravel.test && vendor/bin/sail exec -T -e APP_ENV=testing -e DB_HOST=mysql laravel.test php artisan test --compact",
+        "validate:agents": "node .aiox-core/development/scripts/validate-agents.js",
+        "validate:structure": "node .aiox-core/development/scripts/validate-structure.js",
+        "sync:ide": "node .aiox-core/infrastructure/scripts/ide-sync/index.js sync",
+        "sync:ide:check": "node .aiox-core/infrastructure/scripts/ide-sync/index.js validate --strict",
+        "sync:skills:codex": "node .aiox-core/infrastructure/scripts/codex-skills-sync/index.js",
+        "sync:skills:codex:global": "node .aiox-core/infrastructure/scripts/codex-skills-sync/index.js --global",
         "sail:up": "vendor/bin/sail up -d mysql redis mailpit",
         "dev": "vite",
         "build": "vite build"
