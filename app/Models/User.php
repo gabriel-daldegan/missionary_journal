@@ -175,6 +175,11 @@ class User extends Authenticatable implements FilamentUser, HasTenants, MustVeri
         return $this->hasOne(Address::class);
     }
 
+    public function memoryProfile(): HasOne
+    {
+        return $this->hasOne(MemoryProfile::class);
+    }
+
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class)->using(TenantUser::class)->withPivot('id')->withTimestamps();

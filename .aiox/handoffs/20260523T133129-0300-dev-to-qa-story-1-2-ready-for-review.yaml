@@ -1,0 +1,108 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T13:31:29-03:00"
+  from_agent: "dev"
+  to_agent: "qa"
+  consumed: true
+  last_command: "story-1-2-dev-handoff"
+
+  story_context:
+    story_id: "1.2"
+    story_path: "docs/stories/1.2.memory-profile-setup-gate.story.md"
+    status: "Ready for Review"
+    title: "Memory Profile Setup Gate"
+    branch: "feature/story-1-2-memory-profile-setup-gate-draft"
+    jira_issue: ""
+    parent_epic: "MIS-1"
+    previous_story: "MIS-2"
+
+  handoff_reason:
+    summary: "Story 1.2 implementation artifacts already exist in the worktree and are ready for quality review. Dev performed a pre-handoff audit, confirmed no duplicate implementation should be created, and staged the Story 1.2 scoped files for versioning."
+    qa_status: "QA Results is intentionally empty and should be populated by the reviewing agent."
+    quality_gate_note: "The story executor assignment lists @architect as quality gate; this QA handoff is created because the current workflow is Dev-to-QA review for completed development work."
+
+  implementation_result:
+    summary: "Implemented the memory profile setup gate with user-scoped profile persistence, locale preference, optional mission context, memory-only route gating, class-based Livewire setup UI, memory layout/localization updates, and focused PHPUnit/Livewire coverage."
+    completed_scope:
+      - "Created user-scoped `memory_profiles` persistence with nullable `mission_context`, default `preferred_locale`, `completed_at`, model, factory, and `User::memoryProfile()`."
+      - "Added `MemoryProfileService` to complete profiles, determine completion, normalize supported locales, and resolve user locale preference."
+      - "Added `memory.profile.complete` middleware and route shape with `memories.entry`, `memories.profile.setup`, and gated `memories.timeline`."
+      - "Built class-based `MemoryProfileSetup` Livewire component through the dedicated memory layout."
+      - "Added `resources/lang/en|pt|es/memory.php` UI translation files and avoided translating user-generated mission context."
+      - "Updated the existing memory shell only as needed for profile access and the new timeline route shape."
+
+  changed_artifacts:
+    implementation:
+      - "app/Http/Middleware/EnsureMemoryProfileComplete.php"
+      - "app/Livewire/Memory/MemoryProfileSetup.php"
+      - "app/Livewire/Memory/MemoryTimeline.php"
+      - "app/Models/MemoryProfile.php"
+      - "app/Models/User.php"
+      - "app/Services/MemoryProfileService.php"
+      - "bootstrap/app.php"
+      - "database/factories/MemoryProfileFactory.php"
+      - "database/migrations/2026_05_23_110927_create_memory_profiles_table.php"
+      - "resources/lang/en/memory.php"
+      - "resources/lang/es/memory.php"
+      - "resources/lang/pt/memory.php"
+      - "resources/views/components/layouts/memory.blade.php"
+      - "resources/views/livewire/memory/memory-profile-setup.blade.php"
+      - "resources/views/livewire/memory/memory-timeline.blade.php"
+      - "routes/web.php"
+      - "tests/Feature/Livewire/Memory/MemoryProfileSetupTest.php"
+      - "tests/Feature/Memory/MemoryProfileSetupGateTest.php"
+      - "tests/Feature/Memory/MemoryRouteAccessTest.php"
+    story_record:
+      - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+    workflow_context:
+      - ".aiox/handoffs/20260523T094742-0300-devops-to-sm-story-1-2-ready-to-draft.yaml"
+      - ".ai/story-1-2-validation-20260523T110345-0300.json"
+      - ".aiox/handoffs/20260523T105304-0300-sm-to-po-story-1-2-draft.yaml"
+      - ".aiox/handoffs/20260523T110345-0300-po-to-dev-story-1-2.yaml"
+      - ".aiox/handoffs/20260523T133129-0300-dev-to-qa-story-1-2-ready-for-review.yaml"
+
+  staged_for_versioning:
+    included_scope:
+      - "All Story 1.2 implementation files listed above."
+      - "Story 1.2 story record."
+      - "Story 1.2 SM-to-PO, PO-to-Dev, validation, and Dev-to-QA workflow artifacts."
+    intentionally_excluded:
+      - "Skill synchronization changes under `.agents/skills`, `.claude/skills`, and `.github/skills`."
+      - "Local MCP/Codex configuration changes in `.codex/config.toml`, `.mcp.json`, `boost.json`, and `AGENTS.md`."
+      - "Composer dependency drift in `composer.json` and `composer.lock` for `laravel/boost`, because Story 1.2 does not require a dependency update."
+      - "Project status cache files under `.aiox/project-status.yaml` and `.aiox/project-status.yaml.lock`."
+      - "Unrelated `CLAUDE.md` and new debug/skill folders."
+
+  verification:
+    passed:
+      - "docker compose exec -T laravel.test php artisan route:list --name=memories"
+      - "docker compose exec -T -e APP_ENV=testing -e DB_HOST=mysql -e DB_DATABASE=testing -e DB_USERNAME=sail_missionaryjournal -e DB_PASSWORD=password_missionaryjournal laravel.test php artisan migrate:status --path=database/migrations/2026_05_23_110927_create_memory_profiles_table.php"
+      - "docker compose exec -T -e APP_ENV=testing -e DB_HOST=mysql -e DB_DATABASE=testing -e DB_USERNAME=sail_missionaryjournal -e DB_PASSWORD=password_missionaryjournal laravel.test php artisan test --compact tests/Feature/Memory/MemoryProfileSetupGateTest.php tests/Feature/Livewire/Memory/MemoryProfileSetupTest.php"
+      - "docker compose exec -T -e APP_ENV=testing -e DB_HOST=mysql -e DB_DATABASE=testing -e DB_USERNAME=sail_missionaryjournal -e DB_PASSWORD=password_missionaryjournal laravel.test php artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php"
+    recorded_in_story:
+      - "vendor/bin/pint --dirty --format agent"
+      - "docker compose exec -T laravel.test vendor/bin/phpstan analyse app/Http/Middleware/EnsureMemoryProfileComplete.php app/Livewire/Memory/MemoryProfileSetup.php app/Models/MemoryProfile.php app/Services/MemoryProfileService.php --memory-limit=1G"
+      - "npm run lint"
+      - "git diff --check"
+    known_non_blocking_failures:
+      - "`npm run typecheck` failed with a PHPStan internal parallel worker timeout after processing all files; focused PHPStan passed and no story-specific error was reported."
+      - "`npm test` failed before application assertions because the script uses MySQL `root` without a password against `saasykit_tenancy_test`; this matches pre-existing repo-wide test DB configuration debt."
+
+  qa_review_focus:
+    - "Confirm incomplete memory profile users are redirected to setup before timeline access."
+    - "Confirm setup captures only display name, preferred interface language, and optional mission context."
+    - "Confirm completing setup redirects to the same tenant timeline and persists `completed_at`."
+    - "Confirm profile gating applies only to memory product routes and does not block Filament account, billing, dashboard, teams, users, roles, invitations, security, or subscriptions."
+    - "Confirm non-members receive generic denial without tenant-private detail leakage."
+    - "Confirm localization uses memory translation keys and does not translate user-generated mission context."
+    - "Confirm no out-of-scope diary records, trip/period records, timeline grouping, media, filters, sharing, SPA router, JSON client, or JavaScript domain store were introduced."
+
+  recommended_command:
+    agent: "/agent aiox-qa"
+    command: "Review Story 1.2 from .aiox/handoffs/20260523T133129-0300-dev-to-qa-story-1-2-ready-for-review.yaml"
+    reason: "QA should review the completed Story 1.2 implementation and populate the story QA Results section."
+    alternate_agent: "/agent aiox-architect"
+    alternate_reason: "Use if enforcing the story's declared @architect quality gate before QA signoff."
+
+  blockers: []
+  next_action: "Switch to QA, consume this handoff, review Story 1.2, and populate QA Results."

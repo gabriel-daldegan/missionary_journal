@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Memory;
 
+use App\Models\MemoryProfile;
 use App\Models\Tenant;
 use Tests\Feature\FeatureTest;
 
@@ -25,6 +26,7 @@ class MemoryRouteAccessTest extends FeatureTest
             'name' => 'Santos Family Workspace',
         ]);
         $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
 
         $response = $this->actingAs($user)->get($this->memoryRoute($tenant));
 
@@ -32,7 +34,8 @@ class MemoryRouteAccessTest extends FeatureTest
         $response->assertSee('data-memory-layout="true"', false);
         $response->assertSee('Memory Timeline');
         $response->assertSee('Santos Family Workspace');
-        $response->assertSee('Profile');
+        $response->assertSee('Memory profile');
+        $response->assertSee('Account');
         $response->assertSee('Dashboard');
     }
 
@@ -57,6 +60,7 @@ class MemoryRouteAccessTest extends FeatureTest
     {
         $tenant = $this->createTenant();
         $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
 
         $response = $this->actingAs($user)->get($this->memoryRoute($tenant));
 

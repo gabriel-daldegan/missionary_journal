@@ -1,0 +1,99 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T14:31:04-03:00"
+  from_agent: "qa"
+  to_agent: "devops"
+  consumed: true
+  last_command: "qa-review-story"
+
+  story_context:
+    story_id: "1.2"
+    story_path: "docs/stories/1.2.memory-profile-setup-gate.story.md"
+    status: "Ready for Review"
+    title: "Memory Profile Setup Gate"
+    branch: "feature/story-1-2-memory-profile-setup-gate-draft"
+    jira_issue: ""
+    parent_epic: "MIS-1"
+    previous_story: "MIS-2"
+
+  decision:
+    gate: "CONCERNS"
+    gate_file: "docs/qa/gates/1.2-memory-profile-setup-gate.yml"
+    summary: "Story 1.2 is story-scoped complete and ready for Done from QA's perspective, but repo-wide quality scripts remain unreliable under the default package-script environment."
+    recommended_status: "Ready for Done with repo-wide quality concerns tracked or waived before PR/release enforcement."
+    waiver:
+      active: true
+      approved_by: "project_owner"
+      approved_at: "2026-05-23T17:36:34-03:00"
+      note: "Owner approved waiving blockers that are outside Stories 1.1 and 1.2. DevOps fixed in-scope Story 1.2 CodeRabbit findings before recording this waiver."
+
+  qa_findings:
+    passed:
+      - "Memory profile setup gate is enforced server-side on `memories.timeline`."
+      - "Setup remains reachable at `memories.profile.setup` before profile completion."
+      - "Profile persistence is user-scoped and stores display name, preferred locale, optional mission context, and completion timestamp."
+      - "Completing setup redirects to the same tenant timeline."
+      - "Profile gating is scoped to memory product routes and does not block dashboard/account behavior."
+      - "Non-members receive generic not-found responses without tenant-private detail leakage."
+      - "Memory UI uses translation keys and does not translate user-generated mission context."
+      - "No out-of-scope diary records, trip/period records, media, filters, sharing, SPA router, JSON client, or JavaScript domain store were introduced."
+    concerns:
+      - id: "ENV-001"
+        severity: "medium"
+        finding: "`npm run typecheck` fails outside Story 1.2 with a PHPStan cache write error under `/tmp/phpstan/cache` while analysing `app/Services/PaymentProviders/Stripe/StripeProvider.php`."
+        suggested_action: "Repair PHPStan cache path/permissions or formally waive this repo-wide gate before PR/release enforcement."
+        suggested_owner: "devops"
+      - id: "ENV-002"
+        severity: "medium"
+        finding: "`npm test -- --stop-on-failure` now reaches the application suite with Sail test DB credentials, but the global run fails outside Story 1.2 when the public pricing plan component renders a usage-based plan without a meter."
+        suggested_action: "Harden or isolate the public pricing plan test data path, or continue using the owner-approved temporary waiver for Story 1.2 publication only."
+        suggested_owner: "devops"
+
+  verification:
+    passed:
+      - "git diff --check"
+      - "git diff --cached --check"
+      - "docker compose exec -T laravel.test php artisan route:list --name=memories"
+      - "docker compose exec -T -e APP_ENV=testing -e DB_HOST=mysql -e DB_DATABASE=testing -e DB_USERNAME=sail_missionaryjournal -e DB_PASSWORD=password_missionaryjournal laravel.test php artisan migrate:status --path=database/migrations/2026_05_23_110927_create_memory_profiles_table.php"
+      - "docker compose exec -T -e APP_ENV=testing -e DB_HOST=mysql -e DB_DATABASE=testing -e DB_USERNAME=sail_missionaryjournal -e DB_PASSWORD=password_missionaryjournal laravel.test php artisan test --compact tests/Feature/Memory/MemoryProfileSetupGateTest.php tests/Feature/Livewire/Memory/MemoryProfileSetupTest.php tests/Feature/Memory/MemoryRouteAccessTest.php"
+      - "docker compose exec -T -e APP_ENV=testing -e DB_HOST=mysql -e DB_DATABASE=testing -e DB_USERNAME=sail_missionaryjournal -e DB_PASSWORD=password_missionaryjournal laravel.test php artisan test --compact tests/Feature/Http/Controllers/Auth/LoginControllerTest.php tests/Feature/Http/Controllers/Auth/RegisterControllerTest.php"
+      - "docker compose exec -T laravel.test vendor/bin/phpstan analyse app/Http/Middleware/EnsureMemoryProfileComplete.php app/Livewire/Memory/MemoryProfileSetup.php app/Models/MemoryProfile.php app/Services/MemoryProfileService.php --memory-limit=1G"
+      - "npm run lint"
+      - "php -r 'require \"vendor/autoload.php\"; Symfony\\Component\\Yaml\\Yaml::parseFile(\"docs/qa/gates/1.2-memory-profile-setup-gate.yml\"); echo \"yaml ok\\n\";'"
+    failed_or_blocked:
+      - "npm run typecheck"
+      - "npm test"
+
+  qa_outputs:
+    - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+    - "docs/qa/gates/1.2-memory-profile-setup-gate.yml"
+
+  files_touched_by_qa:
+    - ".aiox/handoffs/20260523T133129-0300-dev-to-qa-story-1-2-ready-for-review.yaml"
+    - ".aiox/handoffs/20260523T143104-0300-qa-to-devops-story-1-2-concerns.yaml"
+    - "docs/qa/gates/1.2-memory-profile-setup-gate.yml"
+    - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+
+  worktree_notes:
+    staged_story_scope:
+      - "Story 1.2 implementation files were already staged by Dev before QA review."
+      - "QA Results were appended as unstaged changes on top of the staged story file."
+      - "The QA gate file and this handoff are currently unstaged."
+    intentionally_excluded_drift:
+      - "Skill synchronization changes under `.agents/skills`, `.claude/skills`, and `.github/skills`."
+      - "Local MCP/Codex configuration changes in `.codex/config.toml`, `.mcp.json`, `boost.json`, and `AGENTS.md`."
+      - "Composer dependency drift in `composer.json` and `composer.lock` for `laravel/boost`, because Story 1.2 does not require a dependency update."
+      - "Project status cache files under `.aiox/project-status.yaml` and `.aiox/project-status.yaml.lock`."
+      - "Unrelated `CLAUDE.md` and new debug/skill folders."
+
+  recommended_command:
+    agent: "/agent aiox-devops"
+    command: "*pre-push"
+    reason: "DevOps should verify the staged Story 1.2 scope, decide whether to repair or waive ENV-001/ENV-002, and only then proceed with publication."
+    alternate_command: "*push"
+    alternate_reason: "Use only if the repo-wide concerns are explicitly fixed or waived and DevOps confirms the publication scope."
+
+  blockers:
+    - "Repo-wide typecheck remains red and the global test suite still has an outside-story public pricing failure, but both are owner-waived for Story 1.2 publication because they are outside Stories 1.1 and 1.2."
+
+  next_action: "Switch to DevOps, consume this handoff, reconcile Story 1.2 QA artifacts into the staged scope, and run the publication workflow with an explicit decision on ENV-001/ENV-002."

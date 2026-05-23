@@ -3,7 +3,7 @@ handoff:
   timestamp: "2026-05-23T09:47:42-03:00"
   from_agent: "devops"
   to_agent: "sm"
-  consumed: false
+  consumed: true
   last_command: "execute-post-merge-story-1-2-prep"
 
   execution_context:

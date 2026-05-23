@@ -20,7 +20,7 @@ class MemoryTimeline extends Component
         return view('livewire.memory.memory-timeline')
             ->layout('components.layouts.memory', [
                 'tenant' => $this->tenant,
-                'title' => __('Memory Timeline'),
+                'title' => __('memory.timeline.title'),
             ]);
     }
 }
