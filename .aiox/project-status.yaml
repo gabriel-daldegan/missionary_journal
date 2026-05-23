@@ -1,17 +1,19 @@
 status:
-  branch: feature/pre-configuration
+  branch: feature/story-1-1-tenant-safe-memory-route-layout-shell
   modifiedFiles:
     - .aiox/project-status.yaml
-    - .aiox/project-status.yaml.lock
-    - .aiox/project-status.yaml.tmp.2
-  modifiedFilesTotalCount: 3
+    - .antigravity/rules/agents/aiox-master.md
+    - .antigravity/rules/agents/analyst.md
+    - .antigravity/rules/agents/architect.md
+    - .antigravity/rules/agents/data-engineer.md
+  modifiedFilesTotalCount: 98
   recentCommits:
-    - 'chore: sync planning artifacts and Sail gates'
-    - 'docs: add memory timeline planning artifacts'
+    - 'feat: add tenant-safe memory route shell'
+    - 'fix: align release workflow with semantic-release'
   currentEpic: null
   currentStory: null
-  lastUpdate: '2026-05-21T00:11:03.805Z'
+  lastUpdate: '2026-05-23T12:47:00.772Z'
   isGitRepo: true
-timestamp: 1779322263808
+timestamp: 1779540420780
 ttl: 60
 gitFingerprint: null
