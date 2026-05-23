@@ -1,0 +1,116 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T09:44:53-03:00"
+  from_agent: "aiox-master"
+  to_agent: "devops"
+  consumed: true
+  consumed_at: "2026-05-23T09:47:42-03:00"
+  last_command: "project-review-next-step"
+
+  transition_context:
+    summary: "Story 1.1 has been merged, and the repo should be cleaned and resynchronized before Story 1.2 work begins."
+    branch_observed: "feature/story-1-1-tenant-safe-memory-route-layout-shell"
+    target_base: "origin/main"
+    merged_pr:
+      number: 4
+      title: "feat: add tenant-safe memory route shell"
+      url: "https://github.com/gabriel-daldegan/missionary_journal/pull/4"
+      state: "MERGED"
+      merged_at: "2026-05-23T12:12:50Z"
+      merge_commit: "f45f60b6d16370edff087e40a24de3a1cfee7be9"
+      release_check: "success"
+
+  immediate_objective:
+    owner: "@devops"
+    goal: "Prepare a clean local base for the next story without mixing generated IDE/tooling deletions or local environment edits into Story 1.2."
+    recommended_steps:
+      - "Inspect the current dirty worktree before changing branches or staging anything."
+      - "Classify the existing local changes: generated IDE/tool sync deletions, local environment edits, AIOX cache/status files, and any source/story artifacts."
+      - "Do not revert or discard user-owned changes without explicit approval."
+      - "Synchronize local main with origin/main after the dirty worktree is handled safely."
+      - "Create or prepare a story-specific branch for Story 1.2 only from the clean merged base."
+      - "Hand off to SM to create the implementation-ready Story 1.2 draft."
+
+  dirty_worktree_snapshot:
+    status: "dirty"
+    notable_changes:
+      - ".aiox/project-status.yaml modified"
+      - ".aiox/cache/ untracked"
+      - "compose.yml modified"
+      - "large generated IDE/tooling deletions under .antigravity/, .cursor/, .gemini/, .junie/, and .kimi/"
+    handling_guidance:
+      - "Treat the generated IDE/tooling deletions as unrelated to Story 1.2 unless the user confirms they are intentional."
+      - "Keep any future Story 1.2 commit focused on story artifacts only."
+      - "Use origin/main as the post-merge source of truth; local main was observed behind origin/main during review."
+
+  next_product_context:
+    next_story_id: "1.2"
+    title: "Memory Profile Setup Gate"
+    source_artifacts:
+      - "docs/prd.md#story-12-memory-profile-setup-gate"
+      - "docs/ui-architecture.md#routing"
+      - "docs/ui-architecture.md#route-responsibilities"
+      - "docs/framework/coding-standards.md"
+      - "docs/framework/source-tree.md"
+      - "docs/framework/tech-stack.md"
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+      - "docs/qa/gates/1.1-tenant-safe-memory-route-and-layout-shell.yml"
+    story_summary:
+      as_a: "new user"
+      i_want: "to complete a lightweight memory profile before using the timeline"
+      so_that: "the product can personalize the memory workspace without forcing mission setup as the global product object"
+    acceptance_criteria:
+      - "A new user without a completed memory profile is routed to profile setup before timeline access."
+      - "Profile setup captures only MVP-critical information, including display name and preferred interface language."
+      - "Mission context is optional and does not block completion."
+      - "Completing setup redirects the user to the tenant timeline."
+      - "Existing authentication and account-profile behavior remains available."
+    integration_verification:
+      - "Existing user registration and login flows still complete successfully."
+      - "Profile gating applies only to the memory product surface and does not block Filament account/billing operations."
+      - "Tests cover setup gating, successful completion, and redirect to the correct tenant timeline."
+
+  scope_boundaries:
+    - "Do not create Story 1.2 implementation code during DevOps cleanup."
+    - "Do not implement diary records, trip/period records, media, filters, localization tables, admin reporting, or public sharing in Story 1.2."
+    - "Do not move account, billing, user, role, team, invitation, security, or subscription flows out of the existing Filament Dashboard."
+    - "Do not introduce a SPA router, JSON API client, JavaScript domain store, or new frontend runtime."
+    - "Do not use album-facing language in MVP UI copy."
+
+  known_quality_context:
+    story_1_1:
+      status: "Ready for Review"
+      qa_gate: "WAIVED"
+      reason: "Story-focused requirements and focused access tests passed; repository-wide typecheck/test failures were accepted as external debt."
+      focused_validation:
+        - "Memory route feature tests passed: 5 tests, 23 assertions."
+        - "Focused PHPStan passed for Story 1.1 files."
+        - "Pint passed."
+        - "Route list confirmed memories.timeline."
+      external_debt:
+        - "npm run typecheck timed out or failed on existing repository-wide PHPStan issues."
+        - "npm test remains noisy/red due to repository-wide test environment issues."
+
+  recommended_command:
+    agent: "/agent aiox-devops"
+    command: "Review and execute .aiox/handoffs/20260523T094453-0300-aiox-master-to-devops-post-merge-story-1-2-prep.yaml"
+    reason: "DevOps owns repo hygiene and post-merge branch preparation before the next story starts."
+    after_devops:
+      agent: "/agent aiox-sm"
+      command: "*create-next-story"
+      reason: "SM owns creating the next implementation-ready Story 1.2 draft from the PRD and architecture sources."
+
+  blockers:
+    - "The local worktree is dirty with unrelated generated/tooling deletions and local config edits."
+    - "Do not start Story 1.2 implementation until the branch/base is clean or the user explicitly approves carrying local changes."
+
+  execution_result:
+    status: "completed_with_isolated_worktree"
+    summary: "DevOps verified PR #4 is merged, aligned local main to origin/main, created the Story 1.2 branch from origin/main, and added a clean worktree for SM drafting."
+    local_main: "f45f60b6d16370edff087e40a24de3a1cfee7be9"
+    story_branch: "feature/story-1-2-memory-profile-setup-gate"
+    clean_worktree: "/tmp/missionary_journal-story-1-2"
+    follow_up_handoff: ".aiox/handoffs/20260523T094742-0300-devops-to-sm-story-1-2-ready-to-draft.yaml"
+    untouched_local_changes: "The original checkout remains dirty; generated IDE/tooling deletions and local config/status changes were not reverted, staged, or committed."
+
+  next_action: "Switch to SM using the clean worktree and create the implementation-ready Story 1.2 draft."

@@ -1,0 +1,108 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T09:47:42-03:00"
+  from_agent: "devops"
+  to_agent: "sm"
+  consumed: false
+  last_command: "execute-post-merge-story-1-2-prep"
+
+  execution_context:
+    source_handoff: ".aiox/handoffs/20260523T094453-0300-aiox-master-to-devops-post-merge-story-1-2-prep.yaml"
+    summary: "Post-merge repo preparation is complete enough for SM to draft Story 1.2 without using the dirty primary checkout."
+    original_checkout:
+      path: "/home/jose/projects/missionary_journal"
+      branch: "feature/story-1-1-tenant-safe-memory-route-layout-shell"
+      status: "dirty"
+      note: "Left untouched to avoid reverting or committing user-owned generated/tooling changes."
+    clean_worktree:
+      path: "/tmp/missionary_journal-story-1-2"
+      branch: "feature/story-1-2-memory-profile-setup-gate"
+      base: "origin/main"
+      head: "f45f60b6d16370edff087e40a24de3a1cfee7be9"
+      status: "clean_base_with_untracked_handoff"
+    repository:
+      origin: "https://github.com/gabriel-daldegan/missionary_journal.git"
+      upstream: "https://github.com/joseferrao/saasykit-tenancy.git"
+      local_main: "f45f60b6d16370edff087e40a24de3a1cfee7be9"
+      merged_pr:
+        number: 4
+        title: "feat: add tenant-safe memory route shell"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/4"
+        state: "MERGED"
+        release_check: "success"
+
+  next_story:
+    story_id: "1.2"
+    title: "Memory Profile Setup Gate"
+    target_path: "docs/stories/1.2.memory-profile-setup-gate.story.md"
+    jira:
+      project_key: "MIS"
+      parent_epic: "MIS-1"
+      previous_story: "MIS-2"
+      note: "Create or sync the Jira child story only if the SM/PO workflow requires live Jira alignment before validation."
+    source_artifacts:
+      primary:
+        - "docs/prd.md#story-12-memory-profile-setup-gate"
+        - "docs/ui-architecture.md#routing"
+        - "docs/ui-architecture.md#route-responsibilities"
+        - "docs/ui-architecture.md#redirect-and-denial-behavior"
+      implementation_context:
+        - "docs/framework/coding-standards.md"
+        - "docs/framework/source-tree.md"
+        - "docs/framework/tech-stack.md"
+        - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+        - "docs/qa/gates/1.1-tenant-safe-memory-route-and-layout-shell.yml"
+
+    user_story:
+      as_a: "new user"
+      i_want: "to complete a lightweight memory profile before using the timeline"
+      so_that: "the product can personalize the memory workspace without forcing mission setup as the global product object"
+
+    acceptance_criteria:
+      - "A new user without a completed memory profile is routed to profile setup before timeline access."
+      - "Profile setup captures only MVP-critical information, including display name and preferred interface language."
+      - "Mission context is optional and does not block completion."
+      - "Completing setup redirects the user to the tenant timeline."
+      - "Existing authentication and account-profile behavior remains available."
+
+    integration_verification:
+      - "Existing user registration and login flows still complete successfully."
+      - "Profile gating applies only to the memory product surface and does not block Filament account/billing operations."
+      - "Tests cover setup gating, successful completion, and redirect to the correct tenant timeline."
+
+  drafting_guidance:
+    - "Use the clean worktree at /tmp/missionary_journal-story-1-2 for all Story 1.2 drafting work."
+    - "Do not edit or stage the dirty primary checkout while drafting Story 1.2."
+    - "Start from the merged Story 1.1 route shell and keep the route boundary under /memories/{tenant:uuid}."
+    - "Draft the story only; do not implement migrations, Livewire components, services, middleware, or tests in the SM step."
+    - "Keep profile setup limited to display name, preferred interface language, and optional mission context."
+    - "Preserve SaaSykit account, billing, dashboard, teams, users, roles, invitations, security, and subscription flows."
+    - "Do not add diary records, timeline grouping, media, filters, localization tables, reporting, public sharing, SPA routing, JSON clients, or a JavaScript domain store."
+    - "Avoid album-facing language in MVP UI copy."
+
+  known_quality_context:
+    story_1_1:
+      status: "Ready for Review"
+      qa_gate: "WAIVED"
+      merged: true
+      release_check: "success"
+      note: "Focused route and tenant-boundary validation passed; repo-wide typecheck/test issues remain external debt."
+    repo_wide_debt:
+      - "npm run typecheck timed out or failed on existing repository-wide PHPStan issues."
+      - "npm test remains noisy/red due to repository-wide test environment issues."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*create-next-story"
+    cwd: "/tmp/missionary_journal-story-1-2"
+    reason: "SM owns creating the next implementation-ready Story 1.2 draft from the PRD and architecture sources."
+    after_sm:
+      agent: "/agent aiox-po"
+      command: "*validate-story-draft docs/stories/1.2.memory-profile-setup-gate.story.md"
+      reason: "PO should validate the Story 1.2 draft before Dev implementation starts."
+
+  blockers:
+    - "Do not use the dirty primary checkout for Story 1.2 drafting."
+    - "Do not discard generated/tooling deletions in the primary checkout without explicit user approval."
+
+  next_action: "Switch to SM, use /tmp/missionary_journal-story-1-2, and create the Story 1.2 draft."
