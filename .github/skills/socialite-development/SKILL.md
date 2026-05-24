@@ -8,17 +8,6 @@ metadata:
 
 # Socialite Authentication
 
-## When to Apply
-
-Activate this skill when:
-
-- Adding or configuring social login providers
-- Setting up OAuth redirect/callback routes
-- Retrieving or mapping authenticated user details
-- Customizing scopes, parameters, or stateless auth
-- Setting up community providers
-- Testing OAuth flows with Socialite fakes
-
 ## Documentation
 
 Use `search-docs` for detailed Socialite patterns and documentation (installation, configuration, routing, callbacks, testing, scopes, stateless auth).
@@ -50,7 +39,7 @@ Two routes are needed: one that calls `Socialite::driver('provider')->redirect()
 
 ### 3. Authenticate and store the user
 
-In the callback, use `updateOrCreate` to find or create a user record from the provider's response (`id`, `name`, `email`, `token`, `refreshToken`), then call `Auth::login()`.
+In the callback, check for denied grants before calling `Socialite::driver(...)->user()`. OAuth providers commonly return request parameters such as `error` or `denied` when the user declines authorization. Handle that path with a user-facing denial response or a clear domain exception, then use `updateOrCreate` to find or create a user record from the provider's response (`id`, `name`, `email`, `token`, `refreshToken`) and call `Auth::login()`.
 
 ### 4. Customize the redirect (optional)
 
@@ -88,4 +77,4 @@ Socialite provides `Socialite::fake()` for testing redirects and callbacks. Use 
 - Redirect URL in `config/services.php` must exactly match the provider's OAuth dashboard (including trailing slashes and protocol).
 - Do not pass `state`, `response_type`, `client_id`, `redirect_uri`, or `scope` via `with()` — these are reserved.
 - Community providers require event listener registration via `SocialiteWasCalled`.
-- `user()` throws when the user declines authorization. Always handle denied grants.
+- Check callback request inputs such as `error` or `denied` before calling `Socialite::driver(...)->user()`. Handle denied grants explicitly instead of relying on a provider HTTP exception from `user()`.
