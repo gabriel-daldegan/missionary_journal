@@ -1,23 +1,24 @@
 {
     "agents": [
-        "junie",
-        "cursor",
         "claude_code",
         "codex",
         "copilot"
     ],
+    "cloud": false,
     "guidelines": true,
-    "herd_mcp": false,
     "mcp": true,
-    "nightwatch_mcp": false,
+    "nightwatch": false,
     "packages": [
-        "filament/filament"
+        "filament/filament",
+        "barryvdh/laravel-debugbar"
     ],
     "sail": false,
     "skills": [
+        "laravel-best-practices",
         "configuring-horizon",
         "socialite-development",
         "livewire-development",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "debug-using-debugbar"
     ]
 }

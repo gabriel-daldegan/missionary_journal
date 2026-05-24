@@ -1,0 +1,24 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "php",
+            "args": [
+                "artisan",
+                "boost:mcp"
+            ]
+        },
+        "time": {
+            "command": "docker",
+            "args": [
+                "run",
+                "-i",
+                "--rm",
+                "mcp/time"
+            ]
+        },
+        "notion": {
+            "type": "http",
+            "url": "https://mcp.notion.com/mcp"
+        }
+    }
+}
