@@ -8,6 +8,7 @@
 
 @php
     $price = $planService->getPlanPrice($plan);
+    $meterName = $plan->meter?->name;
     $tenant = \Filament\Facades\Filament::getTenant();
     $tenantUserCount = $tenant ? $tenant->users()->count() : 0;
     $exceedsMaxUsers = $plan->max_users_per_tenant > 0 && $tenantUserCount > $plan->max_users_per_tenant;
@@ -27,7 +28,7 @@
         <div class="text-lg font-semibold">{{ __($plan->product->name) }}</div>
         <div class="flex items-center justify-center mt-2 flex-col">
 
-            @if($price->price > 0)
+            @if($price !== null && $price->price > 0)
                 <div class="mr-1 text-4xl font-bold">@money($price->price, $price->currency->code)</div>
                 <div class="text-sm">
                     @if($plan->type === \App\Constants\PlanType::SEAT_BASED->value && $price->type === \App\Constants\PlanPriceType::SEAT_BASED_WITH_INCLUDED_SEATS->value)
@@ -44,18 +45,18 @@
                 </div>
             @endif
 
-            @if($price->type === \App\Constants\PlanPriceType::USAGE_BASED_PER_UNIT->value)
+            @if($price !== null && $price->type === \App\Constants\PlanPriceType::USAGE_BASED_PER_UNIT->value && $meterName !== null)
                 <div class="text-sm mt-2">
-                    + @money($price->price_per_unit, $price->currency->code) / {{ __($plan->meter->name) }}
+                    + @money($price->price_per_unit, $price->currency->code) / {{ __($meterName) }}
                 </div>
-            @elseif($price->type === \App\Constants\PlanPriceType::USAGE_BASED_TIERED_GRADUATED->value
-                    || $price->type === \App\Constants\PlanPriceType::USAGE_BASED_TIERED_VOLUME->value)
+            @elseif($price !== null && $meterName !== null && ($price->type === \App\Constants\PlanPriceType::USAGE_BASED_TIERED_GRADUATED->value
+                    || $price->type === \App\Constants\PlanPriceType::USAGE_BASED_TIERED_VOLUME->value))
                 <div class="text-xs mt-2">
                     @php $start = 0; $startingPhrase = __('From'); @endphp
                     @foreach($price->tiers as $tier)
                         <div class="mt-2 text-sm">
-                            <span class="font-semibold"> {{$startingPhrase}} {{ $start }} - {{ $tier[\App\Constants\PlanPriceTierConstants::UNTIL_UNIT] }} {{ __(strtolower(str()->plural($plan->meter->name))) }} </span>
-                            → <span class="">@money($tier[\App\Constants\PlanPriceTierConstants::PER_UNIT], $price->currency->code) / {{ __($plan->meter->name) }} </span>
+                            <span class="font-semibold"> {{$startingPhrase}} {{ $start }} - {{ $tier[\App\Constants\PlanPriceTierConstants::UNTIL_UNIT] }} {{ __(strtolower(str()->plural($meterName))) }} </span>
+                            → <span class="">@money($tier[\App\Constants\PlanPriceTierConstants::PER_UNIT], $price->currency->code) / {{ __($meterName) }} </span>
                             @if ($tier[\App\Constants\PlanPriceTierConstants::FLAT_FEE] > 0)
                                 + @money($tier['flat_fee'], $price->currency->code)
                             @endif

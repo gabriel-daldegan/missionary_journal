@@ -7,7 +7,7 @@ use App\Models\User;
 use Database\Seeders\Testing\TestingDatabaseSeeder;
 use Tests\TestCase;
 
-class FeatureTest extends TestCase
+abstract class FeatureTest extends TestCase
 {
     protected static bool $setUpHasRunOnce = false;
 

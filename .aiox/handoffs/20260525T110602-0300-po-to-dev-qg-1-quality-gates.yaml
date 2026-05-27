@@ -1,0 +1,74 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-25T11:06:02-03:00"
+  from_agent: "po"
+  to_agent: "dev"
+  consumed: true
+  last_command: "validate-story-draft"
+
+  story_context:
+    story_id: "QG.1"
+    story_path: "docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+    status: "Approved"
+    title: "Stabilize Repository-Wide Quality Gates"
+    branch: "feature/story-1-3-workspace-settings-shared-editing"
+    jira_issue: ""
+    parent_epic: "Technical Quality Gates"
+    sequencing_note: "QG.1 is intentionally executed on the current Story 1.3 branch because it must be resolved before relying on repository-wide typecheck/test gates for Story 1.3 PR or release enforcement."
+
+  validation_result:
+    decision: "GO"
+    readiness_score: 8
+    confidence: "High"
+    summary: "QG.1 is sufficiently clear, bounded, sourced, testable, and aligned with prior QA gate findings for implementation."
+    passed_checks:
+      - "Template-required sections are present and placeholders are resolved."
+      - "Executor assignment is valid: @devops with @architect quality gate and non-empty quality gate tools."
+      - "Acceptance criteria cover PHPStan/typecheck reliability, npm test database credentials, the nullable usage-meter pricing failure, Sail-first scripts, focused story regressions, and CodeRabbit CRITICAL gating."
+      - "Tasks map to acceptance criteria and include reproduction, narrow remediation, validation, and release-waiver boundaries."
+      - "Source claims were checked against Story 1.1 and Story 1.2 QA gates, Story 1.3 testing notes, package.json scripts, pricing Blade, nullable meter migration, and Laravel Boost documentation."
+      - "Scope boundaries exclude Story 1.3 workspace settings implementation, Story 1.4 diary record work, broad billing-provider changes, non-Sail command replacement, and silent waiver reuse."
+
+  non_blocking_notes:
+    - "The local Story Development Cycle routes approved stories to @dev *develop, while QG.1's executor assignment records @devops because the domain is repository quality gates. Use @dev for the implementation command surface and preserve DevOps accountability for final pre-push/release gates."
+    - "Code intelligence is unavailable in this session, so duplicate detection was skipped according to the validate-next-story fallback rule."
+    - "Jira child story sync was not performed; local story remains source of truth until explicitly synced."
+    - "Earlier stories include CodeRabbit skip notices from their original draft time, but current core-config.yaml has CodeRabbit enabled and QG.1 uses the active CodeRabbit path."
+    - "If Story 1.3 is implemented first, also run its focused workspace settings service and memory route/profile regression commands from the story."
+    - "CodeRabbit is an external local quality gate for this repository, not a project npm/composer dependency."
+
+  recommended_command:
+    agent: "/agent aiox-dev"
+    command: "*develop docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+    reason: "PO validation returned GO and QG.1 is now Approved."
+
+  required_dev_checks:
+    - "npm run typecheck"
+    - "npm test -- --stop-on-failure"
+    - "npm run lint"
+    - "vendor/bin/sail artisan test --compact tests/Feature/AppTest.php tests/Feature/Http/Controllers/HomeControllerTest.php"
+    - "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php"
+    - "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryProfileSetupGateTest.php tests/Feature/Livewire/Memory/MemoryProfileSetupTest.php"
+
+  external_quality_gate_checks:
+    - "coderabbit doctor"
+    - "coderabbit review --agent --type uncommitted"
+    - "coderabbit review --agent --base main"
+
+  source_artifacts:
+    primary:
+      - "docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+      - ".aiox/handoffs/20260525T105014-0300-sm-to-po-qg-1-quality-gates-draft.yaml"
+      - "docs/qa/gates/1.1-tenant-safe-memory-route-and-layout-shell.yml"
+      - "docs/qa/gates/1.2-memory-profile-setup-gate.yml"
+      - "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+    supporting:
+      - "package.json"
+      - "resources/views/components/plans/one.blade.php"
+      - "database/migrations/2024_10_23_194329_usage_based_billing.php"
+      - ".aiox-core/core-config.yaml"
+      - ".aiox-core/product/templates/story-tmpl.yaml"
+      - ".aiox-core/product/checklists/po-master-checklist.md"
+
+  blockers: []
+  next_action: "Switch to Dev and implement QG.1 before reusing repository-wide waivers for Story 1.3 release enforcement."

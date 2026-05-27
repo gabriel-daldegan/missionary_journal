@@ -2,6 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Constants\PlanPriceType;
+use App\Constants\PlanType;
+use App\Models\Currency;
+use App\Models\Plan;
+use App\Models\PlanPrice;
+use App\Models\Product;
+
 class AppTest extends FeatureTest
 {
     public function test_the_application_returns_a_successful_response(): void
@@ -39,5 +46,33 @@ class AppTest extends FeatureTest
         $response = $this->withCookie(config('cookie-consent.cookie_name'), 'accepted')->get('/');
 
         $response->assertSeeHtml('<javascript>Google Analytics</javascript>');
+    }
+
+    public function test_usage_based_pricing_without_meter_does_not_break_home_page(): void
+    {
+        $currency = Currency::where('code', 'USD')->firstOrFail();
+        $product = Product::factory()->create([
+            'name' => 'Usage Product',
+        ]);
+        $plan = Plan::factory()->create([
+            'name' => 'Usage Plan',
+            'product_id' => $product->id,
+            'type' => PlanType::USAGE_BASED->value,
+            'is_visible' => true,
+            'is_active' => true,
+        ]);
+
+        PlanPrice::factory()->create([
+            'plan_id' => $plan->id,
+            'currency_id' => $currency->id,
+            'type' => PlanPriceType::USAGE_BASED_PER_UNIT->value,
+            'price' => 0,
+            'price_per_unit' => 10,
+        ]);
+
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+        $response->assertSee('Usage Product');
     }
 }

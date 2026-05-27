@@ -1,0 +1,66 @@
+{
+  "story_id": "QG.1",
+  "story_path": "docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md",
+  "validated_at": "2026-05-25T11:06:02-03:00",
+  "agent": "po",
+  "command": "validate-story-draft",
+  "validation_result": true,
+  "decision": "GO",
+  "readiness_score": 8,
+  "confidence": "High",
+  "summary": "QG.1 is ready for implementation as a technical quality story. It is sourced to prior QA gate debt, has measurable acceptance criteria, and gives enough implementation and validation context to stabilize repository-wide gates before Story 1.3 PR/release enforcement relies on them.",
+  "checklist": {
+    "template_compliance": {
+      "status": "PASS",
+      "notes": "Required story sections are present, including Status, Executor Assignment, Story, Acceptance Criteria, CodeRabbit Integration, Tasks / Subtasks, Dev Notes, Testing, Change Log, Dev Agent Record, and QA Results. No template placeholders were found."
+    },
+    "executor_assignment": {
+      "status": "PASS",
+      "notes": "Executor @devops and quality gate @architect are distinct known agents with non-empty quality gate tools. The assignment matches the deployment/devtools nature of the story."
+    },
+    "acceptance_criteria": {
+      "status": "PASS",
+      "notes": "The six acceptance criteria are measurable against package scripts, test database behavior, pricing render behavior, focused regression checks, and CodeRabbit output."
+    },
+    "source_verification": {
+      "status": "PASS",
+      "notes": "Claims were checked against Story 1.1 and Story 1.2 QA gates, Story 1.3 testing notes, package.json scripts, resources/views/components/plans/one.blade.php, and database/migrations/2024_10_23_194329_usage_based_billing.php."
+    },
+    "technical_guidance": {
+      "status": "PASS",
+      "notes": "Tasks identify the PHPStan execution path, npm test database credential path, nullable meter pricing risk, scope boundaries, and regression commands."
+    },
+    "testing_guidance": {
+      "status": "PASS",
+      "notes": "Required verification commands cover CodeRabbit, repo-wide lint/typecheck/test gates, pricing smoke coverage, and focused memory story regressions."
+    },
+    "security_scope": {
+      "status": "PASS",
+      "notes": "The story does not introduce new auth, tenancy, secret, or payment-provider behavior beyond the narrow quality-gate and invalid pricing-render scenario."
+    },
+    "coderabbit_integration": {
+      "status": "PASS",
+      "notes": "core-config.yaml has CodeRabbit enabled, and the story includes readiness, uncommitted review, base-main review, blocking behavior for CRITICAL findings, and focus areas."
+    },
+    "code_intelligence": {
+      "status": "SKIPPED",
+      "notes": "isCodeIntelAvailable returned unavailable in this session, so duplicate detection was skipped according to the validate-next-story fallback rule."
+    },
+    "laravel_docs_check": {
+      "status": "PASS",
+      "notes": "Laravel Boost documentation confirmed Sail-first command execution, Sail test equivalence to artisan test, and Sail npm command usage for the installed Laravel/Sail package context."
+    },
+    "dev_readiness": {
+      "status": "PASS",
+      "notes": "A development agent can implement the story without inventing requirements or expanding into Story 1.3 workspace settings, Story 1.4 diary record work, or broad billing-provider behavior."
+    }
+  },
+  "non_blocking_notes": [
+    "The local Story Development Cycle routes approved stories to @dev *develop, while QG.1's executor assignment records @devops because the domain is repository quality gates. Use @dev for the implementation command surface and preserve DevOps accountability for final pre-push/release gates.",
+    "Jira child story sync remains pending; the local story file is the source of truth until PO or DevOps explicitly syncs it.",
+    "Earlier memory stories still show CodeRabbit skip notices because they were drafted before CodeRabbit was enabled in core-config.yaml; QG.1 correctly uses the currently enabled CodeRabbit path."
+  ],
+  "blockers": [],
+  "recommended_command": "/agent aiox-dev *develop docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md",
+  "handoff": ".aiox/handoffs/20260525T110602-0300-po-to-dev-qg-1-quality-gates.yaml"
+}

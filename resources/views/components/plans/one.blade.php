@@ -4,6 +4,7 @@
 
 @php
     $price = $planService->getPlanPrice($plan);
+    $meterName = $plan->meter?->name;
 @endphp
 
 <div {{$attributes->merge(['class' => 'relative px-5 py-10 flex flex-col gap-4 mx-auto text-center border-2 border-primary-500 rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-2 transition'])}}>
@@ -42,12 +43,12 @@
             @endif
         @endif
 
-        @if($price->type === \App\Constants\PlanPriceType::USAGE_BASED_PER_UNIT->value)
+        @if($price !== null && $price->type === \App\Constants\PlanPriceType::USAGE_BASED_PER_UNIT->value && $meterName !== null)
             <div class="text-sm mt-2">
-                + @money($price->price_per_unit, $price->currency->code) / {{ __($plan->meter->name) }}
+                + @money($price->price_per_unit, $price->currency->code) / {{ __($meterName) }}
             </div>
-        @elseif($price->type === \App\Constants\PlanPriceType::USAGE_BASED_TIERED_GRADUATED->value
-                || $price->type === \App\Constants\PlanPriceType::USAGE_BASED_TIERED_VOLUME->value)
+        @elseif($price !== null && $meterName !== null && ($price->type === \App\Constants\PlanPriceType::USAGE_BASED_TIERED_GRADUATED->value
+                || $price->type === \App\Constants\PlanPriceType::USAGE_BASED_TIERED_VOLUME->value))
             <div class="mt-2">
                 @php $start = 0; $startingPhrase = __('From'); @endphp
                 @foreach($price->tiers as $tier)
@@ -55,11 +56,11 @@
                         <span class="font-medium text-xs ">{{$startingPhrase}}</span>
                         <span class="flex flex-col">
                             <span class="text-xl">{{ $start }} - {{ $tier[\App\Constants\PlanPriceTierConstants::UNTIL_UNIT] }}</span>
-                            <span class="text-neutral-400 text-xs">{{ __(strtolower(str()->plural($plan->meter->name))) }}</span>
+                            <span class="text-neutral-400 text-xs">{{ __(strtolower(str()->plural($meterName))) }}</span>
                         </span>
                         →
                         <span class="flex flex-col">
-                            <span class=" text-sm">@money($tier[\App\Constants\PlanPriceTierConstants::PER_UNIT], $price->currency->code) / {{ __($plan->meter->name) }}</span>
+                            <span class=" text-sm">@money($tier[\App\Constants\PlanPriceTierConstants::PER_UNIT], $price->currency->code) / {{ __($meterName) }}</span>
                             @if ($tier[\App\Constants\PlanPriceTierConstants::FLAT_FEE] > 0)
                             <span class="text-neutral-400 text-xs">+ @money($tier['flat_fee'], $price->currency->code)</span>
                             @endif
