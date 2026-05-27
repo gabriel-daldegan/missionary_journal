@@ -1,0 +1,116 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-27T03:40:21-03:00"
+  from_agent: "dev"
+  to_agent: "qa"
+  consumed: true
+  last_command: "*develop-yolo docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+
+  story_context:
+    story_id: "QG.1"
+    story_path: "docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+    status: "Ready for Review"
+    title: "Stabilize Repository-Wide Quality Gates"
+    branch: "feature/story-1-3-workspace-settings-shared-editing"
+    jira_issue: ""
+    parent_epic: "Technical Quality Gates"
+    review_owner: "qa"
+    review_reason: "Workflow chain routes stories in Ready for Review to QA for *review. QG.1 also lists QA as a supporting agent for final gate evidence and regression-risk review."
+
+  implementation_summary:
+    - "Stabilized npm test to run through Sail with testing database creation/refresh and explicit testing credentials."
+    - "Added explicit PHPStan baseline include so repository-wide typecheck completes while preserving legacy static-analysis debt as visible tracked policy."
+    - "Hardened public and Filament plan card rendering for visible usage-based plans that have no meter."
+    - "Added focused regression coverage for usage-based pricing without a meter."
+    - "Prevented PHPUnit from treating helper-only test classes as empty runnable tests."
+    - "Updated QG.1 story status, tasks, Dev Agent Record, file list, and completion notes."
+
+  validation_evidence:
+    passed:
+      - command: "npm run lint"
+        result: "passed"
+        notes: "Pint dirty formatting gate passed."
+      - command: "npm run typecheck"
+        result: "passed"
+        notes: "PHPStan analysed 478 files and reported [OK] No errors with baseline included."
+      - command: "npm test"
+        result: "passed"
+        notes: "414 tests passed, 999 assertions, exit code 0."
+      - command: "npm test -- --stop-on-failure"
+        result: "passed"
+        notes: "414 tests passed, 999 assertions, exit code 0."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/AppTest.php tests/Feature/Http/Controllers/HomeControllerTest.php"
+        result: "passed"
+        notes: "7 tests passed, 10 assertions."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php"
+        result: "passed"
+        notes: "5 tests passed, 24 assertions."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryProfileSetupGateTest.php tests/Feature/Livewire/Memory/MemoryProfileSetupTest.php"
+        result: "passed"
+        notes: "11 tests passed, 39 assertions."
+      - command: "npm run validate:structure"
+        result: "passed"
+        notes: "AIOX structure validation reported 0 errors and 0 warnings."
+      - command: "git diff --check"
+        result: "passed"
+        notes: "No whitespace errors."
+      - command: "coderabbit doctor"
+        result: "passed"
+        notes: "9 passed, 0 warnings, 0 failed."
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "completed_with_findings"
+        notes: "Completed with 12 findings. CRITICAL findings were on unrelated dirty workspace/config/story artifacts; QG.1 runtime changes had no CRITICAL finding. QG.1 PHPStan baseline size was reported as MAJOR."
+      - command: "coderabbit review --agent --base main"
+        result: "completed_with_findings"
+        notes: "Completed with 19 findings, mostly broader branch/worktree debt in skill docs, MCP/config files, and handoff metadata."
+    not_run:
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryWorkspaceSettingsServiceTest.php"
+        reason: "Story 1.3 implementation test file is not present yet."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryWorkspaceSettingsTest.php"
+        reason: "Story 1.3 optional route/view test file is not present yet."
+
+  review_scope:
+    qg1_files:
+      - ".aiox/handoffs/20260525T110602-0300-po-to-dev-qg-1-quality-gates.yaml"
+      - "compose.yml"
+      - "database/factories/UserFactory.php"
+      - "docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+      - "package.json"
+      - "phpstan-baseline.neon"
+      - "phpstan.neon"
+      - "phpunit.xml"
+      - "resources/views/components/filament/plans/one.blade.php"
+      - "resources/views/components/plans/one.blade.php"
+      - "tests/Feature/AppTest.php"
+      - "tests/Feature/FeatureTest.php"
+      - "tests/Unit/ExampleTest.php"
+    handoff_file:
+      - ".aiox/handoffs/20260527T034021-0300-dev-to-qa-qg-1-ready-for-review.yaml"
+
+  known_caveats:
+    - "The worktree contains unrelated modified and untracked files from prior Story 1.3/config/skills work. QA should separate QG.1 review scope from broader branch debt."
+    - "CodeRabbit reported CRITICAL findings in broader dirty worktree/branch files outside QG.1 runtime changes. Those findings should be handled or waived before release handoff if the broader branch is published."
+    - "The PHPStan baseline is intentionally explicit for this technical story, but CodeRabbit reported its size as MAJOR debt. Future work should reduce the baseline rather than treating it as permanent."
+    - "QG.1 was intentionally executed on the current Story 1.3 branch because it unblocks repository-wide gates needed before Story 1.3 PR/release enforcement."
+
+  recommended_command:
+    agent: "/agent aiox-qa"
+    command: "*review docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+    reason: "Story QG.1 is Ready for Review and the workflow chain routes Ready for Review stories to QA review."
+
+  source_artifacts:
+    primary:
+      - "docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+      - ".aiox/handoffs/20260525T110602-0300-po-to-dev-qg-1-quality-gates.yaml"
+      - ".aiox-core/data/workflow-chains.yaml"
+    supporting:
+      - "package.json"
+      - "phpstan.neon"
+      - "phpstan-baseline.neon"
+      - "phpunit.xml"
+      - "resources/views/components/plans/one.blade.php"
+      - "resources/views/components/filament/plans/one.blade.php"
+      - "tests/Feature/AppTest.php"
+
+  blockers: []
+  next_action: "Activate QA and run the formal QG.1 story review."

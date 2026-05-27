@@ -1,0 +1,58 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-27T05:00:36-03:00"
+  from_agent: "qa"
+  to_agent: "devops"
+  consumed: true
+  last_command: "*review-yolo docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+
+  story_context:
+    story_id: "QG.1"
+    story_path: "docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+    status: "Ready for Done with concerns"
+    title: "Stabilize Repository-Wide Quality Gates"
+    branch: "feature/story-1-3-workspace-settings-shared-editing"
+    gate_file: "docs/qa/gates/qg-1-stabilize-repository-wide-quality-gates.yml"
+
+  qa_decision:
+    gate: "CONCERNS"
+    approval: "project_owner_approved_to_proceed"
+    approved_at: "2026-05-27T05:00:36-03:00"
+    approved_scope:
+      - "QG.1 implementation files"
+      - "QG.1 validation evidence"
+      - "QG.1 handoff artifacts"
+      - "QG.1 QA gate and QA Results"
+    publication_note: "Proceed with commit, push, and PR for the QG.1 scope only. Do not bundle unrelated Story 1.3 draft/approval artifacts, synchronized skill docs, CLAUDE.md, local MCP/Codex config, or project-status cache files."
+
+  validation_evidence:
+    passed:
+      - command: "coderabbit doctor"
+        result: "9 passed, 0 warnings, 0 failed"
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "completed with 7 findings; one QG.1-scoped documentation/policy concern, no CRITICAL QG.1 runtime issue"
+      - command: "coderabbit review --agent --base main"
+        result: "completed with 3 findings; CRITICAL in CLAUDE.md outside QG.1 runtime scope"
+      - command: "npm run lint"
+        result: "passed"
+      - command: "npm run typecheck"
+        result: "passed; PHPStan analysed 478 files with no errors"
+      - command: "npm test -- --stop-on-failure"
+        result: "passed; 414 tests, 999 assertions"
+      - command: "npm run validate:structure"
+        result: "passed; 0 errors, 0 warnings"
+      - command: "git diff --check"
+        result: "passed"
+
+  known_caveats:
+    - "The worktree contains unrelated dirty files outside QG.1 scope."
+    - "Out-of-scope CodeRabbit findings included in any broader branch publication still require remediation or explicit project-owner waiver."
+    - "QG.1 carries an explicit PHPStan baseline policy that should be reduced in future quality work."
+
+  recommended_command:
+    agent: "/agent aiox-devops"
+    command: "*push && *create-pr"
+    reason: "Project owner approved proceeding from QG.1 CONCERNS to focused commit, push, and PR."
+
+  blockers: []
+  next_action: "Commit the focused QG.1 scope, push the branch to origin, and open a draft PR against main."

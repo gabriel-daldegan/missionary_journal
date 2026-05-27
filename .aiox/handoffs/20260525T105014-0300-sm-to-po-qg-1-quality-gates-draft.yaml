@@ -1,0 +1,75 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-25T10:50:14-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "draft-technical-quality-story"
+
+  story_context:
+    story_id: "QG.1"
+    title: "Stabilize Repository-Wide Quality Gates"
+    path: "docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+    status: "Draft"
+    category: "technical-quality"
+    branch: "feature/story-1-3-workspace-settings-shared-editing"
+    jira_issue: ""
+    sync_note: "Local technical story draft only; Jira child story has not been created or synced for QG.1."
+
+  source_context:
+    user_request: "Plan correction actions from QA gates before continuing release work."
+    source_artifacts:
+      - "docs/qa/gates/1.1-tenant-safe-memory-route-and-layout-shell.yml"
+      - "docs/qa/gates/1.2-memory-profile-setup-gate.yml"
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+      - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+      - "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+      - "package.json"
+      - "resources/views/components/plans/one.blade.php"
+      - "database/migrations/2024_10_23_194329_usage_based_billing.php"
+
+  planning_summary:
+    rationale: "QA gates for Stories 1.1 and 1.2 repeatedly identify repository-wide typecheck/test instability as external debt. Existing waivers were scoped to prior publications and should not be silently reused for Story 1.3 PR/release enforcement."
+    scope:
+      - "Stabilize `npm run typecheck` through Sail."
+      - "Stabilize `npm test` with correct testing database credentials."
+      - "Fix or isolate the public pricing usage-based plan without meter failure."
+      - "Run CodeRabbit CLI as an active local quality gate."
+      - "Preserve focused validation for Stories 1.1, 1.2, and 1.3."
+    out_of_scope:
+      - "Story 1.3 workspace settings implementation."
+      - "Story 1.4 diary record schema/creation."
+      - "Broad payment provider or billing behavior changes beyond the invalid meter scenario."
+
+  checklist_result:
+    checklist: ".aiox-core/product/checklists/story-draft-checklist.md"
+    readiness: "READY_FOR_PO_REVIEW"
+    clarity_score: 8
+    major_gaps: []
+    table:
+      - category: "Goal & Context Clarity"
+        status: "PASS"
+        issues: "Goal, release risk, and relationship to prior QA gates are explicit."
+      - category: "Technical Implementation Guidance"
+        status: "PASS"
+        issues: "Key package scripts, PHPStan/test DB concerns, pricing meter failure, and focused verification commands are identified."
+      - category: "Reference Effectiveness"
+        status: "PASS"
+        issues: "References point to QA gates, existing story evidence, package scripts, pricing Blade, and nullable meter migration."
+      - category: "Self-Containment Assessment"
+        status: "PASS"
+        issues: "Core requirements, assumptions, scope boundaries, and explicit non-goals are included."
+      - category: "Testing Guidance"
+        status: "PASS"
+        issues: "Required repository-wide and focused regression commands are listed."
+      - category: "CodeRabbit Integration"
+        status: "PASS"
+        issues: "CodeRabbit CLI is installed and `coderabbit doctor` passed with 9 checks. Story now includes active CodeRabbit readiness, implementation review, and pre-PR gate tasks."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/qg-1.stabilize-repository-wide-quality-gates.story.md"
+    reason: "PO should decide whether QG.1 is prioritized before Story 1.3 PR/release enforcement or whether a new explicit waiver is acceptable."
+
+  blockers: []
+  next_action: "Switch to PO and validate or prioritize the QG.1 technical story."

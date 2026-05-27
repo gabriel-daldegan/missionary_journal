@@ -4,7 +4,7 @@
     "scripts": {
         "lint": "vendor/bin/sail up -d laravel.test && vendor/bin/sail pint --dirty --format=agent",
         "typecheck": "vendor/bin/sail up -d laravel.test && vendor/bin/sail bin phpstan analyse --memory-limit=1G",
-        "test": "vendor/bin/sail up -d laravel.test && vendor/bin/sail exec -T -e APP_ENV=testing -e DB_HOST=mysql laravel.test php artisan test --compact",
+        "test": "vendor/bin/sail up -d laravel.test && vendor/bin/sail exec -T mysql bash /docker-entrypoint-initdb.d/10-create-testing-database.sh && vendor/bin/sail exec -T -e APP_ENV=testing -e DB_HOST=mysql -e DB_DATABASE=testing -e DB_USERNAME=sail_missionaryjournal -e DB_PASSWORD=password_missionaryjournal laravel.test php artisan test --compact --do-not-cache-result",
         "validate:agents": "node .aiox-core/development/scripts/validate-agents.js",
         "validate:structure": "node .aiox-core/development/scripts/validate-structure.js",
         "sync:ide": "node .aiox-core/infrastructure/scripts/ide-sync/index.js sync",
