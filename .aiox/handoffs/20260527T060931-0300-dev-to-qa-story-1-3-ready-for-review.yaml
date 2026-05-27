@@ -1,0 +1,93 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-27T06:09:31-03:00"
+  from_agent: "dev"
+  to_agent: "qa"
+  consumed: true
+  last_command: "*develop-yolo docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+
+  story_context:
+    story_id: "1.3"
+    story_path: "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+    status: "Ready for Review"
+    title: "Workspace Settings and Shared Editing Policy Foundation"
+    branch: "feature/story-1-3-workspace-settings-shared-editing"
+    jira_issue: ""
+    parent_epic: "MIS-1"
+    review_owner: "qa"
+    review_reason: "Story 1.3 implementation is complete, required focused tests pass, full suite is green, and CodeRabbit rerun reported 0 findings."
+
+  implementation_summary:
+    - "Added tenant-scoped memory_workspace_settings persistence with shared_editing default and one row per tenant."
+    - "Added MemoryWorkspaceSettings model, factory, and Tenant::memoryWorkspaceSettings() relationship."
+    - "Added MemoryWorkspaceSettingsService for resolving settings and centralizing future memory-record create/update allow-deny decisions."
+    - "Reused existing SaaSykit tenant membership through User::canAccessTenant($tenant); no parallel membership, invitation, role, seat-limit, route, UI, MemoryRecord, or memory_records scope was added."
+    - "Added focused PHPUnit service coverage for default creation, duplicate prevention, shared-editing member writes, non-shared mode denial, cross-tenant denial, and tenant isolation."
+    - "Updated Story 1.3 tasks, Dev Agent Record, file list, changelog, and status to Ready for Review."
+
+  validation_evidence:
+    passed:
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryWorkspaceSettingsServiceTest.php"
+        result: "passed"
+        notes: "8 tests passed, 17 assertions."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryProfileSetupGateTest.php tests/Feature/Memory/MemoryRouteAccessTest.php"
+        result: "passed"
+        notes: "12 tests passed, 46 assertions."
+      - command: "vendor/bin/sail artisan route:list --name=memories"
+        result: "passed"
+        notes: "Routes remain memories.entry, memories.profile.setup, and memories.timeline."
+      - command: "vendor/bin/sail bin pint --dirty --format agent"
+        result: "passed"
+        notes: "Pint dirty formatting gate passed."
+      - command: "npm run typecheck"
+        result: "passed"
+        notes: "PHPStan analysed 480 files and reported [OK] No errors."
+      - command: "npm test -- --stop-on-failure"
+        result: "passed"
+        notes: "422 tests passed, 1016 assertions."
+      - command: "git diff --check"
+        result: "passed"
+        notes: "No whitespace errors."
+      - command: "coderabbit doctor"
+        result: "passed"
+        notes: "9 passed, 0 warnings, 0 failed."
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "passed"
+        notes: "Initial MAJOR Story 1.3 coverage finding was fixed; rerun completed with 0 findings."
+
+  review_scope:
+    story_1_3_files:
+      - "app/Models/MemoryWorkspaceSettings.php"
+      - "app/Models/Tenant.php"
+      - "app/Services/MemoryWorkspaceSettingsService.php"
+      - "database/factories/MemoryWorkspaceSettingsFactory.php"
+      - "database/migrations/2026_05_27_053529_create_memory_workspace_settings_table.php"
+      - "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+      - "tests/Feature/Services/Memory/MemoryWorkspaceSettingsServiceTest.php"
+    handoff_file:
+      - ".aiox/handoffs/20260527T060931-0300-dev-to-qa-story-1-3-ready-for-review.yaml"
+
+  known_caveats:
+    - "The local worktree still contains unrelated modified files from skill/config/project-status work. QA should review the Story 1.3 file list and not treat unrelated dirty files as story implementation scope."
+    - "The Story 1.3 source story and earlier handoff artifacts were already untracked in the local worktree before this implementation run."
+    - "No memory routes or views were changed, so the conditional MemoryWorkspaceSettings route/UI regression test file was not created."
+
+  recommended_command:
+    agent: "/agent aiox-qa"
+    command: "*review docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+    reason: "Story 1.3 is Ready for Review with focused and full validation passing."
+
+  source_artifacts:
+    primary:
+      - "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+      - ".aiox/handoffs/20260523T223650-0300-po-to-dev-story-1-3.yaml"
+      - ".aiox-core/data/workflow-chains.yaml"
+    supporting:
+      - "docs/framework/coding-standards.md"
+      - "docs/framework/source-tree.md"
+      - "docs/framework/tech-stack.md"
+      - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+      - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+
+  blockers: []
+  next_action: "Activate QA and run the formal Story 1.3 review."

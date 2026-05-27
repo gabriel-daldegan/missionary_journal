@@ -31,6 +31,11 @@ class Tenant extends Model
         return $this->belongsToMany(User::class)->using(TenantUser::class)->withPivot('id')->withTimestamps();
     }
 
+    public function memoryWorkspaceSettings(): HasOne
+    {
+        return $this->hasOne(MemoryWorkspaceSettings::class);
+    }
+
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);

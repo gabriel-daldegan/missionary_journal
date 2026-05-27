@@ -1,0 +1,59 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T21:55:52-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  superseded_by: ".aiox/handoffs/20260523T221526-0300-architect-to-sm-story-1-3-adjustments.yaml"
+  superseded_reason: "Architectural clarification returned Story 1.3 to SM before PO validation."
+  last_command: "*draft"
+
+  execution_context:
+    source_handoff: ".aiox/handoffs/20260523T213518-0300-devops-to-sm-story-1-3-ready-to-draft.yaml"
+    branch: "feature/story-1-3-workspace-settings-shared-editing"
+    base: "origin/main"
+    note: "SM created a fresh Story 1.3 branch from origin/main. Local .aiox/project-status cache drift remains unstaged and outside story scope."
+
+  created_story:
+    story_id: "1.3"
+    title: "Workspace Settings and Shared Editing Policy Foundation"
+    path: "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+    status: "Draft"
+    jira:
+      project_key: "MIS"
+      parent_epic: "MIS-1"
+      previous_story: ""
+      issue_key: ""
+      sync_note: "Local draft only; Jira child story was not created or synced during SM drafting."
+
+  source_artifacts:
+    - "docs/prd.md#story-13-workspace-settings-and-shared-editing-policy-foundation"
+    - "docs/architecture.md#tenant-and-access-architecture"
+    - "docs/architecture.md#collaboration-mode-architecture"
+    - "docs/architecture.md#memory_workspace_settings"
+    - "docs/architecture.md#service-architecture"
+    - "docs/architecture.md#testing-strategy"
+    - "docs/ui-architecture.md#route-tests-required-by-stories"
+    - "docs/framework/coding-standards.md#component-boundaries"
+    - "docs/framework/source-tree.md#memory-product-locations"
+    - "docs/framework/tech-stack.md#memory-product-direction"
+    - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+    - "docs/qa/gates/1.2-memory-profile-setup-gate.yml"
+
+  validation_summary:
+    story_draft_checklist: "READY"
+    coderabbit_integration: "disabled in core-config.yaml"
+    code_intelligence: "unavailable"
+    clickup_sync: "skipped; this repo's current story artifacts use local Jira metadata and no ClickUp MCP is available in this session"
+    notes:
+      - "Story 1.2 file remains Ready for Review, but DevOps handoff records Story 1.2 and PR #7 as merged; Story 1.3 sequencing proceeds from that operational truth."
+      - "Story 1.3 is scoped to memory_workspace_settings, MemoryWorkspaceSettingsService, shared_editing allow/deny decisions, and focused service/route tests."
+      - "No implementation code was created by SM."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+    reason: "PO should validate the Story 1.3 draft before Dev implementation starts."
+
+  next_action: "Superseded. Use the Architect-to-SM adjustment handoff before PO validation."
