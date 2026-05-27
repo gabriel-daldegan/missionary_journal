@@ -41,31 +41,18 @@ class PodcastProcessingException extends Exception implements ShouldntReport {}
 
 ## Throttle High-Volume Exceptions
 
-A single failing integration can flood error tracking. Use `throttle()` to sample or rate-limit reported exceptions before they reach logs or external trackers.
-
-```php
-use Illuminate\Support\Lottery;
-use Throwable;
-
-$exceptions->throttle(function (Throwable $e): Lottery {
-    return Lottery::odds(1, 1000);
-});
-```
+A single failing integration can flood error tracking. Use `throttle()` to rate-limit per exception type.
 
 ## Enable `dontReportDuplicates()`
 
 Prevents the same exception instance from being logged multiple times when `report($e)` is called in multiple catch blocks.
-
-```php
-$exceptions->dontReportDuplicates();
-```
 
 ## Force JSON Error Rendering for API Routes
 
 Laravel auto-detects `Accept: application/json` but API clients may not set it. Explicitly declare JSON rendering for API routes.
 
 ```php
-$exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $e): bool {
+$exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $e) {
     return $request->is('api/*') || $request->expectsJson();
 });
 ```

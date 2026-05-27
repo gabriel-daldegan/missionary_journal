@@ -24,6 +24,15 @@ mcp:
   servers: []
 qa:
   qaLocation: docs/qa
+coderabbit_integration:
+  enabled: true
+  installation_mode: local
+  installation_path: /home/jose/.local/bin/coderabbit
+  commands:
+    doctor: "coderabbit doctor"
+    review_uncommitted: "coderabbit review --agent --type uncommitted"
+    review_against_main: "coderabbit review --agent --base main"
+  report_location: docs/qa/coderabbit-reports
 prd:
   prdFile: docs/prd.md
   prdVersion: v4

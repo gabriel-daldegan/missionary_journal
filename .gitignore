@@ -24,6 +24,11 @@ yarn-error.log
 /.vscode
 .DS_Store
 
+# Project personal files
+.env.testing
+.env.production
+boost.json
+
 # Environment & Secrets (AIOX)
 .env.local
 .env.*.local

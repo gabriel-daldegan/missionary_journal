@@ -1,19 +1,19 @@
 status:
-  branch: feature/story-1-1-tenant-safe-memory-route-layout-shell
+  branch: feature/story-1-3-workspace-settings-shared-editing
   modifiedFiles:
-    - .aiox/project-status.yaml
-    - .antigravity/rules/agents/aiox-master.md
-    - .antigravity/rules/agents/analyst.md
-    - .antigravity/rules/agents/architect.md
-    - .antigravity/rules/agents/data-engineer.md
-  modifiedFilesTotalCount: 98
+    - .agents/skills/configuring-horizon/SKILL.md
+    - .agents/skills/laravel-best-practices/rules/collections.md
+    - .agents/skills/laravel-best-practices/rules/config.md
+    - .agents/skills/laravel-best-practices/rules/error-handling.md
+    - .agents/skills/laravel-best-practices/rules/queue-jobs.md
+  modifiedFilesTotalCount: 40
   recentCommits:
-    - 'feat: add tenant-safe memory route shell'
-    - 'fix: align release workflow with semantic-release'
+    - 'fix(devtools): stabilize repository quality gates'
+    - 'feat(devtools): sync project automation configuration'
   currentEpic: null
   currentStory: null
-  lastUpdate: '2026-05-23T12:47:00.772Z'
+  lastUpdate: '2026-05-27T09:58:32.038Z'
   isGitRepo: true
-timestamp: 1779540420780
+timestamp: 1779875912047
 ttl: 60
 gitFingerprint: null
