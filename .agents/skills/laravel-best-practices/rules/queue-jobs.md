@@ -42,7 +42,7 @@ Correct (exponential backoff):
 class SyncWithStripe implements ShouldQueue
 {
     public $tries = 3;
-    public $backoff = [1, 5, 10]; // seconds
+    public $backoff = [1, 5, 10];
 }
 ```
 
@@ -79,19 +79,10 @@ public function failed(?Throwable $exception): void
 Use `RateLimited` middleware to throttle jobs calling third-party APIs.
 
 ```php
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Queue\Middleware\RateLimited;
-use Illuminate\Support\Facades\RateLimiter;
-
 public function middleware(): array
 {
     return [new RateLimited('external-api')];
 }
-
-// In a service provider boot() method:
-RateLimiter::for('external-api', function (object $job): Limit {
-    return Limit::perHour(60)->by((string) $job->user->id);
-});
 ```
 
 ## Batch Related Jobs

@@ -1,18 +1,17 @@
 {
     "agents": [
         "claude_code",
-        "codex",
-        "copilot"
+        "codex"
     ],
     "cloud": false,
     "guidelines": true,
     "mcp": true,
     "nightwatch": false,
     "packages": [
-        "filament/filament",
-        "barryvdh/laravel-debugbar"
+        "barryvdh/laravel-debugbar",
+        "filament/filament"
     ],
-    "sail": false,
+    "sail": true,
     "skills": [
         "laravel-best-practices",
         "configuring-horizon",

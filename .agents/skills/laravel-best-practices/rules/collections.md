@@ -11,7 +11,7 @@ $users->each(function (User $user) {
 
 Correct: `$users->each->markAsVip();`
 
-For the complete supported method list, check Laravel's higher-order message documentation before assuming a method is available.
+Works with `each`, `map`, `sum`, `filter`, `reject`, `contains`, etc.
 
 ## Choose `cursor()` vs. `lazy()` Correctly
 
@@ -24,7 +24,7 @@ Correct: `User::with('roles')->lazy()` for relationship access; `User::cursor()`
 
 ## Use `lazyById()` When Updating Records While Iterating
 
-`lazy()` uses offset pagination, so updating records during iteration can skip or double-process rows. `lazyById()` pages by `id > last_id`, which is safer for updates, but do not update the paging column itself during iteration. New rows inserted while the loop is running may still be picked up later if they match the query, and `lazyById()` does not provide transactional consistency; use explicit locks or transactions when concurrency-sensitive updates require a stable snapshot.
+`lazy()` uses offset pagination — updating records during iteration can skip or double-process. `lazyById()` uses `id > last_id`, safe against mutation.
 
 ## Use `toQuery()` for Bulk Operations on Collections
 

@@ -1,0 +1,79 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-27T06:34:35-03:00"
+  from_agent: "qa"
+  to_agent: "devops"
+  consumed: true
+  last_command: "*review docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+
+  story_context:
+    story_id: "1.3"
+    story_path: "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+    status: "Ready for Done"
+    title: "Workspace Settings and Shared Editing Policy Foundation"
+    branch: "feature/story-1-3-workspace-settings-shared-editing"
+    gate_file: "docs/qa/gates/1.3-workspace-settings-and-shared-editing-policy-foundation.yml"
+
+  qa_decision:
+    gate: "PASS"
+    approval: "approved_for_publication"
+    approved_at: "2026-05-27T06:34:35-03:00"
+    approved_scope:
+      - "Story 1.3 implementation files"
+      - "Story 1.3 validation evidence"
+      - "Story 1.3 QA gate and QA Results"
+      - "Story 1.3 workflow handoff artifacts"
+    publication_note: "Proceed with focused Story 1.3 publication. Do not bundle unrelated synchronized skill docs, CLAUDE.md, local MCP/Codex config, or project-status cache files unless DevOps intentionally scopes them."
+
+  validation_evidence:
+    passed:
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryWorkspaceSettingsServiceTest.php"
+        result: "passed; 8 tests, 17 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryProfileSetupGateTest.php tests/Feature/Memory/MemoryRouteAccessTest.php"
+        result: "passed; 12 tests, 46 assertions"
+      - command: "vendor/bin/sail artisan route:list --name=memories"
+        result: "passed; 3 memory routes"
+      - command: "npm run lint"
+        result: "passed"
+      - command: "npm run typecheck"
+        result: "passed; PHPStan analysed 480 files with no errors"
+      - command: "npm test -- --stop-on-failure"
+        result: "passed; 422 tests, 1016 assertions"
+      - command: "git diff --check"
+        result: "passed"
+      - command: "coderabbit doctor"
+        result: "passed; 9 passed, 0 warnings, 0 failed"
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "completed with 2 minor story-documentation findings and no implementation blockers"
+
+  known_caveats:
+    - "The worktree contains unrelated dirty files outside Story 1.3 publication scope."
+    - "CodeRabbit noted minor story documentation inconsistencies where command examples are not Sail-prefixed; QA treated this as non-blocking future cleanup because implementation evidence used Sail-backed commands."
+    - "Story 1.3 source story and earlier handoff artifacts were already untracked in the local worktree before QA review."
+
+  recommended_command:
+    agent: "/agent aiox-devops"
+    command: "*push"
+    reason: "Story 1.3 has a PASS QA gate and is ready for focused publication."
+
+  publication_scope:
+    include:
+      - "app/Models/MemoryWorkspaceSettings.php"
+      - "app/Models/Tenant.php"
+      - "app/Services/MemoryWorkspaceSettingsService.php"
+      - "database/factories/MemoryWorkspaceSettingsFactory.php"
+      - "database/migrations/2026_05_27_053529_create_memory_workspace_settings_table.php"
+      - "tests/Feature/Services/Memory/MemoryWorkspaceSettingsServiceTest.php"
+      - "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+      - "docs/qa/gates/1.3-workspace-settings-and-shared-editing-policy-foundation.yml"
+      - ".aiox/handoffs/20260527T060931-0300-dev-to-qa-story-1-3-ready-for-review.yaml"
+      - ".aiox/handoffs/20260527T063435-0300-qa-to-devops-story-1-3-approved-for-publication.yaml"
+    exclude:
+      - "Synchronized skill docs unrelated to Story 1.3"
+      - "CLAUDE.md"
+      - ".codex/config.toml"
+      - ".mcp.json"
+      - ".aiox/project-status.yaml and lock/cache churn unless intentionally included by DevOps"
+
+  blockers: []
+  next_action: "Switch to DevOps, consume this handoff, stage the focused Story 1.3 scope, and run the publication workflow."

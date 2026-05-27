@@ -1,0 +1,116 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-05-23T21:35:18-03:00"
+  from_agent: "devops"
+  to_agent: "sm"
+  consumed: true
+  last_command: "publish-config-devtooling-and-prepare-next-story"
+
+  publication_context:
+    summary: "Story 1.2 and the follow-up project automation configuration PR are merged. The repository is ready for SM to draft the next PRD story from a clean `origin/main` base."
+    repository:
+      origin: "https://github.com/gabriel-daldegan/missionary_journal.git"
+      current_checkout:
+        path: "/home/jose/projects/missionary_journal"
+        branch: "feature/config-dev-tooling-updates"
+        head: "1255de6578ef3738eeac4da1d1a9e091142f70b0"
+        status: "dirty_with_local_aiox_status_cache_only"
+        dirty_files:
+          - ".aiox/project-status.yaml"
+          - ".aiox/project-status.yaml.lock"
+        note: "These files are local workflow state/cache and were intentionally left out of the config/devtooling PR."
+      latest_remote_main:
+        branch: "origin/main"
+        head: "afd90224189649b7d471029c60d8a1a31534a1fa"
+        tag: "v1.3.0"
+    merged_prs:
+      story_1_2:
+        number: 6
+        title: "feat(memory): add profile setup gate"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/6"
+        state: "MERGED"
+      config_devtooling:
+        number: 7
+        title: "feat(devtools): sync project automation configuration"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/7"
+        state: "MERGED"
+        merge_commit: "afd90224189649b7d471029c60d8a1a31534a1fa"
+        release_check: "success"
+
+  next_story:
+    story_id: "1.3"
+    title: "Workspace Settings and Shared Editing Policy Foundation"
+    target_path: "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+    source_artifacts:
+      primary:
+        - "docs/prd.md#story-13-workspace-settings-and-shared-editing-policy-foundation"
+        - "docs/architecture.md#memory_workspace_settings"
+        - "docs/architecture.md#service-architecture"
+        - "docs/framework/coding-standards.md#component-boundaries"
+      implementation_context:
+        - "docs/framework/source-tree.md"
+        - "docs/framework/tech-stack.md"
+        - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+        - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+        - "docs/qa/gates/1.2-memory-profile-setup-gate.yml"
+
+    user_story:
+      as_a: "workspace owner"
+      i_want: "the memory workspace to use shared editing by default"
+      so_that: "the owner and collaborator can both create and refine records during MVP validation"
+
+    acceptance_criteria:
+      - "The system stores memory workspace settings scoped to `tenant_id`."
+      - "The default collaboration mode is `shared_editing`."
+      - "Owner and collaborator can both create and edit records under MVP `shared_editing`."
+      - "Future collaboration modes are represented at the workspace level, not as per-record missionary-vs-family visibility."
+      - "The MVP does not expose a collaboration mode selector unless a later story explicitly adds it."
+
+    integration_verification:
+      - "Existing SaaSykit tenant membership, roles, and invitations remain the source of workspace membership."
+      - "Existing tenant plan/member limits remain usable for the two-user validation tier."
+      - "Policy or service tests verify owner/collaborator shared editing and cross-tenant denial."
+
+  drafting_guidance:
+    - "Start from `origin/main` at or after `afd90224189649b7d471029c60d8a1a31534a1fa`."
+    - "Use a fresh branch such as `feature/story-1-3-workspace-settings-shared-editing`."
+    - "Draft the story only; do not implement migrations, services, policies, Livewire components, or tests in the SM step."
+    - "Keep Story 1.3 focused on workspace-level settings and shared editing policy foundation."
+    - "Do not introduce diary record CRUD, trip/period records, media upload/access, filters, reporting, public sharing, SPA routing, JSON API clients, or per-record missionary-vs-family visibility."
+    - "Reuse SaaSykit `Tenant`, `tenant_user`, roles, invitations, and plan/member limits as the workspace membership foundation."
+    - "Preserve the dedicated memory product route/layout and profile setup behavior delivered in Stories 1.1 and 1.2."
+    - "Include policy/service-oriented test expectations for owner/collaborator write access and cross-tenant denial."
+    - "Use repo artifacts in English, even if the conversation remains in Portuguese."
+
+  known_quality_context:
+    passed:
+      - "PR #7 release check passed."
+      - "Config/devtooling commit used `feat(devtools): ...`, producing the expected minor semantic-release signal."
+      - "`npm run validate:structure` passed."
+      - "`npm run validate:agents` passed with 0 errors and known warnings."
+      - "`npm run lint` passed."
+      - "`composer validate --no-check-publish` passed."
+      - "CodeRabbit actionable findings for the config/devtooling PR were addressed."
+    warnings:
+      - "`npm run validate:agents` still reports existing warning-only missing AIOX task/checklist dependencies."
+      - "`npm run sync:ide:check --strict` reports optional IDE target drift for `.cursor`, `.gemini`, and `.antigravity`; PR #7 intentionally kept scope to already implemented Boost/devtooling files."
+      - "Repo-wide typecheck/test debt from Stories 1.1 and 1.2 remains separate from Story 1.3 drafting and should be handled or waived explicitly if publication policy requires it later."
+      - "Story 1.1 and Story 1.2 story files may still contain workflow-status wording from review phases; use merged PR and QA gate context as operational truth when sequencing."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*create-next-story"
+    cwd: "/home/jose/projects/missionary_journal"
+    reason: "SM owns creating the next implementation-ready Story 1.3 draft from the PRD and architecture sources."
+    setup_note: "Before drafting, switch to a clean branch from `origin/main`, for example `git switch -c feature/story-1-3-workspace-settings-shared-editing origin/main`."
+    after_sm:
+      agent: "/agent aiox-po"
+      command: "*validate-story-draft docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+      reason: "PO should validate the Story 1.3 draft before Dev implementation starts."
+
+  blockers:
+    - "Do not draft Story 1.3 on the current `feature/config-dev-tooling-updates` branch."
+    - "Do not mix local `.aiox/project-status.yaml` cache drift into the Story 1.3 branch or commit."
+    - "Do not start Story 1.3 implementation before SM draft and PO validation."
+
+  next_action: "Switch to SM, create a clean Story 1.3 branch from `origin/main`, and draft Story 1.3."

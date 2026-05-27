@@ -1,3 +1,7 @@
+
+[mcp_servers.laravel-boost.tools.search-docs]
+approval_mode = "approve"
+
 [mcp_servers.laravel-boost]
-command = "php"
-args = ["artisan", "boost:mcp"]
+command = "/usr/bin/php8.4"
+args = ["/home/jose/projects/missionary_journal/artisan", "boost:mcp"]
