@@ -1,0 +1,107 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-05T22:54:54-03:00"
+  from_agent: "dev"
+  to_agent: "qa"
+  consumed: true
+  last_command: "Verify Story 1.4a quality gate and prepare QA handoff"
+
+  story_context:
+    story_id: "1.4a"
+    story_path: "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+    status: "Ready for Review"
+    title: "Diary Record Schema Foundation"
+    branch: "feature/story-1-4-diary-record-schema-creation"
+    jira_issue: ""
+    parent_epic: "MIS-1"
+    review_owner: "qa"
+    review_reason: "Dev quality gate was rerun and passed, including focused memory tests, memory route list, Pint, lint, full PHPStan, full PHPUnit regression, whitespace check, and CodeRabbit with 0 findings."
+
+  implementation_summary:
+    - "Added tenant-scoped memory_records persistence with uuid, tenant ownership, nullable author/editor user references, diary/period timeline fields, optional source fields, JSON people/source metadata, and timeline indexes."
+    - "Added memory_tags, memory_record_tag, and memory_highlights persistence with tenant-scoped tag slugs and unique highlight sort_order values per record."
+    - "Added MemoryRecord, MemoryTag, and MemoryHighlight models with safe fillable attributes, casts/defaults, relationships, active/reserved type constants, and uuid route key support."
+    - "Added Tenant::memoryRecords() without changing existing SaaSykit tenant membership behavior."
+    - "Added factories for record, tag, and highlight test setup; MemoryRecordFactory attaches generated author/editor users to the generated tenant."
+    - "Added focused PHPUnit schema/model coverage for schema boundaries, tenant/author/editor creation, factory relationships, tag tenant uniqueness, reusable slugs across tenants, and highlight ordering/uniqueness."
+    - "Updated Story 1.4a Dev Agent Record with Dex quality gate evidence and kept status Ready for Review."
+
+  validation_evidence:
+    passed:
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRecordSchemaTest.php"
+        result: "passed"
+        notes: "5 tests passed, 34 assertions."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php"
+        result: "passed"
+        notes: "12 tests passed, 46 assertions."
+      - command: "vendor/bin/sail artisan route:list --name=memories"
+        result: "passed"
+        notes: "Routes remain memories.entry, memories.profile.setup, and memories.timeline."
+      - command: "vendor/bin/sail bin pint --dirty --format agent"
+        result: "passed"
+        notes: "Pint dirty formatting gate passed."
+      - command: "npm run lint"
+        result: "passed"
+        notes: "Project lint wrapper completed Pint successfully."
+      - command: "npm run typecheck"
+        result: "passed"
+        notes: "PHPStan analysed 483 files and reported no errors."
+      - command: "npm test"
+        result: "passed"
+        notes: "427 tests passed, 1050 assertions."
+      - command: "git diff --check"
+        result: "passed"
+        notes: "No whitespace errors."
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "passed"
+        notes: "Review completed with 0 findings."
+
+  review_scope:
+    story_1_4a_files:
+      - "app/Models/MemoryHighlight.php"
+      - "app/Models/MemoryRecord.php"
+      - "app/Models/MemoryTag.php"
+      - "app/Models/Tenant.php"
+      - "database/factories/MemoryHighlightFactory.php"
+      - "database/factories/MemoryRecordFactory.php"
+      - "database/factories/MemoryTagFactory.php"
+      - "database/migrations/2026_06_05_200315_create_memory_records_table.php"
+      - "database/migrations/2026_06_05_200315_create_memory_tags_table.php"
+      - "database/migrations/2026_06_05_200316_create_memory_highlights_table.php"
+      - "database/migrations/2026_06_05_200316_create_memory_record_tag_table.php"
+      - "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+      - "tests/Feature/Memory/MemoryRecordSchemaTest.php"
+    handoff_file:
+      - ".aiox/handoffs/20260605T225454-0300-dev-to-qa-story-1-4a-ready-for-review.yaml"
+
+  known_caveats:
+    - "The local worktree includes untracked AIOX validation and split-story artifacts for Stories 1.4a, 1.4b, and 1.4c. QA should use the Story 1.4a file list as review scope."
+    - "The incoming data-engineer-to-dev handoff was consumed after Dev quality gate verification."
+    - "Story 1.4b remains sequence-dependent on Story 1.4a QA/publication; Story 1.4c remains sequence-dependent on Stories 1.4a and 1.4b."
+
+  qa_review_focus:
+    - "Confirm schema supports tenant-scoped diary records with body, experience_date, optional location_name, tags, and ordered highlights."
+    - "Confirm period/trip fields are nullable reserved fields only and no period/trip behavior was introduced."
+    - "Confirm no missionary-only, family-visible, approval, public sharing, AI classification, media, policy, service, route, Livewire, or user-facing form behavior was added."
+    - "Confirm model relationships, uuid route key behavior, type constants, casts/defaults, and factories match the migrations and tenant membership assumptions."
+    - "Confirm tag slug uniqueness is tenant-scoped and highlight sort_order uniqueness is per record."
+    - "Confirm existing memory routes/profile gate behavior remains unchanged."
+
+  recommended_command:
+    agent: "/agent aiox-qa"
+    command: "*review docs/stories/1.4a.diary-record-schema-foundation.story.md"
+    reason: "Story 1.4a is Ready for Review with Dev quality gate passing and CodeRabbit reporting 0 findings."
+
+  source_artifacts:
+    primary:
+      - "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+      - ".aiox/handoffs/20260605T194750-0300-po-to-data-engineer-story-1-4a.yaml"
+      - ".aiox/handoffs/20260605T215000-0300-data-engineer-to-dev-story-1-4a-ready-for-quality-gate.yaml"
+      - ".aiox-core/data/workflow-chains.yaml"
+    supporting:
+      - "docs/framework/coding-standards.md"
+      - "docs/framework/source-tree.md"
+      - "docs/framework/tech-stack.md"
+
+  blockers: []
+  next_action: "Activate QA and run the formal Story 1.4a review."

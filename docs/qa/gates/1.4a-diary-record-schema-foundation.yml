@@ -1,0 +1,73 @@
+schema: 1
+story: '1.4a'
+story_title: 'Diary Record Schema Foundation'
+gate: PASS
+status_reason: 'Story-scoped schema, model, factory, and regression coverage satisfies AC1-AC5 and IV1-IV3. QA fixed the only valid CodeRabbit finding, then focused tests, memory route/profile regressions, lint, typecheck, full PHPUnit, structure validation, whitespace check, route inspection, and CodeRabbit all passed.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2026-06-06T00:00:07-03:00'
+quality_score: 100
+expires: '2026-06-20T00:00:07-03:00'
+
+top_issues: []
+
+waiver:
+  active: false
+
+evidence:
+  tests_reviewed: 446
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5]
+    ac_gaps: []
+    integration_covered: [1, 2, 3]
+    integration_gaps: []
+  commands:
+    - command: 'coderabbit review --agent --type uncommitted'
+      result: 'initial run found 1 major factory finding; QA fixed it'
+    - command: 'vendor/bin/sail bin pint --dirty --format agent'
+      result: 'passed'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRecordSchemaTest.php'
+      result: 'passed; 6 tests, 35 assertions'
+    - command: 'vendor/bin/sail artisan route:list --name=memories'
+      result: 'passed; 3 memory routes'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php'
+      result: 'passed; 12 tests, 46 assertions'
+    - command: 'npm run lint'
+      result: 'passed'
+    - command: 'npm run typecheck'
+      result: 'passed; PHPStan analysed 483 files with no errors'
+    - command: 'git diff --check'
+      result: 'passed'
+    - command: 'npm run validate:structure'
+      result: 'passed; 0 errors, 0 warnings'
+    - command: 'coderabbit review --agent --type uncommitted'
+      result: 'rerun passed with 0 findings'
+    - command: 'npm test'
+      result: 'passed; 428 tests, 1051 assertions'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Tenant ownership exists on records and tags; no privacy-expanding columns, public routes, media, approval, AI classification, or visibility behavior were added. Cross-tenant tag sync should be guarded in Story 1.4b service tests.'
+  performance:
+    status: PASS
+    notes: 'Timeline and tenant/tag lookup indexes are present, highlight ordering is indexed by uniqueness, and this slice adds no runtime query path.'
+  reliability:
+    status: PASS
+    notes: 'Focused and full regression suites passed after QA fixed the highlight factory default sort_order collision risk.'
+  maintainability:
+    status: PASS
+    notes: 'Implementation follows local Laravel model, migration, factory, and PHPUnit patterns and keeps behavior out of this schema-only slice.'
+
+recommendations:
+  immediate: []
+  future:
+    - action: 'In Story 1.4b, add service-level negative coverage preventing tags from one tenant being synced to records from another tenant.'
+      refs:
+        - 'database/migrations/2026_06_05_200316_create_memory_record_tag_table.php'
+        - 'app/Models/MemoryRecord.php'
+      suggested_owner: dev
+    - action: 'In Story 1.4b, ensure MemoryRecordService assigns uuid before persistence for route-key readiness.'
+      refs:
+        - 'app/Models/MemoryRecord.php'
+      suggested_owner: dev
