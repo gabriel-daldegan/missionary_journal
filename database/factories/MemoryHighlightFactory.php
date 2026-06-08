@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class MemoryHighlightFactory extends Factory
 {
+    private static int $nextSortOrder = 0;
+
     /**
      * Define the model's default state.
      *
@@ -21,7 +23,16 @@ class MemoryHighlightFactory extends Factory
         return [
             'memory_record_id' => MemoryRecord::factory(),
             'text' => fake()->sentence(),
-            'sort_order' => fake()->unique()->numberBetween(0, 1_000_000_000),
+            'sort_order' => self::$nextSortOrder++,
         ];
+    }
+
+    public function forRecord(MemoryRecord $memoryRecord, int $sortOrder = 0): static
+    {
+        return $this
+            ->for($memoryRecord, 'memoryRecord')
+            ->state(fn (): array => [
+                'sort_order' => $sortOrder,
+            ]);
     }
 }

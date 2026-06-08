@@ -106,10 +106,9 @@ class MemoryRecordSchemaTest extends FeatureTest
                 'slug' => 'faith-building',
             ]);
         $highlight = MemoryHighlight::factory()
-            ->for($record, 'memoryRecord')
+            ->forRecord($record, 1)
             ->create([
                 'text' => 'A family asked to learn more.',
-                'sort_order' => 1,
             ]);
 
         $record->tags()->attach($tag);
@@ -153,16 +152,14 @@ class MemoryRecordSchemaTest extends FeatureTest
         $record = MemoryRecord::factory()->create();
 
         MemoryHighlight::factory()
-            ->for($record, 'memoryRecord')
+            ->forRecord($record, 20)
             ->create([
                 'text' => 'Second highlight',
-                'sort_order' => 20,
             ]);
         MemoryHighlight::factory()
-            ->for($record, 'memoryRecord')
+            ->forRecord($record, 10)
             ->create([
                 'text' => 'First highlight',
-                'sort_order' => 10,
             ]);
 
         $this->assertSame([10, 20], $record->refresh()->highlights->pluck('sort_order')->all());
@@ -170,14 +167,13 @@ class MemoryRecordSchemaTest extends FeatureTest
         $this->expectException(QueryException::class);
 
         MemoryHighlight::factory()
-            ->for($record, 'memoryRecord')
+            ->forRecord($record, 10)
             ->create([
                 'text' => 'Duplicate sort position',
-                'sort_order' => 10,
             ]);
     }
 
-    public function test_highlight_factory_generates_unique_default_sort_order_values_for_one_record(): void
+    public function test_highlight_factory_generates_non_colliding_default_sort_order_values_for_one_record(): void
     {
         $record = MemoryRecord::factory()->create();
 
