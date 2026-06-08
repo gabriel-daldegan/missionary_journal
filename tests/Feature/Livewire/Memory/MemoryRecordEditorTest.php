@@ -58,7 +58,7 @@ class MemoryRecordEditorTest extends FeatureTest
         $response->assertDontSee('New diary entry');
     }
 
-    public function test_unsupported_record_type_returns_not_found_and_writes_nothing(): void
+    public function test_unsupported_record_type_is_rejected_by_route_and_writes_nothing(): void
     {
         $this->withExceptionHandling();
 
@@ -67,10 +67,11 @@ class MemoryRecordEditorTest extends FeatureTest
         MemoryProfile::factory()->for($user)->create();
         $recordCount = MemoryRecord::query()->count();
 
-        $response = $this->actingAs($user)->get(route('memories.records.create', [
-            'tenant' => $tenant,
-            'type' => 'period',
-        ]));
+        $response = $this->actingAs($user)->get(sprintf(
+            '/memories/%s/records/create/%s',
+            $tenant->uuid,
+            MemoryRecord::TYPE_PERIOD,
+        ));
 
         $response->assertNotFound();
         $this->assertSame($recordCount, MemoryRecord::query()->count());
