@@ -1,0 +1,60 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-05T17:43:46-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "split-story-1-4-draft"
+
+  execution_context:
+    source_handoff: ".aiox/handoffs/20260527T142043-0300-devops-to-sm-story-1-4-ready-to-draft.yaml"
+    supersedes: ".aiox/handoffs/20260605T173658-0300-sm-to-po-story-1-4-draft.yaml"
+    branch: "feature/story-1-4-diary-record-schema-creation"
+    base: "origin/main"
+    note: "SM split the fullstack Story 1.4 draft into smaller 1.4a/1.4b/1.4c drafts. No implementation code, migrations, models, Livewire components, routes, policies, services, or tests were created in this step."
+
+  created_stories:
+    - story_id: "1.4a"
+      title: "Diary Record Schema Foundation"
+      path: "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+      status: "Draft"
+      depends_on:
+        - "Story 1.3"
+    - story_id: "1.4b"
+      title: "Diary Record Service and Authorization"
+      path: "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+      status: "Draft"
+      depends_on:
+        - "Story 1.4a"
+    - story_id: "1.4c"
+      title: "Diary Record Creation UI"
+      path: "docs/stories/1.4c.diary-record-creation-ui.story.md"
+      status: "Draft"
+      depends_on:
+        - "Story 1.4a"
+        - "Story 1.4b"
+
+  removed_story:
+    story_id: "1.4"
+    path: "docs/stories/1.4.diary-record-schema-and-creation.story.md"
+    reason: "Replaced by split implementation slices to reduce fullstack blast radius and avoid Dev rework."
+
+  validation_summary:
+    story_draft_checklist: "READY pending PO validation"
+    coderabbit_integration: "enabled in core-config.yaml and populated in all three split stories"
+    code_intelligence: "unavailable"
+    clickup_sync: "skipped; this repo's current story artifacts use local Jira metadata and no ClickUp MCP is available in this session"
+    split_rationale:
+      - "1.4a isolates migrations, models, relationships, and factories."
+      - "1.4b isolates service and authorization behavior over the schema."
+      - "1.4c isolates Livewire route/UI and user-facing validation over the service."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.4a.diary-record-schema-foundation.story.md"
+    reason: "PO should validate the split drafts in dependency order before Dev implementation starts."
+    then:
+      - "*validate-story-draft docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+      - "*validate-story-draft docs/stories/1.4c.diary-record-creation-ui.story.md"
+
+  next_action: "Switch to PO and validate Story 1.4a, then 1.4b, then 1.4c."

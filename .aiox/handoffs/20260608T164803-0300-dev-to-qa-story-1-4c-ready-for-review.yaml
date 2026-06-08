@@ -1,0 +1,116 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-08T16:48:03-03:00"
+  from_agent: "dev"
+  to_agent: "qa"
+  consumed: true
+  last_command: "Prepare individual QA gate handoff for Story 1.4c"
+
+  story_context:
+    story_id: "1.4c"
+    story_path: "docs/stories/1.4c.diary-record-creation-ui.story.md"
+    status: "Ready for Review"
+    title: "Diary Record Creation UI"
+    branch: "feature/story-1-4-diary-record-schema-creation"
+    pull_request: "https://github.com/gabriel-daldegan/missionary_journal/pull/10"
+    jira_issue: ""
+    parent_epic: "MIS-1"
+    review_owner: "qa"
+    review_reason: "Story 1.4c is implemented and published in PR #10, with focused route/Livewire validations, full lint/typecheck/test gates, GitHub release check, and CodeRabbit committed review passing with 0 findings. The story QA Results section is still empty and needs a formal individual QA gate."
+
+  implementation_summary:
+    - "Added tenant-scoped memories.records.create Livewire route under the completed memory profile route group."
+    - "Restricted record creation route {type} to MemoryRecord::ACTIVE_TYPES so only diary creation is routable in this story."
+    - "Added MemoryRecordEditor with body/date-first form state, optional location/tags, dynamic ordered Memory Highlights, service delegation, and timeline redirect."
+    - "Added a component-level tenant membership guard during mount so direct Livewire mounts cannot bypass route middleware."
+    - "Added stable per-highlight UIDs for Livewire wire:key values so DOM identity follows highlights across reorder operations."
+    - "Added first-level diary create action from the timeline and EN/PT/ES customer-facing copy."
+    - "Kept forbidden controls out of scope: missionary-only, family-visible, collaboration mode, owner review, read-only collaborator, public sharing, technical metadata, AI classification, email-source, media upload, period/trip, detail/edit, and reporting."
+
+  validation_evidence:
+    passed:
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php --do-not-cache-result"
+        result: "passed"
+        notes: "Final focused run passed with 10 tests and 52 assertions after route, wire:key, and mount-guard fixes."
+      - command: "vendor/bin/sail artisan route:list --name=memories"
+        result: "passed"
+        notes: "Routes include memories.entry, memories.profile.setup, memories.records.create, and memories.timeline."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryRecordServiceTest.php --do-not-cache-result"
+        result: "passed"
+        notes: "8 tests passed, 26 assertions during focused service regression validation."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php --do-not-cache-result"
+        result: "passed"
+        notes: "12 tests passed, 46 assertions during focused route/profile regression validation."
+      - command: "vendor/bin/sail bin pint --dirty --format agent"
+        result: "passed"
+        notes: "Pint dirty formatting gate passed."
+      - command: "npm run lint"
+        result: "passed"
+        notes: "Project lint wrapper completed Pint successfully after final CodeRabbit fixes."
+      - command: "npm run typecheck"
+        result: "passed"
+        notes: "PHPStan analysed 486 files and reported no errors after final CodeRabbit fixes."
+      - command: "npm run validate:structure"
+        result: "passed"
+        notes: "AIOX structure validation reported 0 errors and 0 warnings."
+      - command: "npm test"
+        result: "passed"
+        notes: "Final full regression after CodeRabbit fixes passed with 446 tests and 1129 assertions."
+      - command: "coderabbit review --agent --type committed --base main"
+        result: "passed"
+        notes: "Final committed review completed with 0 findings."
+      - command: "gh pr checks --repo gabriel-daldegan/missionary_journal 10"
+        result: "passed"
+        notes: "GitHub release check passed for PR #10."
+
+  review_scope:
+    story_1_4c_files:
+      - "app/Livewire/Memory/MemoryRecordEditor.php"
+      - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+      - "resources/lang/en/memory.php"
+      - "resources/lang/es/memory.php"
+      - "resources/lang/pt/memory.php"
+      - "resources/views/livewire/memory/memory-record-editor.blade.php"
+      - "resources/views/livewire/memory/memory-timeline.blade.php"
+      - "routes/web.php"
+      - "tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php"
+    related_dependency_files:
+      - "app/Services/MemoryRecordService.php"
+      - "app/Policies/MemoryRecordPolicy.php"
+      - "tests/Feature/Services/Memory/MemoryRecordServiceTest.php"
+      - "tests/Feature/Memory/MemoryRouteAccessTest.php"
+      - "tests/Feature/Memory/MemoryProfileSetupGateTest.php"
+    handoff_file:
+      - ".aiox/handoffs/20260608T164803-0300-dev-to-qa-story-1-4c-ready-for-review.yaml"
+
+  known_caveats:
+    - "PR #10 intentionally contains Story 1.4a plus follow-up Stories 1.4b and 1.4c on the same branch; QA should gate this story against the 1.4c file list and acceptance criteria."
+    - "The local worktree contains unrelated modified/untracked agent/config artifacts. They are outside Story 1.4c scope and were not committed to PR #10."
+    - "The Story 1.4c QA Results section is empty as of this handoff."
+
+  qa_review_focus:
+    - "Confirm members with completed memory profile can access diary creation and members without completed profile are redirected to setup."
+    - "Confirm non-members receive generic not-found behavior both through direct route access and direct Livewire component mount."
+    - "Confirm only diary is routable/creatable in this story and unsupported active/reserved types do not create records."
+    - "Confirm body and experience date are primary and required, while location, tags, and highlights are optional and delegate persistence to MemoryRecordService."
+    - "Confirm dynamic highlights maintain stable Livewire keys and preserve user ordering through reorder/add/remove actions."
+    - "Confirm forbidden controls and labels remain absent from UI and translations stay customer-facing."
+
+  recommended_command:
+    agent: "/agent aiox-qa"
+    command: "*review docs/stories/1.4c.diary-record-creation-ui.story.md"
+    reason: "Run the formal individual QA gate for Story 1.4c; technical gates are green but QA Results are not yet applied."
+
+  source_artifacts:
+    primary:
+      - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+      - "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+      - ".aiox-core/data/workflow-chains.yaml"
+    supporting:
+      - "docs/framework/coding-standards.md"
+      - "docs/framework/source-tree.md"
+      - "docs/framework/tech-stack.md"
+      - "docs/ui-architecture.md"
+
+  blockers: []
+  next_action: "Activate QA and run the formal Story 1.4c review."

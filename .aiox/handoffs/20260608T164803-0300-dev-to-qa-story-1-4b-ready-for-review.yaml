@@ -1,0 +1,111 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-08T16:48:03-03:00"
+  from_agent: "dev"
+  to_agent: "qa"
+  consumed: true
+  last_command: "Prepare individual QA gate handoff for Story 1.4b"
+
+  story_context:
+    story_id: "1.4b"
+    story_path: "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+    status: "Ready for Review"
+    title: "Diary Record Service and Authorization"
+    branch: "feature/story-1-4-diary-record-schema-creation"
+    pull_request: "https://github.com/gabriel-daldegan/missionary_journal/pull/10"
+    jira_issue: ""
+    parent_epic: "MIS-1"
+    review_owner: "qa"
+    review_reason: "Story 1.4b is implemented and published in PR #10, with focused service/schema/authorization validations, full lint/typecheck/test gates, GitHub release check, and CodeRabbit committed review passing with 0 findings. The story QA Results section is still empty and needs a formal individual QA gate."
+
+  implementation_summary:
+    - "Added MemoryRecordPolicy::create() using tenant context and MemoryWorkspaceSettingsService authorization decisions from Story 1.3."
+    - "Added MemoryRecordService::createDiaryRecord() to validate diary payloads, authorize before persistence, assign UUID/tenant/author/editor, normalize tenant-scoped tags, persist ordered highlights, and return loaded relationships."
+    - "Hardened MemoryTag mass assignment by removing slug from fillable while keeping internal slug creation controlled by the service."
+    - "Switched tag lookup/create flow to createOrFirst against the tenant_id+slug unique constraint to avoid check-then-insert races."
+    - "Added Tenant::memoryTags(), registered MemoryRecordPolicy, and kept UI/routes/media/period/trip/detail/edit/public-sharing behavior out of this backend slice."
+    - "Added focused PHPUnit coverage for service authorization, validation, tag reuse, highlights, tenant isolation, and related schema regressions."
+
+  validation_evidence:
+    passed:
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryRecordServiceTest.php --do-not-cache-result"
+        result: "passed"
+        notes: "8 tests passed, 26 assertions during focused validation."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRecordSchemaTest.php --do-not-cache-result"
+        result: "passed"
+        notes: "6 tests passed, 35 assertions during focused validation."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryWorkspaceSettingsServiceTest.php --do-not-cache-result"
+        result: "passed"
+        notes: "8 tests passed, 17 assertions during focused authorization regression validation."
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php --do-not-cache-result"
+        result: "passed"
+        notes: "12 tests passed, 46 assertions during focused route/profile regression validation."
+      - command: "vendor/bin/sail bin pint --dirty --format agent"
+        result: "passed"
+        notes: "Pint dirty formatting gate passed."
+      - command: "npm run lint"
+        result: "passed"
+        notes: "Project lint wrapper completed Pint successfully after final CodeRabbit fixes."
+      - command: "npm run typecheck"
+        result: "passed"
+        notes: "PHPStan analysed 486 files and reported no errors after final CodeRabbit fixes."
+      - command: "npm run validate:structure"
+        result: "passed"
+        notes: "AIOX structure validation reported 0 errors and 0 warnings."
+      - command: "npm test"
+        result: "passed"
+        notes: "Final full regression after CodeRabbit fixes passed with 446 tests and 1129 assertions."
+      - command: "coderabbit review --agent --type committed --base main"
+        result: "passed"
+        notes: "Final committed review completed with 0 findings."
+      - command: "gh pr checks --repo gabriel-daldegan/missionary_journal 10"
+        result: "passed"
+        notes: "GitHub release check passed for PR #10."
+
+  review_scope:
+    story_1_4b_files:
+      - "app/Models/MemoryRecord.php"
+      - "app/Models/MemoryTag.php"
+      - "app/Models/Tenant.php"
+      - "app/Policies/MemoryRecordPolicy.php"
+      - "app/Providers/AuthServiceProvider.php"
+      - "app/Services/MemoryRecordService.php"
+      - "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+      - "tests/Feature/Services/Memory/MemoryRecordServiceTest.php"
+    related_dependency_files:
+      - "database/migrations/2026_06_05_200315_create_memory_tags_table.php"
+      - "tests/Feature/Memory/MemoryRecordSchemaTest.php"
+      - "tests/Feature/Services/Memory/MemoryWorkspaceSettingsServiceTest.php"
+    handoff_file:
+      - ".aiox/handoffs/20260608T164803-0300-dev-to-qa-story-1-4b-ready-for-review.yaml"
+
+  known_caveats:
+    - "PR #10 intentionally contains Story 1.4a plus follow-up Stories 1.4b and 1.4c on the same branch; QA should gate this story against the 1.4b file list and acceptance criteria."
+    - "The local worktree contains unrelated modified/untracked agent/config artifacts. They are outside Story 1.4b scope and were not committed to PR #10."
+    - "The Story 1.4b QA Results section is empty as of this handoff."
+
+  qa_review_focus:
+    - "Confirm create authorization delegates to MemoryWorkspaceSettingsService and respects tenant membership/shared-editing behavior."
+    - "Confirm diary payload validation covers body, experience_date, optional location, tags, and highlights without accepting unsupported UI or metadata scope."
+    - "Confirm tag creation is tenant-scoped, slug-normalized, race-safe through the unique tenant_id+slug constraint, and protected from user mass assignment."
+    - "Confirm highlights persist in request order and record relationships return loaded data as expected."
+    - "Confirm no period/trip, media upload, public sharing, visibility, detail/edit, or reporting behavior leaked into this service slice."
+
+  recommended_command:
+    agent: "/agent aiox-qa"
+    command: "*review docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+    reason: "Run the formal individual QA gate for Story 1.4b; technical gates are green but QA Results are not yet applied."
+
+  source_artifacts:
+    primary:
+      - "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+      - "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+      - ".aiox-core/data/workflow-chains.yaml"
+    supporting:
+      - "docs/framework/coding-standards.md"
+      - "docs/framework/source-tree.md"
+      - "docs/framework/tech-stack.md"
+      - "docs/ui-architecture.md"
+
+  blockers: []
+  next_action: "Activate QA and run the formal Story 1.4b review."

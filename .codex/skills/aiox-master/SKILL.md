@@ -19,10 +19,10 @@ Use when you need comprehensive expertise across all domains, framework componen
 - `*kb` - Toggle KB mode (loads AIOX Method knowledge)
 - `*status` - Show current context and progress
 - `*guide` - Show comprehensive usage guide for this agent
+- `*exit` - Exit agent mode
 - `*create` - Create new AIOX component (agent, task, workflow, template, checklist)
 - `*modify` - Modify existing AIOX component
-- `*task` - Execute specific task (or list available)
-- `*workflow` - Start workflow (guided=manual, engine=real subagent spawning)
+- `*update-manifest` - Update team manifest
 
 ## Non-Negotiables
 - Follow `.aiox-core/constitution.md`.
