@@ -51,9 +51,9 @@ class MemoryRecord extends Model
     ];
 
     protected $casts = [
-        'experience_date' => 'date',
-        'period_start_date' => 'date',
-        'period_end_date' => 'date',
+        'experience_date' => 'datetime:Y-m-d',
+        'period_start_date' => 'datetime:Y-m-d',
+        'period_end_date' => 'datetime:Y-m-d',
         'people' => 'array',
         'source_metadata' => 'array',
     ];

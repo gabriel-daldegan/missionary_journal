@@ -10,6 +10,7 @@ use App\Http\Controllers\RoadmapController;
 use App\Http\Controllers\SubscriptionCheckoutController;
 use App\Http\Controllers\SubscriptionController;
 use App\Livewire\Memory\MemoryProfileSetup;
+use App\Livewire\Memory\MemoryRecordEditor;
 use App\Livewire\Memory\MemoryTimeline;
 use App\Models\Tenant;
 use App\Models\User;
@@ -72,6 +73,7 @@ Route::middleware(['auth', 'verified', 'tenant.member'])
 
         Route::middleware('memory.profile.complete')->group(function () {
             Route::livewire('/timeline', MemoryTimeline::class)->name('timeline');
+            Route::livewire('/records/create/{type}', MemoryRecordEditor::class)->name('records.create');
         });
     });
 
