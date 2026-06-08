@@ -6,6 +6,7 @@ use App\Models\MemoryRecord;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\MemoryRecordService;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -24,11 +25,9 @@ class MemoryRecordEditor extends Component
     public string $tagInput = '';
 
     /**
-     * @var array<int, array{text: string}>
+     * @var array<int, array{uid: string, text: string}>
      */
-    public array $highlights = [
-        ['text' => ''],
-    ];
+    public array $highlights = [];
 
     public function mount(Tenant $tenant, string $type): void
     {
@@ -39,30 +38,37 @@ class MemoryRecordEditor extends Component
         $this->tenant = $tenant;
         $this->type = $type;
         $this->experienceDate = now()->toDateString();
+        $this->highlights = [$this->newHighlight()];
     }
 
     public function addHighlight(): void
     {
+        $this->ensureHighlightUids();
+
         if (count($this->highlights) >= 20) {
             return;
         }
 
-        $this->highlights[] = ['text' => ''];
+        $this->highlights[] = $this->newHighlight();
     }
 
     public function removeHighlight(int $index): void
     {
+        $this->ensureHighlightUids();
+
         unset($this->highlights[$index]);
 
         $this->highlights = array_values($this->highlights);
 
         if ($this->highlights === []) {
-            $this->highlights[] = ['text' => ''];
+            $this->highlights[] = $this->newHighlight();
         }
     }
 
     public function moveHighlightUp(int $index): void
     {
+        $this->ensureHighlightUids();
+
         if ($index <= 0 || ! isset($this->highlights[$index])) {
             return;
         }
@@ -78,6 +84,8 @@ class MemoryRecordEditor extends Component
 
     public function moveHighlightDown(int $index): void
     {
+        $this->ensureHighlightUids();
+
         if (! isset($this->highlights[$index], $this->highlights[$index + 1])) {
             return;
         }
@@ -93,6 +101,8 @@ class MemoryRecordEditor extends Component
 
     public function save(MemoryRecordService $memoryRecordService): void
     {
+        $this->ensureHighlightUids();
+
         $validated = $this->validate();
 
         $memoryRecordService->createDiaryRecord($this->tenant, $this->authenticatedTenantMember(), [
@@ -100,7 +110,7 @@ class MemoryRecordEditor extends Component
             'experience_date' => $validated['experienceDate'],
             'location_name' => $validated['locationName'] ?? null,
             'tags' => $this->tagNames(),
-            'highlights' => $validated['highlights'] ?? [],
+            'highlights' => $this->highlightPayload($validated['highlights'] ?? []),
         ]);
 
         $this->redirectRoute('memories.timeline', [
@@ -110,6 +120,8 @@ class MemoryRecordEditor extends Component
 
     public function render(): View
     {
+        $this->ensureHighlightUids();
+
         return view('livewire.memory.memory-record-editor')
             ->layout('components.layouts.memory', [
                 'tenant' => $this->tenant,
@@ -128,6 +140,7 @@ class MemoryRecordEditor extends Component
             'locationName' => ['nullable', 'string', 'max:255'],
             'tagInput' => ['nullable', 'string', 'max:500'],
             'highlights' => ['array', 'max:20'],
+            'highlights.*.uid' => ['required', 'string', 'max:64'],
             'highlights.*.text' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -156,6 +169,55 @@ class MemoryRecordEditor extends Component
             ->filter()
             ->values()
             ->all();
+    }
+
+    /**
+     * @param  array<int, array{uid?: string, text?: string|null}>  $highlights
+     * @return array<int, array{text: string|null}>
+     */
+    private function highlightPayload(array $highlights): array
+    {
+        return collect($highlights)
+            ->map(fn (array $highlight): array => [
+                'text' => $highlight['text'] ?? null,
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function ensureHighlightUids(): void
+    {
+        $this->highlights = collect($this->highlights)
+            ->map(function (mixed $highlight): array {
+                if (! is_array($highlight)) {
+                    return $this->newHighlight();
+                }
+
+                $uid = $highlight['uid'] ?? null;
+                $text = $highlight['text'] ?? '';
+
+                return [
+                    'uid' => is_string($uid) && $uid !== '' ? $uid : (string) Str::uuid(),
+                    'text' => is_string($text) ? $text : '',
+                ];
+            })
+            ->values()
+            ->all();
+
+        if ($this->highlights === []) {
+            $this->highlights[] = $this->newHighlight();
+        }
+    }
+
+    /**
+     * @return array{uid: string, text: string}
+     */
+    private function newHighlight(): array
+    {
+        return [
+            'uid' => (string) Str::uuid(),
+            'text' => '',
+        ];
     }
 
     private function authenticatedTenantMember(): User

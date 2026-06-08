@@ -93,7 +93,7 @@
 
                     <div class="grid gap-3">
                         @foreach ($highlights as $index => $highlight)
-                            <div wire:key="highlight-{{ $index }}" class="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                            <div wire:key="highlight-{{ $highlight['uid'] }}" class="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
                                 <label class="grid gap-2">
                                     <span class="sr-only">{{ __('memory.record_editor.highlight_number', ['number' => $index + 1]) }}</span>
                                     <textarea

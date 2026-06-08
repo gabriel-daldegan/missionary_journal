@@ -145,17 +145,32 @@ class MemoryRecordEditorTest extends FeatureTest
         MemoryProfile::factory()->for($user)->create();
         $this->actingAs($user);
 
-        Livewire::test(MemoryRecordEditor::class, [
+        $component = Livewire::test(MemoryRecordEditor::class, [
             'tenant' => $tenant,
             'type' => MemoryRecord::TYPE_DIARY,
-        ])
+        ]);
+
+        $firstHighlightUid = $component->get('highlights.0.uid');
+        $this->assertIsString($firstHighlightUid);
+        $this->assertStringContainsString('wire:key="highlight-'.$firstHighlightUid.'"', $component->html());
+
+        $component
             ->set('body', 'A memory with reordered highlights.')
             ->set('experienceDate', '2026-06-08')
-            ->set('highlights', [
-                ['text' => 'Second'],
-                ['text' => 'First'],
-            ])
-            ->call('moveHighlightUp', 1)
+            ->set('highlights.0.text', 'Second')
+            ->call('addHighlight')
+            ->set('highlights.1.text', 'First');
+
+        $secondHighlightUid = $component->get('highlights.1.uid');
+        $this->assertIsString($secondHighlightUid);
+        $this->assertNotSame($firstHighlightUid, $secondHighlightUid);
+
+        $component->call('moveHighlightUp', 1);
+
+        $this->assertSame($secondHighlightUid, $component->get('highlights.0.uid'));
+        $this->assertSame($firstHighlightUid, $component->get('highlights.1.uid'));
+
+        $component
             ->call('addHighlight')
             ->set('highlights.2.text', 'Remove me')
             ->call('removeHighlight', 2)
