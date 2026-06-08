@@ -1,0 +1,93 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-06T00:00:07-03:00"
+  from_agent: "qa"
+  to_agent: "devops"
+  consumed: true
+  last_command: "*review docs/stories/1.4a.diary-record-schema-foundation.story.md"
+
+  story_context:
+    story_id: "1.4a"
+    story_path: "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+    status: "Ready for Done"
+    title: "Diary Record Schema Foundation"
+    branch: "feature/story-1-4-diary-record-schema-creation"
+    gate_file: "docs/qa/gates/1.4a-diary-record-schema-foundation.yml"
+
+  qa_decision:
+    gate: "PASS"
+    approval: "approved_for_publication"
+    approved_at: "2026-06-06T00:00:07-03:00"
+    approved_scope:
+      - "Story 1.4a schema/model/factory implementation files"
+      - "Story 1.4a focused tests and QA regression fix"
+      - "Story 1.4a validation evidence"
+      - "Story 1.4a QA gate and QA Results"
+      - "Story 1.4a workflow handoff artifacts"
+    publication_note: "Proceed with focused Story 1.4a publication. Do not bundle Story 1.4b/1.4c drafts, unrelated AIOX validation JSONs, project-status cache churn, or unrelated handoff artifacts unless DevOps intentionally scopes them."
+
+  validation_evidence:
+    passed:
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "initial run found 1 major factory finding; QA fixed it"
+      - command: "vendor/bin/sail bin pint --dirty --format agent"
+        result: "passed"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRecordSchemaTest.php"
+        result: "passed; 6 tests, 35 assertions"
+      - command: "vendor/bin/sail artisan route:list --name=memories"
+        result: "passed; 3 memory routes"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php"
+        result: "passed; 12 tests, 46 assertions"
+      - command: "npm run lint"
+        result: "passed"
+      - command: "npm run typecheck"
+        result: "passed; PHPStan analysed 483 files with no errors"
+      - command: "git diff --check"
+        result: "passed"
+      - command: "npm run validate:structure"
+        result: "passed; 0 errors, 0 warnings"
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "rerun passed with 0 findings"
+      - command: "npm test"
+        result: "passed; 428 tests, 1051 assertions"
+
+  known_caveats:
+    - "The worktree contains untracked AIOX artifacts for Stories 1.4a, 1.4b, and 1.4c; DevOps should publish only the approved 1.4a scope."
+    - "Story 1.4b should add service-level negative coverage for cross-tenant tag sync."
+    - "Story 1.4b should ensure record creation assigns uuid before persistence."
+
+  recommended_command:
+    agent: "/agent aiox-devops"
+    command: "*push"
+    reason: "Story 1.4a has a PASS QA gate and is ready for focused publication."
+
+  publication_scope:
+    include:
+      - "app/Models/MemoryHighlight.php"
+      - "app/Models/MemoryRecord.php"
+      - "app/Models/MemoryTag.php"
+      - "app/Models/Tenant.php"
+      - "database/factories/MemoryHighlightFactory.php"
+      - "database/factories/MemoryRecordFactory.php"
+      - "database/factories/MemoryTagFactory.php"
+      - "database/migrations/2026_06_05_200315_create_memory_records_table.php"
+      - "database/migrations/2026_06_05_200315_create_memory_tags_table.php"
+      - "database/migrations/2026_06_05_200316_create_memory_highlights_table.php"
+      - "database/migrations/2026_06_05_200316_create_memory_record_tag_table.php"
+      - "tests/Feature/Memory/MemoryRecordSchemaTest.php"
+      - "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+      - "docs/qa/gates/1.4a-diary-record-schema-foundation.yml"
+      - ".aiox/handoffs/20260605T194750-0300-po-to-data-engineer-story-1-4a.yaml"
+      - ".aiox/handoffs/20260605T215000-0300-data-engineer-to-dev-story-1-4a-ready-for-quality-gate.yaml"
+      - ".aiox/handoffs/20260605T225454-0300-dev-to-qa-story-1-4a-ready-for-review.yaml"
+      - ".aiox/handoffs/20260606T000007-0300-qa-to-devops-story-1-4a-approved-for-publication.yaml"
+    exclude:
+      - "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+      - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+      - ".aiox/project-status.yaml"
+      - ".ai/story-1-4b-validation-20260605T181929-0300.json"
+      - ".ai/story-1-4c-validation-20260605T181929-0300.json"
+      - "Unrelated handoff artifacts outside Story 1.4a"
+
+  blockers: []
+  next_action: "Switch to DevOps, consume this handoff, stage the focused Story 1.4a scope, and run the publication workflow."

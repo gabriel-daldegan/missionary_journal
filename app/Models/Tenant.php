@@ -36,6 +36,16 @@ class Tenant extends Model
         return $this->hasOne(MemoryWorkspaceSettings::class);
     }
 
+    public function memoryRecords(): HasMany
+    {
+        return $this->hasMany(MemoryRecord::class);
+    }
+
+    public function memoryTags(): HasMany
+    {
+        return $this->hasMany(MemoryTag::class);
+    }
+
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);

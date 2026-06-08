@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
+use App\Models\MemoryRecord;
 use App\Models\Role;
+use App\Policies\MemoryRecordPolicy;
 use App\Policies\RolePolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -17,6 +19,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
+        MemoryRecord::class => MemoryRecordPolicy::class,
         Role::class => RolePolicy::class,
     ];
 
