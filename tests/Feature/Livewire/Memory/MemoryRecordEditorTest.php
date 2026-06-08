@@ -7,6 +7,7 @@ use App\Models\MemoryProfile;
 use App\Models\MemoryRecord;
 use App\Models\Tenant;
 use Livewire\Livewire;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Feature\FeatureTest;
 
 class MemoryRecordEditorTest extends FeatureTest
@@ -56,6 +57,21 @@ class MemoryRecordEditorTest extends FeatureTest
         $response->assertNotFound();
         $response->assertDontSee('Private Tenant Details');
         $response->assertDontSee('New diary entry');
+    }
+
+    public function test_non_member_cannot_mount_editor_component_directly(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser();
+        MemoryProfile::factory()->for($user)->create();
+        $this->actingAs($user);
+
+        $this->expectException(NotFoundHttpException::class);
+
+        Livewire::test(MemoryRecordEditor::class, [
+            'tenant' => $tenant,
+            'type' => MemoryRecord::TYPE_DIARY,
+        ]);
     }
 
     public function test_unsupported_record_type_is_rejected_by_route_and_writes_nothing(): void

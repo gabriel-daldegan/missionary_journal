@@ -35,6 +35,8 @@ class MemoryRecordEditor extends Component
             abort(404);
         }
 
+        $this->ensureAuthenticatedTenantMember($tenant);
+
         $this->tenant = $tenant;
         $this->type = $type;
         $this->experienceDate = now()->toDateString();
@@ -105,7 +107,7 @@ class MemoryRecordEditor extends Component
 
         $validated = $this->validate();
 
-        $memoryRecordService->createDiaryRecord($this->tenant, $this->authenticatedTenantMember(), [
+        $memoryRecordService->createDiaryRecord($this->tenant, $this->ensureAuthenticatedTenantMember($this->tenant), [
             'body' => $validated['body'],
             'experience_date' => $validated['experienceDate'],
             'location_name' => $validated['locationName'] ?? null,
@@ -220,12 +222,12 @@ class MemoryRecordEditor extends Component
         ];
     }
 
-    private function authenticatedTenantMember(): User
+    private function ensureAuthenticatedTenantMember(Tenant $tenant): User
     {
         /** @var User|null $user */
         $user = auth()->user();
 
-        if ($user === null || ! $user->canAccessTenant($this->tenant)) {
+        if ($user === null || ! $user->canAccessTenant($tenant)) {
             abort(404);
         }
 
