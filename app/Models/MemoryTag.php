@@ -15,7 +15,6 @@ class MemoryTag extends Model
 
     protected $fillable = [
         'name',
-        'slug',
     ];
 
     public function tenant(): BelongsTo

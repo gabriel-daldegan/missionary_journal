@@ -6,6 +6,7 @@ use App\Models\MemoryRecord;
 use App\Models\MemoryTag;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
@@ -123,21 +124,16 @@ class MemoryRecordService
             ->filter(fn (array $tag): bool => $tag['slug'] !== '')
             ->unique('slug')
             ->map(function (array $tag) use ($tenant): int {
-                /** @var MemoryTag|null $memoryTag */
-                $memoryTag = MemoryTag::query()
-                    ->whereBelongsTo($tenant)
-                    ->where('slug', $tag['slug'])
-                    ->first();
-
-                if ($memoryTag === null) {
-                    $memoryTag = new MemoryTag;
-                    $memoryTag->forceFill([
+                /** @var MemoryTag $memoryTag */
+                $memoryTag = Model::unguarded(fn (): MemoryTag => MemoryTag::query()->createOrFirst(
+                    [
                         'tenant_id' => $tenant->id,
-                        'name' => $tag['name'],
                         'slug' => $tag['slug'],
-                    ]);
-                    $memoryTag->save();
-                }
+                    ],
+                    [
+                        'name' => $tag['name'],
+                    ],
+                ));
 
                 return $memoryTag->id;
             })
