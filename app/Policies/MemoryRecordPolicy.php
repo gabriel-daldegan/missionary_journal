@@ -18,7 +18,8 @@ class MemoryRecordPolicy
 
     public function view(User $user, MemoryRecord $memoryRecord): bool
     {
-        return false;
+        return $memoryRecord->tenant !== null
+            && $user->canAccessTenant($memoryRecord->tenant);
     }
 
     public function create(User $user, Tenant $tenant): bool
@@ -28,7 +29,11 @@ class MemoryRecordPolicy
 
     public function update(User $user, MemoryRecord $memoryRecord): bool
     {
-        return false;
+        if ($memoryRecord->tenant === null) {
+            return false;
+        }
+
+        return $this->workspaceSettingsService->canUpdateMemoryRecord($memoryRecord->tenant, $user);
     }
 
     public function delete(User $user, MemoryRecord $memoryRecord): bool

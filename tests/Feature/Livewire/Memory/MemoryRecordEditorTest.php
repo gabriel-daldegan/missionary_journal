@@ -6,6 +6,7 @@ use App\Livewire\Memory\MemoryRecordEditor;
 use App\Models\MemoryProfile;
 use App\Models\MemoryRecord;
 use App\Models\Tenant;
+use App\Services\MemoryRecordService;
 use Livewire\Livewire;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Feature\FeatureTest;
@@ -154,6 +155,107 @@ class MemoryRecordEditorTest extends FeatureTest
         $this->assertSame([0, 1], $record->highlights->pluck('sort_order')->all());
     }
 
+    public function test_edit_mode_prefills_and_updates_record_without_changing_identity(): void
+    {
+        $tenant = $this->createTenant();
+        $author = $this->createUser($tenant);
+        $editor = $this->createUser($tenant);
+        MemoryProfile::factory()->for($editor)->create();
+        $record = app(MemoryRecordService::class)->createDiaryRecord($tenant, $author, [
+            'body' => 'Original memory body.',
+            'experience_date' => '2026-06-08',
+            'location_name' => 'Sao Paulo',
+            'tags' => ['Original', 'Family'],
+            'highlights' => ['Original highlight'],
+        ]);
+        $recordId = $record->id;
+        $recordUuid = $record->uuid;
+        $this->actingAs($editor);
+
+        Livewire::test(MemoryRecordEditor::class, [
+            'tenant' => $tenant,
+            'record' => $record,
+        ])
+            ->assertSet('isEditing', true)
+            ->assertSet('body', 'Original memory body.')
+            ->assertSet('experienceDate', '2026-06-08')
+            ->assertSet('locationName', 'Sao Paulo')
+            ->assertSee('Edit diary entry')
+            ->set('body', 'Updated memory body.')
+            ->set('experienceDate', '2026-06-12')
+            ->set('locationName', 'Curitiba')
+            ->set('tagInput', 'Updated, Family')
+            ->set('highlights', [
+                ['text' => 'Updated highlight'],
+            ])
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('memories.records.show', [
+                'tenant' => $tenant,
+                'record' => $record,
+            ]));
+
+        /** @var MemoryRecord $updatedRecord */
+        $updatedRecord = MemoryRecord::query()->findOrFail($recordId);
+
+        $this->assertSame($recordUuid, $updatedRecord->uuid);
+        $this->assertSame($author->id, $updatedRecord->author_user_id);
+        $this->assertSame($editor->id, $updatedRecord->last_edited_by_user_id);
+        $this->assertSame('Updated memory body.', $updatedRecord->body);
+        $this->assertSame('2026-06-12', $updatedRecord->experience_date->toDateString());
+        $this->assertSame(['family', 'updated'], $updatedRecord->tags->pluck('slug')->sort()->values()->all());
+        $this->assertSame(['Updated highlight'], $updatedRecord->highlights->pluck('text')->all());
+    }
+
+    public function test_member_with_completed_profile_can_access_diary_edit_route(): void
+    {
+        $tenant = $this->createTenant();
+        $author = $this->createUser($tenant);
+        $editor = $this->createUser($tenant);
+        MemoryProfile::factory()->for($editor)->create();
+        $record = app(MemoryRecordService::class)->createDiaryRecord($tenant, $author, [
+            'body' => 'Route mounted edit body.',
+            'experience_date' => '2026-06-08',
+            'location_name' => 'Sao Paulo',
+            'tags' => ['Route'],
+            'highlights' => ['Route mounted highlight.'],
+        ]);
+
+        $response = $this->actingAs($editor)->get(route('memories.records.edit', [
+            'tenant' => $tenant,
+            'record' => $record,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Edit diary entry');
+        $response->assertSee('Route mounted edit body.');
+        $response->assertSee('Sao Paulo');
+        $response->assertSee('Route mounted highlight.');
+    }
+
+    public function test_cross_tenant_edit_route_receives_generic_not_found(): void
+    {
+        $this->withExceptionHandling();
+
+        $recordTenant = $this->createTenant();
+        $routeTenant = $this->createTenant();
+        $author = $this->createUser($recordTenant);
+        $routeUser = $this->createUser($routeTenant);
+        MemoryProfile::factory()->for($routeUser)->create();
+        $record = app(MemoryRecordService::class)->createDiaryRecord($recordTenant, $author, [
+            'body' => 'Wrong tenant edit body.',
+            'experience_date' => '2026-06-08',
+        ]);
+
+        $response = $this->actingAs($routeUser)->get(route('memories.records.edit', [
+            'tenant' => $routeTenant,
+            'record' => $record,
+        ]));
+
+        $response->assertNotFound();
+        $response->assertDontSee('Wrong tenant edit body.');
+    }
+
     public function test_dynamic_highlight_controls_keep_order_before_save(): void
     {
         $tenant = $this->createTenant();
@@ -241,6 +343,51 @@ class MemoryRecordEditorTest extends FeatureTest
         $response->assertOk();
         $response->assertSee('New diary entry');
         $response->assertSee($this->createRoute($tenant), false);
+    }
+
+    public function test_timeline_links_existing_records_and_reorders_after_experience_date_update(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $service = app(MemoryRecordService::class);
+        $olderRecord = $service->createDiaryRecord($tenant, $user, [
+            'body' => 'Older timeline memory.',
+            'experience_date' => '2026-06-01',
+        ]);
+        $newerRecord = $service->createDiaryRecord($tenant, $user, [
+            'body' => 'Newer timeline memory.',
+            'experience_date' => '2026-06-10',
+        ]);
+
+        $initialResponse = $this->actingAs($user)->get(route('memories.timeline', [
+            'tenant' => $tenant,
+        ]));
+
+        $initialResponse->assertOk();
+        $initialResponse->assertSee(route('memories.records.show', [
+            'tenant' => $tenant,
+            'record' => $olderRecord,
+        ]), false);
+        $initialResponse->assertSeeInOrder([
+            'Newer timeline memory.',
+            'Older timeline memory.',
+        ]);
+
+        $service->updateDiaryRecord($olderRecord, $tenant, $user, [
+            'body' => 'Older timeline memory.',
+            'experience_date' => '2026-06-15',
+        ]);
+
+        $updatedResponse = $this->actingAs($user)->get(route('memories.timeline', [
+            'tenant' => $tenant,
+        ]));
+
+        $updatedResponse->assertOk();
+        $updatedResponse->assertSeeInOrder([
+            'Older timeline memory.',
+            'Newer timeline memory.',
+        ]);
     }
 
     private function createRoute(Tenant $tenant): string

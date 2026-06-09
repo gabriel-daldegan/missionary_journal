@@ -1,0 +1,49 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-09T22:32:11-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "story-checklist"
+
+  execution_context:
+    source_handoff: ".aiox/handoffs/20260609T215200-0300-devops-to-sm-story-1-5-ready-to-draft.yaml"
+    branch: "feature/story-1-5-closeout2"
+    base: "origin/main"
+    note: "SM reviewed Story 1.5 after edits and checklist validation; no implementation code was changed in this step."
+
+  created_story:
+    story_id: "1.5"
+    title: "Diary Record Editing and Detail View"
+    path: "docs/stories/1.5.diary-record-editing-and-detail-view.story.md"
+    status: "Draft"
+
+  source_artifacts:
+    - "docs/prd.md#story-1.5-diary-record-editing-and-detail-view"
+    - ".aiox/handoffs/20260609T215200-0300-devops-to-sm-story-1-5-ready-to-draft.yaml"
+    - "docs/architecture.md"
+    - "docs/ui-architecture.md"
+    - "docs/framework/coding-standards.md"
+    - "docs/framework/source-tree.md"
+    - "docs/framework/tech-stack.md"
+
+  review_status:
+    story_draft_checklist: "READY"
+    quality_notes: "No blocking gaps found; route naming and CodeRabbit command language were normalized during this review."
+    key_changes_since_last_review:
+      - "Standardized route names/tasks to explicit `memories.records.show` and `memories.records.edit` conventions."
+      - "Clarified route-model binding expectation with `MemoryRecordDetail` and explicit route naming."
+      - "Anchored CodeRabbit references to configured commands in core-config.yaml."
+
+  validation_summary:
+    checklist: ".aiox-core/product/checklists/story-draft-checklist.md"
+    result: "READY"
+    decision: "approve for PO validation"
+    blocker_count: 0
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.5.diary-record-editing-and-detail-view.story.md"
+    reason: "PO must validate draft before development starts."
+
+  next_action: "Switch to PO, run validation, and, if approved, send handoff for Dev with the implementation-ready story."

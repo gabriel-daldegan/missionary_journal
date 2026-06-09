@@ -1,0 +1,64 @@
+schema: 1
+story: '1.5'
+story_title: 'Diary Record Editing and Detail View'
+gate: PASS
+status_reason: 'Story 1.5 now satisfies the detail/edit route, authorization, identity preservation, timeline ordering, and forbidden-label boundaries. Architect review found and fixed one edit-route mount regression, then reran focused gates, lint, typecheck, full tests, and CodeRabbit with no remaining findings.'
+reviewer: 'Aria (Architect)'
+updated: '2026-06-09T01:17:48-03:00'
+quality_score: 100
+expires: '2026-06-23T01:17:48-03:00'
+
+top_issues: []
+
+waiver:
+  active: false
+
+evidence:
+  tests_reviewed: 457
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+    integration_covered: [1, 2, 3]
+    integration_gaps: []
+  commands:
+    - command: 'Laravel Boost search_docs'
+      result: 'confirmed current Laravel/Livewire testing context before adding route coverage'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php --filter=test_member_with_completed_profile_can_access_diary_edit_route'
+      result: 'initially failed with NotFoundHttpException; exposed edit route mount regression'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php --filter=test_member_with_completed_profile_can_access_diary_edit_route'
+      result: 'passed after fix; 1 test, 5 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php'
+      result: 'passed; 14 tests, 79 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryRecordDetailTest.php tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php tests/Feature/Services/Memory/MemoryRecordServiceTest.php'
+      result: 'passed; 29 tests, 142 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php'
+      result: 'passed; 12 tests, 46 assertions'
+    - command: 'vendor/bin/sail artisan route:list --name=memories'
+      result: 'passed; 6 memory routes listed including records.show and records.edit'
+    - command: 'npm run lint'
+      result: 'passed; Pint dirty check passed'
+    - command: 'npm run typecheck'
+      result: 'passed; PHPStan analysed 487 files with no errors'
+    - command: 'npm test'
+      result: 'passed; 457 tests, 1193 assertions'
+    - command: 'coderabbit review --agent --type uncommitted'
+      result: 'passed; 0 findings on final rerun'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Detail and edit routes stay inside the tenant/member/profile middleware stack, component mounts enforce tenant-record matching, and service updates authorize through policy before persistence.'
+  performance:
+    status: PASS
+    notes: 'Timeline reads remain bounded to tenant diary records for this MVP slice, with eager loading for tags/highlights and deterministic ordering by experience_date then id.'
+  reliability:
+    status: PASS
+    notes: 'Architect review added positive edit-route coverage after exposing the route mount regression, then reran focused tests and the full suite successfully.'
+  maintainability:
+    status: PASS
+    notes: 'The fix aligns MemoryRecordEditor with Livewire route-parameter behavior by using the typed public record property for edit mode and preserving the create type parameter.'
+
+recommendations:
+  immediate: []
+  future: []

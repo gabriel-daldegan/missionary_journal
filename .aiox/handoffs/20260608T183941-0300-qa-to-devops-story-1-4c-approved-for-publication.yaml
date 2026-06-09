@@ -1,0 +1,102 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-08T18:39:41-03:00"
+  from_agent: "qa"
+  to_agent: "devops"
+  consumed: true
+  last_command: "*review docs/stories/1.4c.diary-record-creation-ui.story.md"
+
+  story_context:
+    story_id: "1.4c"
+    story_path: "docs/stories/1.4c.diary-record-creation-ui.story.md"
+    status: "Ready for Done"
+    title: "Diary Record Creation UI"
+    branch: "feature/story-1-4-diary-record-schema-creation"
+    pull_request: "https://github.com/gabriel-daldegan/missionary_journal/pull/10"
+    gate_file: "docs/qa/gates/1.4c-diary-record-creation-ui.yml"
+
+  qa_decision:
+    gate: "PASS"
+    approval: "approved_for_publication"
+    approved_at: "2026-06-08T18:39:41-03:00"
+    approved_scope:
+      - "Story 1.4c tenant-scoped diary creation route and Livewire UI"
+      - "Story 1.4c translations, timeline create action, and focused Livewire tests"
+      - "Story 1.4c QA Results and gate file"
+      - "QA fix for the shared MemoryHighlightFactory sort_order reliability issue"
+      - "Story 1.4c workflow handoff artifacts"
+    publication_note: "Proceed with final PR #10 publication only after DevOps verifies the combined approved Story 1.4a/1.4b/1.4c scope. Keep unrelated local agent/config artifacts, validation JSON churn, and stale draft handoffs out of publication unless intentionally scoped."
+
+  validation_evidence:
+    passed:
+      - command: "Laravel Boost search_docs"
+        result: "confirmed Livewire 4 testing patterns for validation, authorization, redirects, route model binding, and stable keyed dynamic loops"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php --do-not-cache-result"
+        result: "passed; 10 tests, 52 assertions"
+      - command: "vendor/bin/sail artisan route:list --name=memories"
+        result: "passed; 4 memory routes including memories.records.create"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRecordSchemaTest.php --do-not-cache-result"
+        result: "passed; 6 tests, 35 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryRecordServiceTest.php --do-not-cache-result"
+        result: "passed; 8 tests, 26 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php --do-not-cache-result"
+        result: "passed; 12 tests, 46 assertions"
+      - command: "npm run typecheck"
+        result: "passed; PHPStan analysed 486 files with no errors"
+      - command: "npm run lint"
+        result: "passed"
+      - command: "coderabbit review --agent --type committed --base main"
+        result: "initial run found 1 major MemoryHighlightFactory finding; QA fixed it"
+      - command: "coderabbit review --agent --type committed --base main"
+        result: "rerun found 1 major MemoryTag tenant_id fillable finding; reviewed as false positive because system-owned FKs intentionally remain out of fillable"
+      - command: "gh pr checks 10 --repo gabriel-daldegan/missionary_journal"
+        result: "passed; release check completed successfully"
+      - command: "git diff --check"
+        result: "passed"
+      - command: "npm test"
+        result: "passed; 446 tests, 1129 assertions"
+
+  known_caveats:
+    - "PR #10 intentionally contains Story 1.4a, Story 1.4b, and Story 1.4c on the same branch; DevOps should stage and publish the combined approved scope deliberately."
+    - "The local worktree contains unrelated modified/untracked agent/config artifacts and older validation/handoff files outside Story 1.4c scope."
+    - "CodeRabbit's MemoryTag tenant_id fillable finding was intentionally not applied because Story 1.4a documents system-owned FKs outside mass assignment and Story 1.4b controls tag creation in the service."
+    - "QA modified MemoryHighlightFactory and MemoryRecordSchemaTest during this review; include those QA reliability fixes in publication if they are not already committed."
+
+  recommended_command:
+    agent: "/agent aiox-devops"
+    command: "*push"
+    reason: "Story 1.4c has a PASS QA gate and PR #10 checks are green; DevOps should perform the final scoped publication step."
+
+  publication_scope:
+    include:
+      - "app/Livewire/Memory/MemoryRecordEditor.php"
+      - "database/factories/MemoryHighlightFactory.php"
+      - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+      - "docs/qa/gates/1.4c-diary-record-creation-ui.yml"
+      - "resources/lang/en/memory.php"
+      - "resources/lang/es/memory.php"
+      - "resources/lang/pt/memory.php"
+      - "resources/views/livewire/memory/memory-record-editor.blade.php"
+      - "resources/views/livewire/memory/memory-timeline.blade.php"
+      - "routes/web.php"
+      - "tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php"
+      - "tests/Feature/Memory/MemoryRecordSchemaTest.php"
+      - ".aiox/handoffs/20260608T164803-0300-dev-to-qa-story-1-4c-ready-for-review.yaml"
+      - ".aiox/handoffs/20260608T183941-0300-qa-to-devops-story-1-4c-approved-for-publication.yaml"
+    exclude:
+      - ".aiox/project-status.yaml"
+      - ".ai/story-1-4a-validation-20260605T175854-0300.json"
+      - ".ai/story-1-4a-validation-20260605T194750-0300.json"
+      - ".ai/story-1-4b-validation-20260605T181929-0300.json"
+      - ".ai/story-1-4c-validation-20260605T181929-0300.json"
+      - ".antigravity/"
+      - ".claude/commands/AIOX/agents/"
+      - ".codex/agents/"
+      - ".codex/skills/aiox-master/SKILL.md"
+      - ".cursor/"
+      - ".gemini/"
+      - ".github/agents/"
+      - "Unrelated draft/validation handoff artifacts outside the final approved PR #10 scope"
+
+  blockers: []
+  next_action: "Switch to DevOps, consume this handoff, verify the combined Story 1.4 approved scope, and run the publication workflow."

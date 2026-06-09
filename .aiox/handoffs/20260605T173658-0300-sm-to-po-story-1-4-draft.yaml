@@ -1,0 +1,66 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-05T17:36:58-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  superseded_by: ".aiox/handoffs/20260605T174346-0300-sm-to-po-story-1-4-split-drafts.yaml"
+  superseded_reason: "User requested splitting the fullstack Story 1.4 draft into smaller 1.4a/1.4b/1.4c implementation slices before PO validation."
+  last_command: "*draft"
+
+  execution_context:
+    source_handoff: ".aiox/handoffs/20260527T142043-0300-devops-to-sm-story-1-4-ready-to-draft.yaml"
+    branch: "feature/story-1-4-diary-record-schema-creation"
+    base: "origin/main"
+    note: "SM created the local Story 1.4 draft only. No implementation code, migrations, models, Livewire components, routes, policies, services, or tests were created in this step."
+
+  created_story:
+    story_id: "1.4"
+    title: "Diary Record Schema and Creation"
+    path: "docs/stories/1.4.diary-record-schema-and-creation.story.md"
+    status: "Draft"
+    jira:
+      project_key: "MIS"
+      parent_epic: "MIS-1"
+      previous_story: ""
+      issue_key: ""
+      sync_note: "Local draft only; Jira child story was not created or synced during SM drafting."
+
+  source_artifacts:
+    - "docs/prd.md#story-14-diary-record-schema-and-creation"
+    - "docs/architecture.md#tenant-and-access-architecture"
+    - "docs/architecture.md#memory_records"
+    - "docs/architecture.md#memory_tags-and-memory_record_tag"
+    - "docs/architecture.md#memory_highlights"
+    - "docs/architecture.md#service-architecture"
+    - "docs/architecture.md#testing-strategy"
+    - "docs/ui-architecture.md#route-hierarchy"
+    - "docs/ui-architecture.md#route-responsibilities"
+    - "docs/ui-architecture.md#service-template"
+    - "docs/ui-architecture.md#livewire-action-pattern"
+    - "docs/ui-architecture.md#required-coverage-by-story-type"
+    - "docs/framework/coding-standards.md#tests"
+    - "docs/framework/source-tree.md#memory-product-locations"
+    - "docs/framework/tech-stack.md#memory-product-direction"
+    - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+    - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+    - "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+    - "docs/qa/gates/1.3-workspace-settings-and-shared-editing-policy-foundation.yml"
+
+  validation_summary:
+    story_draft_checklist: "READY"
+    coderabbit_integration: "enabled in core-config.yaml and populated in story"
+    code_intelligence: "unavailable"
+    clickup_sync: "skipped; this repo's current story artifacts use local Jira metadata and no ClickUp MCP is available in this session"
+    whitespace_check: "passed via git diff --check"
+    notes:
+      - "Story 1.3 file remains Ready for Review, but DevOps handoff records Story 1.3 PR #9 as merged; Story 1.4 sequencing proceeds from that operational truth."
+      - "Story 1.4 is scoped to diary record schema and creation only."
+      - "Story 1.4 may add the neutral memory_records schema required by architecture, but must not implement trip/period behavior, record detail/editing, timeline grouping, media, filters, reporting, public sharing, inbound email automation, or per-record visibility controls."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.4.diary-record-schema-and-creation.story.md"
+    reason: "PO should validate the Story 1.4 draft before Dev implementation starts."
+
+  next_action: "Switch to PO and validate the Story 1.4 draft."

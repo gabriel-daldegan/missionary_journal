@@ -6,6 +6,7 @@ use App\Models\MemoryRecord;
 use App\Models\MemoryTag;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -43,6 +44,42 @@ class MemoryRecordService
             $record->save();
 
             $record->tags()->sync($this->resolveTagIds($tenant, $validated['tags'] ?? []));
+            $this->createHighlights($record, $validated['highlights'] ?? []);
+
+            return $record->refresh()->load([
+                'author',
+                'highlights',
+                'lastEditor',
+                'tags',
+                'tenant',
+            ]);
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function updateDiaryRecord(MemoryRecord $record, Tenant $tenant, User $author, array $data): MemoryRecord
+    {
+        if ($record->tenant_id !== $tenant->id) {
+            throw new AuthorizationException;
+        }
+
+        Gate::forUser($author)->authorize('update', $record);
+
+        $validated = $this->validateDiaryRecordData($data);
+
+        return DB::transaction(function () use ($record, $tenant, $author, $validated): MemoryRecord {
+            $record->fill([
+                'body' => $validated['body'],
+                'experience_date' => $validated['experience_date'],
+                'location_name' => $this->normalizeOptionalText($validated['location_name'] ?? null),
+            ]);
+            $record->lastEditor()->associate($author);
+            $record->save();
+
+            $record->tags()->sync($this->resolveTagIds($tenant, $validated['tags'] ?? []));
+            $record->highlights()->delete();
             $this->createHighlights($record, $validated['highlights'] ?? []);
 
             return $record->refresh()->load([

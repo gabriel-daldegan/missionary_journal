@@ -180,15 +180,111 @@ class MemoryRecordServiceTest extends FeatureTest
         $tenant = $this->createTenant();
         $member = $this->createUser($tenant);
         $outsideUser = $this->createUser();
+        $record = $this->service()->createDiaryRecord($tenant, $member, [
+            'body' => 'Policy memory.',
+            'experience_date' => '2026-06-06',
+        ]);
 
         $this->assertTrue($member->can('create', [MemoryRecord::class, $tenant]));
+        $this->assertTrue($member->can('view', $record));
+        $this->assertTrue($member->can('update', $record));
         $this->assertFalse($outsideUser->can('create', [MemoryRecord::class, $tenant]));
+        $this->assertFalse($outsideUser->can('view', $record));
+        $this->assertFalse($outsideUser->can('update', $record));
 
         $tenant->memoryWorkspaceSettings()->create([
             'collaboration_mode' => 'owner_review',
         ]);
 
         $this->assertFalse($member->can('create', [MemoryRecord::class, $tenant->fresh()]));
+        $this->assertTrue($member->can('view', $record->fresh()));
+        $this->assertFalse($member->can('update', $record->fresh()));
+    }
+
+    public function test_authorized_tenant_member_can_update_diary_record_without_changing_identity(): void
+    {
+        $tenant = $this->createTenant();
+        $author = $this->createUser($tenant);
+        $editor = $this->createUser($tenant);
+        $record = $this->service()->createDiaryRecord($tenant, $author, [
+            'body' => 'Original memory body.',
+            'experience_date' => '2026-06-06',
+            'location_name' => 'Sao Paulo',
+            'tags' => ['Original'],
+            'highlights' => ['Original highlight'],
+        ]);
+        $recordId = $record->id;
+        $recordUuid = $record->uuid;
+
+        $updatedRecord = $this->service()->updateDiaryRecord($record, $tenant, $editor, [
+            'body' => 'Updated memory body.',
+            'experience_date' => '2026-06-10',
+            'location_name' => 'Curitiba',
+            'tags' => ['Updated', 'Family'],
+            'highlights' => ['First updated highlight', 'Second updated highlight'],
+        ]);
+
+        $this->assertSame($recordId, $updatedRecord->id);
+        $this->assertSame($recordUuid, $updatedRecord->uuid);
+        $this->assertSame($author->id, $updatedRecord->author_user_id);
+        $this->assertSame($editor->id, $updatedRecord->last_edited_by_user_id);
+        $this->assertSame('Updated memory body.', $updatedRecord->body);
+        $this->assertSame('2026-06-10', $updatedRecord->experience_date->toDateString());
+        $this->assertSame('Curitiba', $updatedRecord->location_name);
+        $this->assertSame(['family', 'updated'], $updatedRecord->tags->pluck('slug')->sort()->values()->all());
+        $this->assertSame([
+            'First updated highlight',
+            'Second updated highlight',
+        ], $updatedRecord->highlights->pluck('text')->all());
+        $this->assertSame([0, 1], $updatedRecord->highlights->pluck('sort_order')->all());
+    }
+
+    public function test_update_denies_cross_tenant_record_before_any_write(): void
+    {
+        $recordTenant = $this->createTenant();
+        $routeTenant = $this->createTenant();
+        $author = $this->createUser($recordTenant);
+        $editor = $this->createUser($routeTenant);
+        $record = $this->service()->createDiaryRecord($recordTenant, $author, [
+            'body' => 'Original memory body.',
+            'experience_date' => '2026-06-06',
+        ]);
+
+        try {
+            $this->service()->updateDiaryRecord($record, $routeTenant, $editor, [
+                'body' => 'Denied update.',
+                'experience_date' => '2026-06-10',
+            ]);
+
+            $this->fail('The cross-tenant update was not denied.');
+        } catch (AuthorizationException) {
+            $this->assertSame('Original memory body.', $record->fresh()->body);
+        }
+    }
+
+    public function test_non_shared_collaboration_mode_denies_update_before_any_write(): void
+    {
+        $tenant = $this->createTenant();
+        $author = $this->createUser($tenant);
+        $record = $this->service()->createDiaryRecord($tenant, $author, [
+            'body' => 'Original memory body.',
+            'experience_date' => '2026-06-06',
+        ]);
+
+        $tenant->memoryWorkspaceSettings()->create([
+            'collaboration_mode' => 'owner_review',
+        ]);
+
+        try {
+            $this->service()->updateDiaryRecord($record->fresh(), $tenant->fresh(), $author, [
+                'body' => 'Denied update.',
+                'experience_date' => '2026-06-10',
+            ]);
+
+            $this->fail('The non-shared workspace mode did not deny update.');
+        } catch (AuthorizationException) {
+            $this->assertSame('Original memory body.', $record->fresh()->body);
+        }
     }
 
     private function service(): MemoryRecordService
