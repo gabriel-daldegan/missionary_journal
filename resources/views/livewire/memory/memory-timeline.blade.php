@@ -20,13 +20,38 @@
 
     <section class="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
         <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="flex flex-col gap-3">
-                <p class="text-xs font-semibold uppercase text-primary-700">{{ __('memory.layout.timeline') }}</p>
-                <h2 class="text-lg font-semibold tracking-normal text-slate-950">{{ __('memory.timeline.ready_heading') }}</h2>
-                <p class="text-sm leading-6 text-slate-600">
-                    {{ __('memory.timeline.ready_body') }}
-                </p>
-            </div>
+            @if ($records->isEmpty())
+                <div class="flex flex-col gap-3">
+                    <p class="text-xs font-semibold uppercase text-primary-700">{{ __('memory.layout.timeline') }}</p>
+                    <h2 class="text-lg font-semibold tracking-normal text-slate-950">{{ __('memory.timeline.ready_heading') }}</h2>
+                    <p class="text-sm leading-6 text-slate-600">
+                        {{ __('memory.timeline.ready_body') }}
+                    </p>
+                </div>
+            @else
+                <div class="flex flex-col gap-3">
+                    @foreach ($records as $record)
+                        <a
+                            wire:key="timeline-record-{{ $record->id }}"
+                            href="{{ route('memories.records.show', ['tenant' => $tenant, 'record' => $record]) }}"
+                            class="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-4 transition hover:border-primary-300 hover:bg-primary-50/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                        >
+                            <div class="flex flex-wrap items-center gap-2 text-xs font-medium uppercase text-slate-500">
+                                <time datetime="{{ $record->experience_date?->toDateString() }}">
+                                    {{ $record->experience_date?->toFormattedDateString() }}
+                                </time>
+
+                                @if ($record->location_name)
+                                    <span aria-hidden="true">/</span>
+                                    <span>{{ $record->location_name }}</span>
+                                @endif
+                            </div>
+
+                            <p class="line-clamp-3 text-sm leading-6 text-slate-800">{{ $record->body }}</p>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </div>
 
         <aside class="rounded-lg border border-slate-200 bg-slate-50 p-5">

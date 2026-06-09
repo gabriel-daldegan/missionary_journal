@@ -3,7 +3,7 @@ handoff:
   timestamp: "2026-06-05T18:19:29-03:00"
   from_agent: "po"
   to_agent: "sm"
-  consumed: false
+  consumed: true
   last_command: "validate-story-draft"
 
   story_context:

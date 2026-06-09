@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Memory;
 
+use App\Models\MemoryHighlight;
 use App\Models\MemoryRecord;
 use App\Models\Tenant;
 use App\Models\User;
@@ -14,7 +15,11 @@ class MemoryRecordEditor extends Component
 {
     public Tenant $tenant;
 
+    public ?MemoryRecord $record = null;
+
     public string $type = MemoryRecord::TYPE_DIARY;
+
+    public bool $isEditing = false;
 
     public string $body = '';
 
@@ -29,18 +34,22 @@ class MemoryRecordEditor extends Component
      */
     public array $highlights = [];
 
-    public function mount(Tenant $tenant, string $type): void
+    public function mount(Tenant $tenant, string $type = MemoryRecord::TYPE_DIARY): void
     {
         if ($type !== MemoryRecord::TYPE_DIARY) {
             abort(404);
         }
 
-        $this->ensureAuthenticatedTenantMember($tenant);
+        $user = $this->ensureAuthenticatedTenantMember($tenant);
 
         $this->tenant = $tenant;
         $this->type = $type;
         $this->experienceDate = now()->toDateString();
         $this->highlights = [$this->newHighlight()];
+
+        if ($this->record !== null) {
+            $this->mountRecordForEditing($this->record, $tenant, $user);
+        }
     }
 
     public function addHighlight(): void
@@ -107,13 +116,27 @@ class MemoryRecordEditor extends Component
 
         $validated = $this->validate();
 
-        $memoryRecordService->createDiaryRecord($this->tenant, $this->ensureAuthenticatedTenantMember($this->tenant), [
+        $user = $this->ensureAuthenticatedTenantMember($this->tenant);
+        $payload = [
             'body' => $validated['body'],
             'experience_date' => $validated['experienceDate'],
             'location_name' => $validated['locationName'] ?? null,
             'tags' => $this->tagNames(),
             'highlights' => $this->highlightPayload($validated['highlights'] ?? []),
-        ]);
+        ];
+
+        if ($this->isEditing && $this->record !== null) {
+            $record = $memoryRecordService->updateDiaryRecord($this->record, $this->tenant, $user, $payload);
+
+            $this->redirectRoute('memories.records.show', [
+                'tenant' => $this->tenant,
+                'record' => $record,
+            ]);
+
+            return;
+        }
+
+        $memoryRecordService->createDiaryRecord($this->tenant, $user, $payload);
 
         $this->redirectRoute('memories.timeline', [
             'tenant' => $this->tenant,
@@ -127,7 +150,9 @@ class MemoryRecordEditor extends Component
         return view('livewire.memory.memory-record-editor')
             ->layout('components.layouts.memory', [
                 'tenant' => $this->tenant,
-                'title' => __('memory.record_editor.title'),
+                'title' => $this->isEditing
+                    ? __('memory.record_editor.edit_title')
+                    : __('memory.record_editor.title'),
             ]);
     }
 
@@ -220,6 +245,35 @@ class MemoryRecordEditor extends Component
             'uid' => (string) Str::uuid(),
             'text' => '',
         ];
+    }
+
+    private function mountRecordForEditing(MemoryRecord $record, Tenant $tenant, User $user): void
+    {
+        if ($record->tenant_id !== $tenant->id || ! $user->can('update', $record)) {
+            abort(404);
+        }
+
+        $record->load(['highlights', 'tags']);
+
+        $this->record = $record;
+        $this->isEditing = true;
+        $this->body = $record->body ?? '';
+        $this->experienceDate = $record->experience_date?->toDateString() ?? now()->toDateString();
+        $this->locationName = $record->location_name;
+        $this->tagInput = $record->tags
+            ->pluck('name')
+            ->implode(', ');
+        $this->highlights = $record->highlights
+            ->map(fn (MemoryHighlight $highlight): array => [
+                'uid' => (string) Str::uuid(),
+                'text' => $highlight->text,
+            ])
+            ->values()
+            ->all();
+
+        if ($this->highlights === []) {
+            $this->highlights[] = $this->newHighlight();
+        }
     }
 
     private function ensureAuthenticatedTenantMember(Tenant $tenant): User

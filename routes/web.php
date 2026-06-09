@@ -10,6 +10,7 @@ use App\Http\Controllers\RoadmapController;
 use App\Http\Controllers\SubscriptionCheckoutController;
 use App\Http\Controllers\SubscriptionController;
 use App\Livewire\Memory\MemoryProfileSetup;
+use App\Livewire\Memory\MemoryRecordDetail;
 use App\Livewire\Memory\MemoryRecordEditor;
 use App\Livewire\Memory\MemoryTimeline;
 use App\Models\MemoryRecord;
@@ -77,6 +78,10 @@ Route::middleware(['auth', 'verified', 'tenant.member'])
             Route::livewire('/records/create/{type}', MemoryRecordEditor::class)
                 ->whereIn('type', MemoryRecord::ACTIVE_TYPES)
                 ->name('records.create');
+            Route::livewire('/records/{record:uuid}', MemoryRecordDetail::class)
+                ->name('records.show');
+            Route::livewire('/records/{record:uuid}/edit', MemoryRecordEditor::class)
+                ->name('records.edit');
         });
     });
 

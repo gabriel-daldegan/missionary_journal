@@ -3,9 +3,11 @@
         <p class="text-sm font-medium text-primary-700">{{ $tenant->name }}</p>
         <div class="flex flex-col gap-1">
             <p class="text-xs font-semibold uppercase text-slate-500">{{ __('memory.record_editor.eyebrow') }}</p>
-            <h1 class="text-2xl font-semibold tracking-normal text-slate-950">{{ __('memory.record_editor.heading') }}</h1>
+            <h1 class="text-2xl font-semibold tracking-normal text-slate-950">
+                {{ $isEditing ? __('memory.record_editor.edit_heading') : __('memory.record_editor.heading') }}
+            </h1>
             <p class="max-w-2xl text-sm leading-6 text-slate-600">
-                {{ __('memory.record_editor.intro') }}
+                {{ $isEditing ? __('memory.record_editor.edit_intro') : __('memory.record_editor.intro') }}
             </p>
         </div>
     </div>
@@ -142,12 +144,14 @@
                         wire:target="save"
                         class="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary-600 px-4 text-sm font-semibold text-white transition hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                        <span wire:loading.remove wire:target="save">{{ __('memory.record_editor.save') }}</span>
+                        <span wire:loading.remove wire:target="save">
+                            {{ $isEditing ? __('memory.record_editor.save_changes') : __('memory.record_editor.save') }}
+                        </span>
                         <span wire:loading wire:target="save">{{ __('memory.record_editor.saving') }}</span>
                     </button>
 
                     <a
-                        href="{{ route('memories.timeline', ['tenant' => $tenant]) }}"
+                        href="{{ $isEditing && $record !== null ? route('memories.records.show', ['tenant' => $tenant, 'record' => $record]) : route('memories.timeline', ['tenant' => $tenant]) }}"
                         class="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:border-primary-400 hover:text-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
                     >
                         {{ __('memory.record_editor.cancel') }}
@@ -161,7 +165,7 @@
                 <p class="text-xs font-semibold uppercase text-slate-500">{{ __('memory.layout.workspace') }}</p>
                 <p class="text-sm font-medium text-slate-950">{{ $tenant->name }}</p>
                 <p class="text-sm leading-6 text-slate-600">
-                    {{ __('memory.record_editor.sidebar') }}
+                    {{ $isEditing ? __('memory.record_editor.edit_sidebar') : __('memory.record_editor.sidebar') }}
                 </p>
             </div>
         </aside>

@@ -1,0 +1,96 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-09T21:52:00-03:00"
+  from_agent: "devops"
+  to_agent: "sm"
+  consumed: true
+  last_command: "prepare-next-story-after-story-1-4-publication"
+
+  publication_context:
+    summary: "Story 1.4a/1.4b/1.4c were formally closed in PR #10 and the package closeout artifact is now on PR #11."
+    repository:
+      origin: "https://github.com/gabriel-daldegan/missionary_journal.git"
+      current_checkout:
+        path: "/home/jose/projects/missionary_journal"
+        branch: "feature/story-1-5-closeout2"
+        base: "origin/main"
+        status: "clean_except_this_handoff"
+      latest_remote_main:
+        branch: "origin/main"
+        head: "c7c4e551ec03119f11d3df13deaa592e4ea025f3"
+        tag: "v1.4.0"
+    merged_prs:
+      story_1_4_scope:
+        number: 10
+        title: "Story 1.4a/1.4b/1.4c combined implementation PR"
+        state: "MERGED"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/10"
+      closeout_scope:
+        number: 11
+        title: "chore(memory): close formal package state with environment artifacts"
+        state: "OPEN"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/11"
+
+  next_story:
+    story_id: "1.5"
+    title: "Diary Record Editing and Detail View"
+    target_path: "docs/stories/1.5.diary-record-editing-and-detail-view.story.md"
+    source_artifacts:
+      primary:
+        - "docs/prd.md#story-1.5-diary-record-editing-and-detail-view"
+        - "docs/architecture.md"
+        - "docs/ui-architecture.md"
+        - "docs/framework/coding-standards.md"
+        - "docs/framework/source-tree.md"
+        - "docs/framework/tech-stack.md"
+      implementation_context:
+        - "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+        - "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+        - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+        - "docs/qa/gates/1.4a-diary-record-schema-foundation.yml"
+        - "docs/qa/gates/1.4b-diary-record-service-and-authorization.yml"
+        - "docs/qa/gates/1.4c-diary-record-creation-ui.yml"
+        - ".aiox/handoffs/20260608T183941-0300-qa-to-devops-story-1-4c-approved-for-publication.yaml"
+
+  user_story:
+    as_a: "a workspace member"
+    i_want: "to edit and open diary records"
+    so_that: "memories can be corrected, refined, and read in full after capture"
+
+  acceptance_criteria:
+    - "Authorized workspace members can open a diary record detail view."
+    - "Authorized workspace members can edit body text, experience date, location, tags, and Memory Highlights."
+    - "Editing preserves record identity."
+    - "Timeline placement updates when the experience date changes."
+    - "Unauthorized users cannot view or edit records outside their tenant."
+    - "Detail views do not display missionary-only or family-visible labels."
+
+  integration_verification:
+    - "Account/dashboard operations remain unaffected by record editing flow."
+    - "Cross-tenant detail/edit requests are denied without leaking record content."
+    - "Tests cover authorized view/edit, unauthorized denial, and timeline date updates."
+
+  scope_limitations:
+    - "Use Story 1.4's completed service and form as the base boundary."
+    - "Do not introduce trip/period editing."
+    - "Do not add media upload/delivery, public sharing, visibility mode toggles, or AI/email-source controls."
+    - "Do not implement advanced timeline grouping, filters, or reporting in Story 1.5."
+    - "Do not add detail routes that were only used to bypass tenant middleware."
+
+  drafting_guidance:
+    - "Draft the story from existing artifacts before implementation."
+    - "Keep it focused on detail/read + edit boundaries for diary records."
+    - "Define clear tenant-safety acceptance criteria at route, policy/service, and test level."
+    - "Preserve existing timeline home and creation route behavior unless strictly required by detail/edit scope."
+    - "Branching for implementation should be clean from `origin/main`, not from artifact-heavy closeout branch."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*create-next-story"
+    reason: "Need Story 1.5 draft with dependency context from Story 1.4 and current architecture references."
+
+  blockers:
+    - "Do not draft Story 1.5 on top of `.aiox`/`.ai` artifact-heavy branch without rebasing implementation scope from main."
+    - "Do not collapse Story 1.5 scope into Story 1.6 timeline-home behavior."
+
+  next_action: "Switch to SM and draft Story 1.5 with a narrow dependency scope from Story 1.4 results."

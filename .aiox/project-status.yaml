@@ -1,19 +1,24 @@
 status:
-  branch: feature/story-1-4-diary-record-schema-creation
+  branch: feature/story-1-5-closeout2
   modifiedFiles:
-    - .aiox/project-status.yaml
-    - .codex/agents/skill-standardizer.md
-    - .codex/skills/aiox-master/SKILL.md
-    - .ai/story-1-4a-validation-20260605T175854-0300.json
-    - .ai/story-1-4a-validation-20260605T194750-0300.json
-  modifiedFilesTotalCount: 31
+    - >-
+      .aiox/handoffs/20260605T181929-0300-po-to-sm-story-1-4b-dependency-blocked.yaml
+    - .ai/story-1-5-validation-20260608T224611-0300.json
+    - >-
+      .aiox/handoffs/20260608T223211-0300-sm-to-po-story-1-5-ready-for-review.yaml
+    - >-
+      .aiox/handoffs/20260608T224611-0300-po-to-dev-story-1-5-approved-for-review.yaml
+    - >-
+      .aiox/handoffs/20260609T215200-0300-devops-to-sm-story-1-5-ready-to-draft.yaml
+    - docs/stories/1.5.diary-record-editing-and-detail-view.story.md
+  modifiedFilesTotalCount: 6
   recentCommits:
-    - 'fix(memory): guard record editor mount'
-    - 'fix(memory): stabilize highlight wire keys'
+    - 'chore(memory): close formal package state with environment artifacts'
+    - 'chore(memory): include docs/qa gates for stories 1.4b and 1.4c'
   currentEpic: null
   currentStory: null
-  lastUpdate: '2026-06-08T20:08:55.827Z'
+  lastUpdate: '2026-06-09T01:58:49.455Z'
   isGitRepo: true
-timestamp: 1780949335846
+timestamp: 1780970329482
 ttl: 60
 gitFingerprint: null
