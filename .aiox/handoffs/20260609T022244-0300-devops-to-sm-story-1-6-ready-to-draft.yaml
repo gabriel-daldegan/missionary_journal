@@ -1,0 +1,84 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-09T02:22:44-03:00"
+  from_agent: "devops"
+  to_agent: "sm"
+  consumed: false
+  last_command: "prepare-next-story-after-story-1-5-publication"
+
+  publication_context:
+    summary: "Story 1.5 was published and merged through PR #11; the next Story 1.6 branch is prepared from the merged mainline."
+    repository:
+      origin: "https://github.com/gabriel-daldegan/missionary_journal.git"
+      current_checkout:
+        path: "/home/jose/projects/missionary_journal"
+        branch: "feature/story-1-6-vertical-month-grouped-timeline-home"
+        base: "origin/main"
+        head: "3dccad5"
+        tag: "v1.6.0"
+      merged_pr:
+        number: 11
+        title: "feat(memory): add diary record detail editing"
+        state: "MERGED"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/11"
+
+  next_story:
+    story_id: "1.6"
+    title: "Vertical Month-Grouped Timeline Home"
+    target_path: "docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+    source_artifacts:
+      primary:
+        - "docs/prd.md#story-1.6-vertical-month-grouped-timeline-home"
+        - "docs/architecture.md"
+        - "docs/ui-architecture.md"
+        - "docs/framework/coding-standards.md"
+        - "docs/framework/source-tree.md"
+        - "docs/framework/tech-stack.md"
+      implementation_context:
+        - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+        - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+        - "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+        - "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+        - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+        - "docs/stories/1.5.diary-record-editing-and-detail-view.story.md"
+        - "docs/qa/gates/1.5-diary-record-editing-and-detail-view.yml"
+
+  user_story:
+    as_a: "user with a completed profile"
+    i_want: "to land on a memory-first timeline"
+    so_that: "I can immediately see and revisit memories by when they happened"
+
+  acceptance_criteria:
+    - "The timeline home is the first meaningful memory product screen after profile setup."
+    - "Records are ordered by experience date or period start date, not creation date."
+    - "Records are grouped under month separators."
+    - "Timeline cards show date or period, optional location, meaningful excerpt, simple tags, photo count when available, and a clear action to open the full record."
+    - "The empty state encourages diary record creation without using album-generation language."
+    - "The timeline is not rendered as a table, admin list, Filament resource, marketing hero, blog-card feed, masonry layout, map, or complex animation surface."
+
+  integration_verification:
+    - "Timeline queries are scoped by tenant membership."
+    - "Timeline cards do not expose records from other tenants."
+    - "Tests verify ordering, month grouping, empty state, and cross-tenant exclusion."
+
+  scope_limitations:
+    - "Use Story 1.5's merged timeline/detail/edit baseline as the starting point."
+    - "Do not implement trip/period record creation; that is Story 1.7."
+    - "Do not add media upload or private media delivery; that belongs to a later story."
+    - "Do not implement timeline filters by date, tag, or location; that is Story 1.9."
+    - "Do not introduce masonry, maps, complex animation, Filament resources, admin tables, public sharing, visibility toggles, or album-generation language."
+    - "Do not change profile setup, account, dashboard, billing, invitation, or workspace-management flows unless required for regression fixes."
+
+  drafting_guidance:
+    - "Draft the story from the PRD and current merged Story 1.5 implementation."
+    - "Keep the story focused on timeline-home grouping, cards, empty state, and tenant-safe query behavior."
+    - "Use the dedicated memory layout and existing Livewire memory surface."
+    - "Prefer a service/query boundary if month grouping or timeline collection shaping becomes shared behavior."
+    - "Define focused PHPUnit/Livewire tests for ordering, month grouping, empty state, detail-link behavior, and cross-tenant exclusion."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*create-next-story"
+    reason: "Story 1.6 needs a draft grounded in the merged Story 1.5 baseline and PRD timeline-home scope."
+
+  next_action: "Switch to SM and draft Story 1.6 with a narrow vertical month-grouped timeline-home scope."

@@ -1,24 +1,17 @@
 status:
-  branch: feature/story-1-5-closeout2
+  branch: feature/story-1-6-vertical-month-grouped-timeline-home
   modifiedFiles:
     - >-
-      .aiox/handoffs/20260605T181929-0300-po-to-sm-story-1-4b-dependency-blocked.yaml
-    - .ai/story-1-5-validation-20260608T224611-0300.json
-    - >-
-      .aiox/handoffs/20260608T223211-0300-sm-to-po-story-1-5-ready-for-review.yaml
-    - >-
-      .aiox/handoffs/20260608T224611-0300-po-to-dev-story-1-5-approved-for-review.yaml
-    - >-
-      .aiox/handoffs/20260609T215200-0300-devops-to-sm-story-1-5-ready-to-draft.yaml
-    - docs/stories/1.5.diary-record-editing-and-detail-view.story.md
-  modifiedFilesTotalCount: 6
+      .aiox/handoffs/20260609T022244-0300-devops-to-sm-story-1-6-ready-to-draft.yaml
+    - .aiox/project-status.yaml
+  modifiedFilesTotalCount: 2
   recentCommits:
-    - 'chore(memory): close formal package state with environment artifacts'
-    - 'chore(memory): include docs/qa gates for stories 1.4b and 1.4c'
-  currentEpic: null
-  currentStory: null
-  lastUpdate: '2026-06-09T01:58:49.455Z'
+    - 'feat(memory): add diary record detail editing'
+    - 'feat(memory): add diary record'
+  currentEpic: 'Epic 1: Tenant-Scoped Memory Timeline MVP'
+  currentStory: '1.6 Vertical Month-Grouped Timeline Home'
+  lastUpdate: '2026-06-09T05:22:44.000Z'
   isGitRepo: true
-timestamp: 1780970329482
+timestamp: 1780982564000
 ttl: 60
 gitFingerprint: null
