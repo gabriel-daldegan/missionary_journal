@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Database\Factories\MemoryRecordFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class MemoryRecord extends Model
 {
@@ -81,6 +83,31 @@ class MemoryRecord extends Model
     public function highlights(): HasMany
     {
         return $this->hasMany(MemoryHighlight::class)->orderBy('sort_order');
+    }
+
+    public function timelineDate(): ?Carbon
+    {
+        if ($this->type === self::TYPE_PERIOD) {
+            return $this->period_start_date;
+        }
+
+        return $this->experience_date;
+    }
+
+    public function timelineExcerpt(int $limit = 180): string
+    {
+        return Str::limit((string) ($this->body ?: $this->title ?: ''), $limit);
+    }
+
+    public function timelinePhotoCount(): int
+    {
+        $sourceMetadata = $this->source_metadata;
+
+        if (! is_array($sourceMetadata)) {
+            return 0;
+        }
+
+        return (int) ($sourceMetadata['photo_count'] ?? 0);
     }
 
     public function getRouteKeyName(): string

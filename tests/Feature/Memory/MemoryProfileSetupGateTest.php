@@ -57,7 +57,7 @@ class MemoryProfileSetupGateTest extends FeatureTest
 
         $response->assertOk();
         $response->assertSee('Memory Timeline');
-        $response->assertSee('Workspace is ready');
+        $response->assertSee(__('memory.timeline.ready_heading'));
     }
 
     public function test_completed_profile_default_entry_redirects_to_timeline(): void

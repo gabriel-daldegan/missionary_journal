@@ -82,8 +82,11 @@ return [
         'dashboard_note' => 'Cuenta y facturación permanecen en el panel.',
         'heading' => 'Línea de tiempo de memorias',
         'intro' => 'Un espacio privado para memorias familiares.',
-        'ready_body' => 'Las memorias aparecerán aquí cuando el flujo de la línea de tiempo esté habilitado.',
-        'ready_heading' => 'El espacio está listo',
+        'ready_body' => 'Escribe tu primera entrada de diario para comenzar esta línea de tiempo y reunir tus memorias en un solo lugar.',
+        'ready_heading' => 'La línea de tiempo está lista',
         'title' => 'Línea de tiempo de memorias',
+        'open_record' => 'Abrir registro',
+        'period_range_separator' => 'a',
+        'photo_count' => '{0}Sin fotos|{1}:count foto|[2,*]:count fotos',
     ],
 ];

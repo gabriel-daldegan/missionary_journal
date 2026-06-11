@@ -1,0 +1,60 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-10T20:55:27-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "draft"
+
+  execution_context:
+    source_handoff: ".aiox/handoffs/20260609T022244-0300-devops-to-sm-story-1-6-ready-to-draft.yaml"
+    branch: "feature/story-1-6-vertical-month-grouped-timeline-home"
+    base: "origin/main"
+    note: "SM drafted Story 1.6 locally from the DevOps handoff, PRD, architecture, UI architecture, framework docs, Story 1.5, and Story 1.5 QA gate. No implementation code was changed."
+    observed_status_mismatch: "docs/stories/1.5.diary-record-editing-and-detail-view.story.md still says Ready for Review, but the Story 1.5 gate is PASS and the DevOps handoff reports PR #11 merged."
+
+  created_story:
+    story_id: "1.6"
+    title: "Vertical Month-Grouped Timeline Home"
+    path: "docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+    status: "Draft"
+
+  source_artifacts:
+    - "docs/prd.md#story-1.6-vertical-month-grouped-timeline-home"
+    - ".aiox/handoffs/20260609T022244-0300-devops-to-sm-story-1-6-ready-to-draft.yaml"
+    - "docs/stories/1.5.diary-record-editing-and-detail-view.story.md"
+    - "docs/qa/gates/1.5-diary-record-editing-and-detail-view.yml"
+    - "docs/architecture.md"
+    - "docs/ui-architecture.md"
+    - "docs/framework/coding-standards.md"
+    - "docs/framework/source-tree.md"
+    - "docs/framework/tech-stack.md"
+    - "routes/web.php"
+    - "app/Livewire/Memory/MemoryTimeline.php"
+    - "resources/views/livewire/memory/memory-timeline.blade.php"
+    - "app/Models/MemoryRecord.php"
+
+  review_status:
+    story_draft_checklist: "READY"
+    quality_notes: "Draft is scoped to timeline-home grouping, cards, empty state, and tenant-safe query behavior. It explicitly excludes period creation, media upload/delivery, filters, Filament/admin tables, public sharing, visibility toggles, and album-generation language."
+    key_guidance:
+      - "Introduce a MemoryTimelineService rather than keeping timeline query and grouping in the Livewire component."
+      - "Group timeline records by month using experience_date for diary records and period_start_date for future period records."
+      - "Keep photo count conditional on already available authorized media/count data; do not add media upload or delivery in Story 1.6."
+      - "Add focused PHPUnit coverage for ordering, month grouping, empty state, detail links, and cross-tenant exclusion."
+
+  validation_summary:
+    checklist: ".aiox-core/product/checklists/story-draft-checklist.md"
+    result: "READY"
+    decision: "approve for PO validation"
+    blocker_count: 0
+    notes:
+      - "ClickUp/Jira task creation was not performed from this local SM draft because no external project-management MCP tool is configured for this session."
+      - "Architecture sharded path in core-config points to docs/architecture, but this repo currently provides docs/architecture.md and docs/ui-architecture.md; the draft used those configured fallback documents."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+    reason: "PO must validate the Draft story before development starts."
+
+  next_action: "Switch to PO, validate Story 1.6, and, if approved, send handoff for Dev with the implementation-ready story."

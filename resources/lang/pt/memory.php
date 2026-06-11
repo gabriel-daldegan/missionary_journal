@@ -82,8 +82,11 @@ return [
         'dashboard_note' => 'Conta e cobrança continuam no painel.',
         'heading' => 'Linha do tempo de memórias',
         'intro' => 'Um espaço privado para memórias da família.',
-        'ready_body' => 'As memórias aparecerão aqui depois que o fluxo da linha do tempo estiver habilitado.',
-        'ready_heading' => 'O espaço está pronto',
+        'ready_body' => 'Escreva sua primeira entrada de diário para começar a linha do tempo e guardar as lembranças em um único lugar.',
+        'ready_heading' => 'A linha do tempo está pronta',
         'title' => 'Linha do tempo de memórias',
+        'open_record' => 'Abrir registro',
+        'period_range_separator' => 'até',
+        'photo_count' => '{0}Sem fotos|{1}:count foto|[2,*]:count fotos',
     ],
 ];

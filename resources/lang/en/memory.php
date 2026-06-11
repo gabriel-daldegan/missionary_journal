@@ -82,8 +82,11 @@ return [
         'dashboard_note' => 'Account and billing settings stay in the dashboard.',
         'heading' => 'Memory Timeline',
         'intro' => 'A private workspace surface for family memories.',
-        'ready_body' => 'Memory entries will appear here after the timeline workflow is enabled.',
-        'ready_heading' => 'Workspace is ready',
+        'ready_body' => 'Write your first diary entry to start your private timeline and review every memory in one place.',
+        'ready_heading' => 'Your timeline is ready',
         'title' => 'Memory Timeline',
+        'open_record' => 'Open full record',
+        'period_range_separator' => 'to',
+        'photo_count' => '{0}No photos|{1}:count photo|[2,*]:count photos',
     ],
 ];
