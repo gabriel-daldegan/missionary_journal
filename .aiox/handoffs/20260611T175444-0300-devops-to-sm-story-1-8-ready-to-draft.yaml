@@ -1,0 +1,92 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-11T17:54:44-03:00"
+  from_agent: "devops"
+  to_agent: "sm"
+  consumed: false
+  last_command: "prepare-next-story-after-story-1-7-publication"
+
+  publication_context:
+    summary: "Story 1.7 was published and merged through PR #13; the next Story 1.8 branch is prepared from the merged mainline."
+    repository:
+      origin: "https://github.com/gabriel-daldegan/missionary_journal.git"
+      current_checkout:
+        path: "/home/jose/projects/missionary_journal"
+        branch: "feature/story-1-8-private-photo-attachments-media-delivery"
+        base: "origin/main"
+        head: "f77ab0d"
+        tag: "v1.8.0"
+      merged_pr:
+        number: 13
+        title: "feat(memory): add trip period record creation"
+        state: "MERGED"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/13"
+        merged_at: "2026-06-11T20:46:56Z"
+        merge_commit: "f77ab0d9bd6a0ad0ddea75693039dd15bd8ad76c"
+      release_check:
+        workflow: "release"
+        result: "PASS"
+        tag: "v1.8.0"
+
+  next_story:
+    story_id: "1.8"
+    title: "Private Photo Attachments and Authorized Media Delivery"
+    target_path: "docs/stories/1.8.private-photo-attachments-and-authorized-media-delivery.story.md"
+    source_artifacts:
+      primary:
+        - "docs/prd.md#story-1.8-private-photo-attachments-and-authorized-media-delivery"
+        - "docs/architecture.md#memory-media-architecture"
+        - "docs/ui-architecture.md#private-media"
+        - "docs/framework/coding-standards.md"
+        - "docs/framework/source-tree.md"
+        - "docs/framework/tech-stack.md"
+      implementation_context:
+        - "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+        - "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+        - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+        - "docs/stories/1.5.diary-record-editing-and-detail-view.story.md"
+        - "docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+        - "docs/stories/1.7.trip-period-record-creation.story.md"
+        - "docs/qa/gates/1.7-trip-period-record-creation.yml"
+        - ".aiox/handoffs/20260611T160212-0300-architect-to-devops-story-1-7-approved-for-publication.yaml"
+
+  user_story:
+    as_a: "user"
+    i_want: "photos attached to records to stay private"
+    so_that: "sensitive memory media is protected by workspace access"
+
+  acceptance_criteria:
+    - "Users can attach photos to diary records and trip/period records."
+    - "Photos remain connected to their parent memory record."
+    - "Photo upload respects validation limits of 2 GB per workspace, 10 MB per image, and 25 photos per record."
+    - "Memory photos use private storage and are not exposed through public media URLs."
+    - "Served image renditions are authorized by tenant/workspace access and parent-record visibility."
+    - "The implementation preserves a future S3-compatible storage path."
+
+  integration_verification:
+    - "Existing public blog media behavior is not reused for private memory photos."
+    - "Users outside the tenant cannot access record media directly."
+    - "Tests cover authorized media access, unauthorized cross-tenant media denial, and attachment persistence."
+
+  scope_limitations:
+    - "Use the merged Story 1.7 diary and period record surfaces as the starting point."
+    - "Reuse existing tenant-safe memory routes, policies, services, Livewire editor/detail/timeline surfaces, and MemoryRecord model boundaries."
+    - "Do not expose memory photos through public storage, public blog-media assumptions, raw storage paths, or public URLs."
+    - "Do not implement timeline filters by date, tag, or location; that is Story 1.9."
+    - "Do not add public sharing, per-record visibility toggles, masonry, maps, complex animation, album-generation language, or reporting dashboards."
+    - "Do not change account, billing, dashboard, invitation, or workspace-management flows unless required for regression fixes."
+    - "Keep storage compatible with a future S3-compatible disk, but avoid introducing external infrastructure or new dependencies without explicit approval."
+
+  drafting_guidance:
+    - "Draft the story from the PRD, architecture private-media guidance, UI architecture private-media route guidance, and current merged Story 1.7 implementation."
+    - "Keep the story focused on photo attachment, private storage, authorized delivery, upload limits, and tenant-boundary tests."
+    - "Consider whether the implementation should add a dedicated MemoryMediaController route named memories.media.show, but leave final route/controller design to the implementation story after checking current route conventions."
+    - "Define focused PHPUnit/Livewire tests for diary photo attachment, period photo attachment, per-record photo limit, image size validation, workspace storage limit handling, authorized media delivery, and cross-tenant direct URL denial."
+    - "Use Laravel fake disks or test-specific private storage configuration for media tests."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*create-next-story"
+    reason: "Story 1.8 needs an implementation-ready draft grounded in merged Story 1.7 record creation plus the PRD and architecture private-media constraints."
+
+  next_action: "Switch to SM and draft Story 1.8 with a narrow private photo attachment and authorized media delivery scope."
