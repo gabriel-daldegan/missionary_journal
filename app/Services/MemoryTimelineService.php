@@ -31,12 +31,27 @@ class MemoryTimelineService
             ->whereBelongsTo($tenant)
             ->whereIn('type', self::ALLOWED_TYPES)
             ->with(['highlights', 'tags'])
-            ->orderByRaw('COALESCE(period_start_date, experience_date) DESC')
-            ->orderByDesc('id')
             ->get();
 
         return $records
             ->filter(fn (MemoryRecord $record): bool => $this->resolveTimelineDate($record) !== null)
+            ->sort(function (MemoryRecord $firstRecord, MemoryRecord $secondRecord): int {
+                $firstDate = $this->resolveTimelineDate($firstRecord);
+                $secondDate = $this->resolveTimelineDate($secondRecord);
+
+                if ($firstDate === null || $secondDate === null) {
+                    return 0;
+                }
+
+                $dateComparison = $secondDate->getTimestamp() <=> $firstDate->getTimestamp();
+
+                if ($dateComparison !== 0) {
+                    return $dateComparison;
+                }
+
+                return $secondRecord->id <=> $firstRecord->id;
+            })
+            ->values()
             ->groupBy(fn (MemoryRecord $record): string => $this->resolveTimelineDate($record)->format('Y-m'))
             ->sortKeysDesc()
             ->map(function (Collection $groupedRecords): array {

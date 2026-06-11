@@ -7,7 +7,7 @@ status:
     - app/Livewire/Memory/MemoryTimeline.php
     - resources/lang/en/memory.php
     - resources/lang/es/memory.php
-  modifiedFilesTotalCount: 16
+  modifiedFilesTotalCount: 5
   recentCommits:
     - 'chore(jira): sync story issue metadata'
     - 'chore(memory): prepare story 1.6 branch handoff'
