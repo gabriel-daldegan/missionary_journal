@@ -52,7 +52,11 @@ class MemoryTimelineService
                 return $secondRecord->id <=> $firstRecord->id;
             })
             ->values()
-            ->groupBy(fn (MemoryRecord $record): string => $this->resolveTimelineDate($record)->format('Y-m'))
+            ->groupBy(function (MemoryRecord $record): string {
+                $timelineDate = $this->resolveTimelineDate($record);
+
+                return $timelineDate?->format('Y-m') ?? 'unknown';
+            })
             ->sortKeysDesc()
             ->map(function (Collection $groupedRecords): array {
                 $timelineDate = $this->resolveTimelineDate($groupedRecords->first());
