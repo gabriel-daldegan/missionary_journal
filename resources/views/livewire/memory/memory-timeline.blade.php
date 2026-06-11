@@ -9,12 +9,20 @@
                 </p>
             </div>
 
-            <a
-                href="{{ route('memories.records.create', ['tenant' => $tenant, 'type' => \App\Models\MemoryRecord::TYPE_DIARY]) }}"
-                class="inline-flex h-10 items-center justify-center rounded-lg bg-primary-600 px-4 text-sm font-semibold text-white transition hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
-            >
-                {{ __('memory.record_editor.new_diary') }}
-            </a>
+            <div class="flex flex-wrap gap-2">
+                <a
+                    href="{{ route('memories.records.create', ['tenant' => $tenant, 'type' => \App\Models\MemoryRecord::TYPE_DIARY]) }}"
+                    class="inline-flex h-10 items-center justify-center rounded-lg bg-primary-600 px-4 text-sm font-semibold text-white transition hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                >
+                    {{ __('memory.record_editor.new_diary') }}
+                </a>
+                <a
+                    href="{{ route('memories.records.create', ['tenant' => $tenant, 'type' => \App\Models\MemoryRecord::TYPE_PERIOD]) }}"
+                    class="inline-flex h-10 items-center justify-center rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:border-primary-400 hover:text-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                >
+                    {{ __('memory.record_editor.new_period') }}
+                </a>
+            </div>
         </div>
     </div>
 
@@ -27,12 +35,20 @@
                     <p class="text-sm leading-6 text-slate-600">
                         {{ __('memory.timeline.ready_body') }}
                     </p>
-                    <a
-                        href="{{ route('memories.records.create', ['tenant' => $tenant, 'type' => \App\Models\MemoryRecord::TYPE_DIARY]) }}"
-                        class="inline-flex h-10 w-fit items-center justify-center rounded-lg bg-primary-600 px-4 text-sm font-semibold text-white transition hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
-                    >
-                        {{ __('memory.record_editor.new_diary') }}
-                    </a>
+                    <div class="flex flex-wrap gap-2">
+                        <a
+                            href="{{ route('memories.records.create', ['tenant' => $tenant, 'type' => \App\Models\MemoryRecord::TYPE_DIARY]) }}"
+                            class="inline-flex h-10 w-fit items-center justify-center rounded-lg bg-primary-600 px-4 text-sm font-semibold text-white transition hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                        >
+                            {{ __('memory.record_editor.new_diary') }}
+                        </a>
+                        <a
+                            href="{{ route('memories.records.create', ['tenant' => $tenant, 'type' => \App\Models\MemoryRecord::TYPE_PERIOD]) }}"
+                            class="inline-flex h-10 w-fit items-center justify-center rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:border-primary-400 hover:text-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                        >
+                            {{ __('memory.record_editor.new_period') }}
+                        </a>
+                    </div>
                 </div>
             @else
                 <div class="flex flex-col gap-6">

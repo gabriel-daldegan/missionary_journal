@@ -4,6 +4,7 @@ namespace Tests\Feature\Services\Memory;
 
 use App\Models\MemoryRecord;
 use App\Models\MemoryTag;
+use App\Services\MemoryRecordService;
 use App\Services\MemoryTimelineService;
 use Tests\Feature\FeatureTest;
 
@@ -130,6 +131,30 @@ class MemoryTimelineServiceTest extends FeatureTest
         $this->assertSame($periodRecord->id, $grouped[0]['records']->first()->id);
         $this->assertSame('April 2026', $grouped[1]['month_label']);
         $this->assertSame($diaryRecord->id, $grouped[1]['records']->first()->id);
+    }
+
+    public function test_created_period_records_are_ordered_by_period_start_date_with_diary_records(): void
+    {
+        $tenant = $this->createTenant();
+        $author = $this->createUser($tenant);
+
+        $periodRecord = app(MemoryRecordService::class)->createPeriodRecord($tenant, $author, [
+            'title' => 'Period starts later.',
+            'period_start_date' => '2026-07-14',
+            'period_end_date' => '2026-07-18',
+        ]);
+        $diaryRecord = app(MemoryRecordService::class)->createDiaryRecord($tenant, $author, [
+            'body' => 'Diary earlier in July.',
+            'experience_date' => '2026-07-12',
+        ]);
+
+        $grouped = $this->timelineService()->getMonthlyTimelineGroups($tenant);
+
+        $this->assertSame('July 2026', $grouped[0]['month_label']);
+        $this->assertSame([
+            $periodRecord->id,
+            $diaryRecord->id,
+        ], $grouped[0]['records']->pluck('id')->all());
     }
 
     private function timelineService(): MemoryTimelineService

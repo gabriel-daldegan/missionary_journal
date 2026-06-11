@@ -3,21 +3,27 @@
         <p class="text-sm font-medium text-primary-700">{{ $tenant->name }}</p>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div class="flex flex-col gap-1">
-                <p class="text-xs font-semibold uppercase text-slate-500">{{ __('memory.record_detail.eyebrow') }}</p>
-                <h1 class="text-2xl font-semibold tracking-normal text-slate-950">{{ __('memory.record_detail.heading') }}</h1>
+                <p class="text-xs font-semibold uppercase text-slate-500">
+                    {{ $record->type === \App\Models\MemoryRecord::TYPE_PERIOD ? __('memory.record_detail.period_eyebrow') : __('memory.record_detail.eyebrow') }}
+                </p>
+                <h1 class="text-2xl font-semibold tracking-normal text-slate-950">
+                    {{ $record->type === \App\Models\MemoryRecord::TYPE_PERIOD ? ($record->title ?? __('memory.record_detail.period_heading')) : __('memory.record_detail.heading') }}
+                </h1>
                 <p class="max-w-2xl text-sm leading-6 text-slate-600">
-                    {{ __('memory.record_detail.intro') }}
+                    {{ $record->type === \App\Models\MemoryRecord::TYPE_PERIOD ? __('memory.record_detail.period_intro') : __('memory.record_detail.intro') }}
                 </p>
             </div>
 
-            @can('update', $record)
+            @if ($record->type === \App\Models\MemoryRecord::TYPE_DIARY)
+                @can('update', $record)
                 <a
                     href="{{ route('memories.records.edit', ['tenant' => $tenant, 'record' => $record]) }}"
                     class="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:border-primary-400 hover:text-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
                 >
                     {{ __('memory.record_detail.edit') }}
                 </a>
-            @endcan
+                @endcan
+            @endif
         </div>
     </div>
 
@@ -25,9 +31,21 @@
         <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <div class="flex flex-col gap-5">
                 <div class="flex flex-wrap items-center gap-2 text-sm text-slate-600">
-                    <time datetime="{{ $record->experience_date?->toDateString() }}">
-                        {{ $record->experience_date?->toFormattedDateString() }}
-                    </time>
+                    @if ($record->type === \App\Models\MemoryRecord::TYPE_PERIOD)
+                        <time datetime="{{ $record->period_start_date?->toDateString() }}">
+                            {{ $record->period_start_date?->toFormattedDateString() }}
+                        </time>
+                        @if ($record->period_end_date)
+                            <span>{{ __('memory.timeline.period_range_separator') }}</span>
+                            <time datetime="{{ $record->period_end_date->toDateString() }}">
+                                {{ $record->period_end_date->toFormattedDateString() }}
+                            </time>
+                        @endif
+                    @else
+                        <time datetime="{{ $record->experience_date?->toDateString() }}">
+                            {{ $record->experience_date?->toFormattedDateString() }}
+                        </time>
+                    @endif
 
                     @if ($record->location_name)
                         <span aria-hidden="true">/</span>
@@ -35,7 +53,23 @@
                     @endif
                 </div>
 
-                <div class="whitespace-pre-line text-base leading-8 text-slate-950">{{ $record->body }}</div>
+                @if ($record->type === \App\Models\MemoryRecord::TYPE_PERIOD)
+                    @if (! empty($record->people))
+                        <div class="flex flex-wrap gap-2" aria-label="{{ __('memory.record_detail.people') }}">
+                            @foreach ($record->people as $person)
+                                <span wire:key="record-person-{{ $loop->index }}-{{ md5($person) }}" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+                                    {{ $person }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @if ($record->notes)
+                        <div class="whitespace-pre-line text-base leading-8 text-slate-950">{{ $record->notes }}</div>
+                    @endif
+                @else
+                    <div class="whitespace-pre-line text-base leading-8 text-slate-950">{{ $record->body }}</div>
+                @endif
 
                 @if ($record->tags->isNotEmpty())
                     <div class="flex flex-wrap gap-2" aria-label="{{ __('memory.record_detail.tags') }}">

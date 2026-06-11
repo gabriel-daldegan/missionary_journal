@@ -59,6 +59,50 @@ class MemoryRecordService
     /**
      * @param  array<string, mixed>  $data
      */
+    public function createPeriodRecord(Tenant $tenant, User $author, array $data): MemoryRecord
+    {
+        Gate::forUser($author)->authorize('create', [MemoryRecord::class, $tenant]);
+
+        $validated = $this->validatePeriodRecordData($data);
+
+        return DB::transaction(function () use ($tenant, $author, $validated): MemoryRecord {
+            $record = new MemoryRecord([
+                'type' => MemoryRecord::TYPE_PERIOD,
+                'title' => $validated['title'],
+                'notes' => $this->normalizeOptionalText($validated['notes'] ?? null),
+                'experience_date' => null,
+                'period_start_date' => $validated['period_start_date'],
+                'period_end_date' => $validated['period_end_date'],
+                'location_name' => $this->normalizeOptionalText($validated['location_name'] ?? null),
+                'people' => $validated['people'] ?? [],
+                'source' => null,
+                'source_metadata' => null,
+            ]);
+
+            $record->forceFill([
+                'uuid' => (string) Str::uuid(),
+            ]);
+            $record->tenant()->associate($tenant);
+            $record->author()->associate($author);
+            $record->lastEditor()->associate($author);
+            $record->save();
+
+            $record->tags()->sync($this->resolveTagIds($tenant, $validated['tags'] ?? []));
+            $this->createHighlights($record, $validated['highlights'] ?? []);
+
+            return $record->refresh()->load([
+                'author',
+                'highlights',
+                'lastEditor',
+                'tags',
+                'tenant',
+            ]);
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function updateDiaryRecord(MemoryRecord $record, Tenant $tenant, User $author, array $data): MemoryRecord
     {
         if ($record->tenant_id !== $tenant->id) {
@@ -111,6 +155,41 @@ class MemoryRecordService
             'body' => ['required', 'string', 'max:20000'],
             'experience_date' => ['required', 'date'],
             'location_name' => ['nullable', 'string', 'max:255'],
+            'tags' => ['array', 'max:20'],
+            'tags.*' => ['nullable', 'string', 'max:80'],
+            'highlights' => ['array', 'max:20'],
+            'highlights.*' => ['nullable', 'string', 'max:500'],
+        ])->validate();
+
+        return $validated;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{title: string, period_start_date: string, period_end_date: string, location_name?: string|null, notes?: string|null, people?: array<int, string>, tags?: array<int, string|null>, highlights?: array<int, string|null>}
+     */
+    private function validatePeriodRecordData(array $data): array
+    {
+        $payload = [
+            'title' => $this->normalizeOptionalText(is_string($data['title'] ?? null) ? $data['title'] : null),
+            'period_start_date' => $data['period_start_date'] ?? null,
+            'period_end_date' => $data['period_end_date'] ?? null,
+            'location_name' => $data['location_name'] ?? null,
+            'notes' => $data['notes'] ?? null,
+            'people' => $this->normalizeStringList($data['people'] ?? []),
+            'tags' => $data['tags'] ?? [],
+            'highlights' => $this->normalizeHighlightInput($data['highlights'] ?? []),
+        ];
+
+        /** @var array{title: string, period_start_date: string, period_end_date: string, location_name?: string|null, notes?: string|null, people?: array<int, string>, tags?: array<int, string|null>, highlights?: array<int, string|null>} $validated */
+        $validated = Validator::make($payload, [
+            'title' => ['required', 'string', 'max:255'],
+            'period_start_date' => ['required', 'date'],
+            'period_end_date' => ['required', 'date', 'after_or_equal:period_start_date'],
+            'location_name' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:10000'],
+            'people' => ['array', 'max:30'],
+            'people.*' => ['nullable', 'string', 'max:120'],
             'tags' => ['array', 'max:20'],
             'tags.*' => ['nullable', 'string', 'max:80'],
             'highlights' => ['array', 'max:20'],
@@ -193,6 +272,26 @@ class MemoryRecordService
                     'sort_order' => $index,
                 ]);
             });
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function normalizeStringList(mixed $values): array
+    {
+        if (is_string($values)) {
+            $values = explode(',', $values);
+        }
+
+        if (! is_array($values)) {
+            return [];
+        }
+
+        return collect($values)
+            ->map(fn (mixed $value): ?string => is_string($value) ? $this->normalizeOptionalText($value) : null)
+            ->filter()
+            ->values()
+            ->all();
     }
 
     private function normalizeOptionalText(?string $value): ?string

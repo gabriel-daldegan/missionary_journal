@@ -35,7 +35,9 @@ class MemoryTimelineTest extends FeatureTest
         $periodRecord = MemoryRecord::factory()->create([
             'tenant_id' => $tenant->id,
             'type' => MemoryRecord::TYPE_PERIOD,
-            'body' => 'Trip planning.',
+            'title' => 'Trip planning.',
+            'body' => null,
+            'notes' => 'Private planning notes stay on detail.',
             'experience_date' => null,
             'period_start_date' => '2026-06-20',
             'period_end_date' => '2026-06-21',
@@ -64,6 +66,7 @@ class MemoryTimelineTest extends FeatureTest
             'May 2026',
             'Quiet prep before visit.',
         ]);
+        $response->assertDontSee('Private planning notes stay on detail.');
         $response->assertSee($this->recordRoute($tenant, $periodRecord), false);
         $response->assertSee('Recife');
         $response->assertSeeInOrder([
