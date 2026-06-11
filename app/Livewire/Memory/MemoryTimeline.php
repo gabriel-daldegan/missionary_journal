@@ -2,9 +2,8 @@
 
 namespace App\Livewire\Memory;
 
-use App\Models\MemoryRecord;
 use App\Models\Tenant;
-use Illuminate\Database\Eloquent\Collection;
+use App\Services\MemoryTimelineService;
 use Illuminate\View\View;
 use Livewire\Component;
 
@@ -19,17 +18,10 @@ class MemoryTimeline extends Component
 
     public function render(): View
     {
-        /** @var Collection<int, MemoryRecord> $records */
-        $records = MemoryRecord::query()
-            ->whereBelongsTo($this->tenant)
-            ->where('type', MemoryRecord::TYPE_DIARY)
-            ->with(['highlights', 'tags'])
-            ->orderByDesc('experience_date')
-            ->orderByDesc('id')
-            ->get();
+        $timelineGroups = app(MemoryTimelineService::class)->getMonthlyTimelineGroups($this->tenant);
 
         return view('livewire.memory.memory-timeline')
-            ->with('records', $records)
+            ->with('timelineGroups', $timelineGroups)
             ->layout('components.layouts.memory', [
                 'tenant' => $this->tenant,
                 'title' => __('memory.timeline.title'),

@@ -1,0 +1,73 @@
+schema: 1
+story: '1.6'
+story_title: 'Vertical Month-Grouped Timeline Home'
+gate: PASS
+status_reason: 'Story 1.6 satisfies the tenant-scoped month-grouped timeline, card metadata, empty-state, and regression boundaries. Architect review fixed the PHPStan collection contract, centralized timeline helpers on MemoryRecord, and replaced visual-only body clamping with a real excerpt before rerunning focused gates, lint, typecheck, and the full test suite.'
+reviewer: 'Aria (Architect)'
+updated: '2026-06-11T00:23:12-03:00'
+quality_score: 100
+expires: '2026-06-25T00:23:12-03:00'
+
+top_issues: []
+
+waiver:
+  active: false
+
+evidence:
+  tests_reviewed: 464
+  risks_identified: 2
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+    integration_covered: [1, 2, 3]
+    integration_gaps: []
+  commands:
+    - command: 'Laravel Boost application_info'
+      result: 'confirmed Laravel 13.9.0, Livewire 4.3.0, Filament 5.6.3, PHP 8.4 context'
+    - command: 'Laravel Boost search_docs'
+      result: 'confirmed current Laravel/Livewire route model binding, testing, and eager loading context before review changes'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryTimelineTest.php'
+      result: 'passed before review fixes; 3 tests, 17 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryTimelineServiceTest.php'
+      result: 'passed before review fixes; 2 tests, 12 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php'
+      result: 'passed; 12 tests, 46 assertions'
+    - command: 'vendor/bin/sail artisan route:list --name=memories'
+      result: 'passed; 6 memory routes listed'
+    - command: 'vendor/bin/sail bin pint --dirty --format agent'
+      result: 'passed'
+    - command: 'npm run lint'
+      result: 'passed; Pint dirty check passed'
+    - command: 'npm run typecheck'
+      result: 'initially exposed a PHPStan return.type issue in MemoryTimelineService'
+    - command: 'vendor/bin/sail bin phpstan analyse --memory-limit=1G --no-progress --debug'
+      result: 'confirmed the MemoryTimelineService return.type issue before fix'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryTimelineServiceTest.php'
+      result: 'passed after review fixes; 3 tests, 16 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryTimelineTest.php'
+      result: 'passed after review fixes; 4 tests, 20 assertions'
+    - command: 'npm run typecheck'
+      result: 'passed after review fixes; PHPStan analysed 488 files with no errors'
+    - command: 'coderabbit review --agent --type uncommitted'
+      result: 'passed on final rerun; 0 findings after valid code findings were addressed and metadata findings were reconciled'
+    - command: 'npm test'
+      result: 'passed; 464 tests, 1229 assertions'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Timeline access remains inside the authenticated tenant/member/profile route stack, service reads are scoped with whereBelongsTo($tenant), and cross-tenant leakage is covered by service and HTTP tests. Timeline cards now render real excerpts instead of full record bodies.'
+  performance:
+    status: PASS
+    notes: 'Timeline reads remain tenant-bounded, eager-load displayed tags/highlights, and avoid Blade-side queries. Ordering is deterministic by timeline date and id.'
+  reliability:
+    status: PASS
+    notes: 'Focused tests cover grouping, ordering, type-aware timeline dates, empty state, detail links, cross-tenant exclusion, and excerpt rendering. Full PHPUnit suite passed.'
+  maintainability:
+    status: PASS
+    notes: 'The timeline query is isolated in MemoryTimelineService, record-level card helpers live on MemoryRecord, and the Livewire component remains a thin render boundary.'
+
+recommendations:
+  immediate: []
+  future:
+    - 'Consider pagination or cursor loading when tenant timelines become large enough for unbounded monthly reads to matter.'

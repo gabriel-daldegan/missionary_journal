@@ -1,0 +1,68 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-10T23:01:21-03:00"
+  from_agent: "dev"
+  to_agent: "architect"
+  consumed: true
+  last_command: "*develop-yolo docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+
+  story_context:
+    story_id: "1.6"
+    story_path: "docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+    status: "Ready for Review"
+    title: "Vertical Month-Grouped Timeline Home"
+    branch: "feature/story-1-6-vertical-month-grouped-timeline-home"
+    parent_epic: "MIS-1"
+
+  implementation_summary:
+    - "Architect review addendum: added MemoryRecord::timelineDate(), MemoryRecord::timelineExcerpt(), and MemoryRecord::timelinePhotoCount() to centralize timeline date resolution, excerpt generation, and photo-count logic."
+    - "Added MemoryTimelineService for tenant-scoped timeline reads, diary/period timeline dates, eager-loaded tags/highlights, deterministic ordering, and month grouping."
+    - "Refactored MemoryTimeline to delegate timeline query/grouping to the service and pass grouped payloads to Blade."
+    - "Reworked the memory timeline home into a vertical month-grouped timeline with card metadata, optional location, simple tags, conditional photo count, and record detail action."
+    - "Updated EN/PT/ES timeline copy for diary-first empty state and timeline card labels."
+    - "Added focused service and Livewire timeline tests, and updated the existing profile-gate assertion for the new timeline empty-state copy."
+    - "Addressed CodeRabbit findings for pluralization, nullable timeline date rendering, source metadata photo count access, Spanish terminology, and localized test assertion."
+
+  validation:
+    focused_tests:
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryTimelineServiceTest.php"
+        result: "PASS"
+        evidence: "2 tests, 12 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryTimelineTest.php"
+        result: "PASS"
+        evidence: "3 tests, 17 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php"
+        result: "PASS"
+        evidence: "12 tests, 46 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryTimelineServiceTest.php tests/Feature/Livewire/Memory/MemoryTimelineTest.php tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php"
+        result: "PASS"
+        evidence: "17 tests, 75 assertions"
+      - command: "vendor/bin/sail artisan route:list --name=memories"
+        result: "PASS"
+        evidence: "6 memory routes listed"
+      - command: "vendor/bin/sail bin pint --dirty --format agent"
+        result: "PASS"
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "PASS"
+        evidence: "Final rerun completed with 0 findings."
+
+  files_changed:
+    - "app/Models/MemoryRecord.php"
+    - "app/Services/MemoryTimelineService.php"
+    - "app/Livewire/Memory/MemoryTimeline.php"
+    - "resources/views/livewire/memory/memory-timeline.blade.php"
+    - "resources/lang/en/memory.php"
+    - "resources/lang/pt/memory.php"
+    - "resources/lang/es/memory.php"
+    - "tests/Feature/Services/Memory/MemoryTimelineServiceTest.php"
+    - "tests/Feature/Livewire/Memory/MemoryTimelineTest.php"
+    - "tests/Feature/Memory/MemoryProfileSetupGateTest.php"
+    - "docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+
+  review_focus:
+    - "Confirm MemoryTimelineService query boundary is acceptable for tenant scoping, period readiness, month grouping, and deterministic ordering."
+    - "Review timeline view for privacy boundaries, no cross-tenant leakage, no public media assumptions, and no Story 1.7/1.8/1.9 scope drift."
+    - "Confirm card metadata rendering and empty state satisfy Story 1.6 acceptance criteria without introducing admin/table/marketing/blog/masonry/map patterns."
+    - "Review test coverage for tenant-scoped ordering, month grouping, cross-tenant exclusion, empty state, and route/profile regression safety."
+
+  next_action: "Switch to Architect and run the Story 1.6 quality gate review."
