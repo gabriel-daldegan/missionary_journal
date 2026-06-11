@@ -23,9 +23,19 @@ class MemoryRecordEditor extends Component
 
     public string $body = '';
 
+    public string $title = '';
+
     public string $experienceDate = '';
 
+    public string $periodStartDate = '';
+
+    public string $periodEndDate = '';
+
     public ?string $locationName = null;
+
+    public ?string $notes = null;
+
+    public string $peopleInput = '';
 
     public string $tagInput = '';
 
@@ -36,7 +46,7 @@ class MemoryRecordEditor extends Component
 
     public function mount(Tenant $tenant, string $type = MemoryRecord::TYPE_DIARY): void
     {
-        if ($type !== MemoryRecord::TYPE_DIARY) {
+        if (! in_array($type, MemoryRecord::ACTIVE_TYPES, true)) {
             abort(404);
         }
 
@@ -45,6 +55,8 @@ class MemoryRecordEditor extends Component
         $this->tenant = $tenant;
         $this->type = $type;
         $this->experienceDate = now()->toDateString();
+        $this->periodStartDate = now()->toDateString();
+        $this->periodEndDate = now()->toDateString();
         $this->highlights = [$this->newHighlight()];
 
         if ($this->record !== null) {
@@ -117,15 +129,15 @@ class MemoryRecordEditor extends Component
         $validated = $this->validate();
 
         $user = $this->ensureAuthenticatedTenantMember($this->tenant);
-        $payload = [
-            'body' => $validated['body'],
-            'experience_date' => $validated['experienceDate'],
-            'location_name' => $validated['locationName'] ?? null,
-            'tags' => $this->tagNames(),
-            'highlights' => $this->highlightPayload($validated['highlights'] ?? []),
-        ];
 
         if ($this->isEditing && $this->record !== null) {
+            $payload = [
+                'body' => $validated['body'],
+                'experience_date' => $validated['experienceDate'],
+                'location_name' => $validated['locationName'] ?? null,
+                'tags' => $this->tagNames(),
+                'highlights' => $this->highlightPayload($validated['highlights'] ?? []),
+            ];
             $record = $memoryRecordService->updateDiaryRecord($this->record, $this->tenant, $user, $payload);
 
             $this->redirectRoute('memories.records.show', [
@@ -136,7 +148,26 @@ class MemoryRecordEditor extends Component
             return;
         }
 
-        $memoryRecordService->createDiaryRecord($this->tenant, $user, $payload);
+        if ($this->type === MemoryRecord::TYPE_PERIOD) {
+            $memoryRecordService->createPeriodRecord($this->tenant, $user, [
+                'title' => $validated['title'],
+                'period_start_date' => $validated['periodStartDate'],
+                'period_end_date' => $validated['periodEndDate'],
+                'location_name' => $validated['locationName'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'people' => $this->peopleNames(),
+                'tags' => $this->tagNames(),
+                'highlights' => $this->highlightPayload($validated['highlights'] ?? []),
+            ]);
+        } else {
+            $memoryRecordService->createDiaryRecord($this->tenant, $user, [
+                'body' => $validated['body'],
+                'experience_date' => $validated['experienceDate'],
+                'location_name' => $validated['locationName'] ?? null,
+                'tags' => $this->tagNames(),
+                'highlights' => $this->highlightPayload($validated['highlights'] ?? []),
+            ]);
+        }
 
         $this->redirectRoute('memories.timeline', [
             'tenant' => $this->tenant,
@@ -152,7 +183,7 @@ class MemoryRecordEditor extends Component
                 'tenant' => $this->tenant,
                 'title' => $this->isEditing
                     ? __('memory.record_editor.edit_title')
-                    : __('memory.record_editor.title'),
+                    : $this->createPageTitle(),
             ]);
     }
 
@@ -161,14 +192,27 @@ class MemoryRecordEditor extends Component
      */
     protected function rules(): array
     {
-        return [
-            'body' => ['required', 'string', 'max:20000'],
-            'experienceDate' => ['required', 'date'],
+        $sharedRules = [
             'locationName' => ['nullable', 'string', 'max:255'],
             'tagInput' => ['nullable', 'string', 'max:500'],
             'highlights' => ['array', 'max:20'],
             'highlights.*.uid' => ['required', 'string', 'max:64'],
             'highlights.*.text' => ['nullable', 'string', 'max:500'],
+        ];
+
+        if ($this->type === MemoryRecord::TYPE_PERIOD && ! $this->isEditing) {
+            return $sharedRules + [
+                'title' => ['required', 'string', 'max:255'],
+                'periodStartDate' => ['required', 'date'],
+                'periodEndDate' => ['required', 'date', 'after_or_equal:periodStartDate'],
+                'notes' => ['nullable', 'string', 'max:10000'],
+                'peopleInput' => ['nullable', 'string', 'max:1000'],
+            ];
+        }
+
+        return $sharedRules + [
+            'body' => ['required', 'string', 'max:20000'],
+            'experienceDate' => ['required', 'date'],
         ];
     }
 
@@ -179,8 +223,13 @@ class MemoryRecordEditor extends Component
     {
         return [
             'body' => __('memory.record_editor.body'),
+            'title' => __('memory.record_editor.period_title_label'),
             'experienceDate' => __('memory.record_editor.experience_date'),
+            'periodStartDate' => __('memory.record_editor.period_start_date'),
+            'periodEndDate' => __('memory.record_editor.period_end_date'),
             'locationName' => __('memory.record_editor.location_name'),
+            'notes' => __('memory.record_editor.notes'),
+            'peopleInput' => __('memory.record_editor.people'),
             'tagInput' => __('memory.record_editor.tags'),
             'highlights.*.text' => __('memory.record_editor.highlight_text'),
         ];
@@ -193,6 +242,18 @@ class MemoryRecordEditor extends Component
     {
         return collect(explode(',', $this->tagInput))
             ->map(fn (string $tag): string => trim($tag))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function peopleNames(): array
+    {
+        return collect(explode(',', $this->peopleInput))
+            ->map(fn (string $person): string => trim($person))
             ->filter()
             ->values()
             ->all();
@@ -249,7 +310,7 @@ class MemoryRecordEditor extends Component
 
     private function mountRecordForEditing(MemoryRecord $record, Tenant $tenant, User $user): void
     {
-        if ($record->tenant_id !== $tenant->id || ! $user->can('update', $record)) {
+        if ($record->tenant_id !== $tenant->id || $record->type !== MemoryRecord::TYPE_DIARY || ! $user->can('update', $record)) {
             abort(404);
         }
 
@@ -257,6 +318,7 @@ class MemoryRecordEditor extends Component
 
         $this->record = $record;
         $this->isEditing = true;
+        $this->type = MemoryRecord::TYPE_DIARY;
         $this->body = $record->body ?? '';
         $this->experienceDate = $record->experience_date?->toDateString() ?? now()->toDateString();
         $this->locationName = $record->location_name;
@@ -286,5 +348,14 @@ class MemoryRecordEditor extends Component
         }
 
         return $user;
+    }
+
+    private function createPageTitle(): string
+    {
+        if ($this->type === MemoryRecord::TYPE_PERIOD) {
+            return __('memory.record_editor.period_title');
+        }
+
+        return __('memory.record_editor.title');
     }
 }

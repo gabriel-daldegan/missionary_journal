@@ -31,6 +31,30 @@ class MemoryRecordEditorTest extends FeatureTest
         $response->assertSee('Santos Family Workspace');
     }
 
+    public function test_member_with_completed_profile_can_access_period_create_route(): void
+    {
+        $tenant = $this->createTenant();
+        $tenant->update([
+            'name' => 'Santos Family Workspace',
+        ]);
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+
+        $response = $this->actingAs($user)->get($this->periodCreateRoute($tenant));
+
+        $response->assertOk();
+        $response->assertSee('data-memory-layout="true"', false);
+        $response->assertSee('New trip or period');
+        $response->assertSee('Title');
+        $response->assertSee('Start date');
+        $response->assertSee('End date');
+        $response->assertSee('People');
+        $response->assertSee('Notes');
+        $response->assertSee('Memory Highlights');
+        $response->assertSee('Santos Family Workspace');
+        $response->assertDontSee('Memory text');
+    }
+
     public function test_member_without_completed_profile_is_redirected_to_profile_setup(): void
     {
         $tenant = $this->createTenant();
@@ -87,11 +111,24 @@ class MemoryRecordEditorTest extends FeatureTest
         $response = $this->actingAs($user)->get(sprintf(
             '/memories/%s/records/create/%s',
             $tenant->uuid,
-            MemoryRecord::TYPE_PERIOD,
+            'unsupported',
         ));
 
         $response->assertNotFound();
         $this->assertSame($recordCount, MemoryRecord::query()->count());
+    }
+
+    public function test_non_member_cannot_create_period_record(): void
+    {
+        $this->withExceptionHandling();
+
+        $tenant = $this->createTenant();
+        $user = $this->createUser();
+        MemoryProfile::factory()->for($user)->create();
+
+        $response = $this->actingAs($user)->get($this->periodCreateRoute($tenant));
+
+        $response->assertNotFound();
     }
 
     public function test_body_and_experience_date_are_required(): void
@@ -153,6 +190,86 @@ class MemoryRecordEditorTest extends FeatureTest
             'We scheduled another visit.',
         ], $record->highlights->pluck('text')->all());
         $this->assertSame([0, 1], $record->highlights->pluck('sort_order')->all());
+    }
+
+    public function test_successful_period_creation_persists_record_people_tags_and_highlights_then_redirects(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $this->actingAs($user);
+
+        Livewire::test(MemoryRecordEditor::class, [
+            'tenant' => $tenant,
+            'type' => MemoryRecord::TYPE_PERIOD,
+        ])
+            ->assertSet('type', MemoryRecord::TYPE_PERIOD)
+            ->assertSee('New trip or period')
+            ->assertSee('Start date')
+            ->set('title', 'July family visit')
+            ->set('periodStartDate', '2026-07-10')
+            ->set('periodEndDate', '2026-07-14')
+            ->set('locationName', 'Curitiba')
+            ->set('peopleInput', 'Ana, Pedro')
+            ->set('notes', 'A short set of notes for the multi-day memory.')
+            ->set('tagInput', 'Family, Visit')
+            ->set('highlights', [
+                ['text' => 'Arrived together.'],
+                ['text' => 'Shared Sunday lunch.'],
+            ])
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('memories.timeline', [
+                'tenant' => $tenant,
+            ]));
+
+        /** @var MemoryRecord $record */
+        $record = MemoryRecord::query()->whereBelongsTo($tenant)->firstOrFail();
+
+        $this->assertSame(MemoryRecord::TYPE_PERIOD, $record->type);
+        $this->assertSame($user->id, $record->author_user_id);
+        $this->assertSame($user->id, $record->last_edited_by_user_id);
+        $this->assertSame('July family visit', $record->title);
+        $this->assertNull($record->experience_date);
+        $this->assertSame('2026-07-10', $record->period_start_date->toDateString());
+        $this->assertSame('2026-07-14', $record->period_end_date->toDateString());
+        $this->assertSame('Curitiba', $record->location_name);
+        $this->assertSame(['Ana', 'Pedro'], $record->people);
+        $this->assertSame(['family', 'visit'], $record->tags->pluck('slug')->sort()->values()->all());
+        $this->assertSame([
+            'Arrived together.',
+            'Shared Sunday lunch.',
+        ], $record->highlights->pluck('text')->all());
+        $this->assertSame([0, 1], $record->highlights->pluck('sort_order')->all());
+    }
+
+    public function test_period_title_and_date_order_are_required(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $this->actingAs($user);
+
+        Livewire::test(MemoryRecordEditor::class, [
+            'tenant' => $tenant,
+            'type' => MemoryRecord::TYPE_PERIOD,
+        ])
+            ->set('title', '')
+            ->set('periodStartDate', '')
+            ->set('periodEndDate', '')
+            ->call('save')
+            ->assertHasErrors([
+                'title' => 'required',
+                'periodStartDate' => 'required',
+                'periodEndDate' => 'required',
+            ])
+            ->set('title', 'Backwards trip')
+            ->set('periodStartDate', '2026-07-14')
+            ->set('periodEndDate', '2026-07-10')
+            ->call('save')
+            ->assertHasErrors([
+                'periodEndDate' => 'after_or_equal',
+            ]);
     }
 
     public function test_edit_mode_prefills_and_updates_record_without_changing_identity(): void
@@ -322,8 +439,6 @@ class MemoryRecordEditorTest extends FeatureTest
             'Media upload',
             'AI classification',
             'Email source',
-            'Period',
-            'Trip',
             'Reporting',
         ] as $forbiddenText) {
             $response->assertDontSee($forbiddenText);
@@ -343,6 +458,8 @@ class MemoryRecordEditorTest extends FeatureTest
         $response->assertOk();
         $response->assertSee('New diary entry');
         $response->assertSee($this->createRoute($tenant), false);
+        $response->assertSee('New trip / period');
+        $response->assertSee($this->periodCreateRoute($tenant), false);
     }
 
     public function test_timeline_links_existing_records_and_reorders_after_experience_date_update(): void
@@ -395,6 +512,14 @@ class MemoryRecordEditorTest extends FeatureTest
         return route('memories.records.create', [
             'tenant' => $tenant,
             'type' => MemoryRecord::TYPE_DIARY,
+        ]);
+    }
+
+    private function periodCreateRoute(Tenant $tenant): string
+    {
+        return route('memories.records.create', [
+            'tenant' => $tenant,
+            'type' => MemoryRecord::TYPE_PERIOD,
         ]);
     }
 }

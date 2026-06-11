@@ -56,8 +56,8 @@ class MemoryRecordSchemaTest extends FeatureTest
             $this->assertFalse(Schema::hasColumn('memory_records', $excludedColumn));
         }
 
-        $this->assertSame([MemoryRecord::TYPE_DIARY], MemoryRecord::ACTIVE_TYPES);
-        $this->assertSame([MemoryRecord::TYPE_PERIOD], MemoryRecord::RESERVED_TYPES);
+        $this->assertSame([MemoryRecord::TYPE_DIARY, MemoryRecord::TYPE_PERIOD], MemoryRecord::ACTIVE_TYPES);
+        $this->assertSame([], MemoryRecord::RESERVED_TYPES);
     }
 
     public function test_can_create_tenant_scoped_diary_record_with_author_and_last_editor(): void

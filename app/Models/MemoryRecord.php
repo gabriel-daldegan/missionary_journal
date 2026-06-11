@@ -22,13 +22,13 @@ class MemoryRecord extends Model
      */
     public const ACTIVE_TYPES = [
         self::TYPE_DIARY,
+        self::TYPE_PERIOD,
     ];
 
     /**
      * @var array<int, string>
      */
     public const RESERVED_TYPES = [
-        self::TYPE_PERIOD,
     ];
 
     /** @use HasFactory<MemoryRecordFactory> */

@@ -35,6 +35,42 @@ class MemoryRecordServiceTest extends FeatureTest
         $this->assertSame('uuid', $record->getRouteKeyName());
     }
 
+    public function test_authorized_tenant_member_can_create_period_record(): void
+    {
+        $tenant = $this->createTenant();
+        $author = $this->createUser($tenant);
+
+        $record = $this->service()->createPeriodRecord($tenant, $author, [
+            'title' => 'July family visit',
+            'period_start_date' => '2026-07-10',
+            'period_end_date' => '2026-07-14',
+            'location_name' => 'Curitiba',
+            'notes' => 'A short set of notes for the multi-day memory.',
+            'people' => [' Ana ', 'Pedro', ''],
+            'tags' => ['Family', 'Visit'],
+            'highlights' => ['Arrived together.', 'Shared Sunday lunch.'],
+        ]);
+
+        $this->assertModelExists($record);
+        $this->assertTrue($record->tenant->is($tenant));
+        $this->assertTrue($record->author->is($author));
+        $this->assertTrue($record->lastEditor->is($author));
+        $this->assertSame(MemoryRecord::TYPE_PERIOD, $record->type);
+        $this->assertSame('July family visit', $record->title);
+        $this->assertNull($record->experience_date);
+        $this->assertSame('2026-07-10', $record->period_start_date->toDateString());
+        $this->assertSame('2026-07-14', $record->period_end_date->toDateString());
+        $this->assertSame('Curitiba', $record->location_name);
+        $this->assertSame('A short set of notes for the multi-day memory.', $record->notes);
+        $this->assertSame(['Ana', 'Pedro'], $record->people);
+        $this->assertSame(['family', 'visit'], $record->tags->pluck('slug')->sort()->values()->all());
+        $this->assertSame([
+            'Arrived together.',
+            'Shared Sunday lunch.',
+        ], $record->highlights->pluck('text')->all());
+        $this->assertSame([0, 1], $record->highlights->pluck('sort_order')->all());
+    }
+
     public function test_tags_are_created_once_and_reused_inside_the_same_tenant(): void
     {
         $tenant = $this->createTenant();
@@ -171,6 +207,41 @@ class MemoryRecordServiceTest extends FeatureTest
         } catch (ValidationException $exception) {
             $this->assertArrayHasKey('body', $exception->errors());
             $this->assertArrayHasKey('experience_date', $exception->errors());
+            $this->assertSame($recordCount, MemoryRecord::query()->count());
+        }
+    }
+
+    public function test_period_required_fields_and_date_order_are_validated_before_persistence(): void
+    {
+        $tenant = $this->createTenant();
+        $author = $this->createUser($tenant);
+        $recordCount = MemoryRecord::query()->count();
+
+        try {
+            $this->service()->createPeriodRecord($tenant, $author, [
+                'title' => '',
+                'period_start_date' => '',
+                'period_end_date' => '',
+            ]);
+
+            $this->fail('Invalid period data was accepted.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('title', $exception->errors());
+            $this->assertArrayHasKey('period_start_date', $exception->errors());
+            $this->assertArrayHasKey('period_end_date', $exception->errors());
+            $this->assertSame($recordCount, MemoryRecord::query()->count());
+        }
+
+        try {
+            $this->service()->createPeriodRecord($tenant, $author, [
+                'title' => 'Backwards dates',
+                'period_start_date' => '2026-07-14',
+                'period_end_date' => '2026-07-10',
+            ]);
+
+            $this->fail('A period ending before its start date was accepted.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('period_end_date', $exception->errors());
             $this->assertSame($recordCount, MemoryRecord::query()->count());
         }
     }

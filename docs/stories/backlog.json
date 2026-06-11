@@ -1,0 +1,21 @@
+[
+  {
+    "id": "1781200916741",
+    "type": "T",
+    "title": "Padronizar comandos Pint em handoffs AIOX",
+    "description": "CodeRabbit sinalizou como minor o comando vendor/bin/sail bin pint --dirty --format agent no handoff da Story 1.7, embora ele execute corretamente neste repo. Futuro backlog deve decidir e documentar a forma canônica dos comandos Pint em handoffs/checklists para evitar falso positivo recorrente entre vendor/bin/sail pint, vendor/bin/sail bin pint e vendor/bin/sail bin/pint.",
+    "priority": "Low",
+    "relatedStory": "1.7.trip-period-record-creation.story",
+    "createdBy": "@dev",
+    "createdAt": "2026-06-11T18:01:56.743Z",
+    "tags": [
+      "story-1-7",
+      "coderabbit",
+      "handoff",
+      "pint",
+      "area:workflow"
+    ],
+    "estimatedEffort": "XS",
+    "status": "Open"
+  }
+]
