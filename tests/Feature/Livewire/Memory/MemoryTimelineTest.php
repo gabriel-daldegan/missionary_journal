@@ -6,6 +6,8 @@ use App\Models\MemoryProfile;
 use App\Models\MemoryRecord;
 use App\Models\MemoryTag;
 use App\Models\Tenant;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\Feature\FeatureTest;
 
 class MemoryTimelineTest extends FeatureTest
@@ -22,14 +24,21 @@ class MemoryTimelineTest extends FeatureTest
             'slug' => 'family',
         ]);
 
+        Storage::fake('local');
+
         $earlierRecord = MemoryRecord::factory()->create([
             'tenant_id' => $tenant->id,
             'type' => MemoryRecord::TYPE_DIARY,
             'body' => 'Family ministry in 2026.',
             'experience_date' => '2026-06-11',
             'location_name' => 'Recife',
-            'source_metadata' => ['photo_count' => 2],
         ]);
+        $earlierRecord
+            ->addMedia(UploadedFile::fake()->image('first.jpg')->size(10))
+            ->toMediaCollection($earlierRecord->mediaCollectionName(), $earlierRecord->mediaDiskName());
+        $earlierRecord
+            ->addMedia(UploadedFile::fake()->image('second.jpg')->size(10))
+            ->toMediaCollection($earlierRecord->mediaCollectionName(), $earlierRecord->mediaDiskName());
         $earlierRecord->tags()->attach($tag->id);
 
         $periodRecord = MemoryRecord::factory()->create([
@@ -49,7 +58,6 @@ class MemoryTimelineTest extends FeatureTest
             'body' => 'Quiet prep before visit.',
             'experience_date' => '2026-05-15',
             'location_name' => null,
-            'source_metadata' => ['photo_count' => 1],
         ]);
 
         $response = $this->actingAs($user)->get(route('memories.timeline', [

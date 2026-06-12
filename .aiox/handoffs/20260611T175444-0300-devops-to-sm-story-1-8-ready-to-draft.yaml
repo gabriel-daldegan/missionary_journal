@@ -3,7 +3,7 @@ handoff:
   timestamp: "2026-06-11T17:54:44-03:00"
   from_agent: "devops"
   to_agent: "sm"
-  consumed: false
+  consumed: true
   last_command: "prepare-next-story-after-story-1-7-publication"
 
   publication_context:

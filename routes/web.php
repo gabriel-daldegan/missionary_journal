@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\MemoryMediaController;
 use App\Http\Controllers\PaymentProviders\PaddleController;
 use App\Http\Controllers\ProductCheckoutController;
 use App\Http\Controllers\RoadmapController;
@@ -82,6 +83,9 @@ Route::middleware(['auth', 'verified', 'tenant.member'])
                 ->name('records.show');
             Route::livewire('/records/{record:uuid}/edit', MemoryRecordEditor::class)
                 ->name('records.edit');
+            Route::get('/media/{media:uuid}', [MemoryMediaController::class, 'show'])
+                ->withoutScopedBindings()
+                ->name('media.show');
         });
     });
 

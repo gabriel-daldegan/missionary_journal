@@ -184,6 +184,71 @@
                     @enderror
                 </label>
 
+                @if (! $isEditing)
+                    <div class="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                        <div class="grid gap-1">
+                            <h2 class="text-base font-semibold tracking-normal text-slate-950">{{ __('memory.record_editor.photos') }}</h2>
+                            <p class="text-sm leading-6 text-slate-600">{{ __('memory.record_editor.photos_help') }}</p>
+                        </div>
+
+                        <label class="grid gap-2">
+                            <span class="sr-only">{{ __('memory.record_editor.photos') }}</span>
+                            <input
+                                type="file"
+                                wire:model="photos"
+                                multiple
+                                accept="image/jpeg,image/png,image/webp"
+                                class="block w-full rounded-lg border border-slate-300 bg-white text-sm text-slate-700 shadow-sm file:mr-4 file:min-h-11 file:border-0 file:bg-primary-50 file:px-4 file:text-sm file:font-semibold file:text-primary-700 transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                            >
+                        </label>
+
+                        <div wire:loading wire:target="photos" class="text-sm text-slate-600">
+                            {{ __('memory.record_editor.photos_uploading') }}
+                        </div>
+
+                        @error('photos')
+                            <span class="text-sm text-red-600">{{ $message }}</span>
+                        @enderror
+
+                        @if ($photos !== [])
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                @foreach ($photos as $index => $photo)
+                                    <div wire:key="photo-preview-{{ $index }}" class="grid gap-2 rounded-lg border border-slate-200 bg-white p-3">
+                                        @if (is_object($photo) && method_exists($photo, 'temporaryUrl') && method_exists($photo, 'getMimeType') && str_starts_with((string) $photo->getMimeType(), 'image/'))
+                                            <img
+                                                src="{{ $photo->temporaryUrl() }}"
+                                                alt="{{ __('memory.record_editor.photo_preview_alt', ['number' => $index + 1]) }}"
+                                                class="aspect-video w-full rounded-md border border-slate-200 object-cover"
+                                            >
+                                        @else
+                                            <div class="flex aspect-video w-full items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">
+                                                {{ __('memory.record_editor.photo_protected_state') }}
+                                            </div>
+                                        @endif
+
+                                        <div class="flex items-center justify-between gap-2">
+                                            <p class="text-xs font-medium text-slate-600">
+                                                {{ __('memory.record_editor.photo_selected', ['number' => $index + 1]) }}
+                                            </p>
+                                            <button
+                                                type="button"
+                                                wire:click="removePhoto({{ $index }})"
+                                                class="inline-flex min-h-8 items-center justify-center rounded-lg border border-slate-300 px-3 text-xs font-medium text-slate-700 transition hover:border-red-300 hover:text-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+                                            >
+                                                {{ __('memory.record_editor.remove_photo') }}
+                                            </button>
+                                        </div>
+
+                                        @error('photos.'.$index)
+                                            <span class="text-sm text-red-600">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
                 <div class="grid gap-3">
                     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div>

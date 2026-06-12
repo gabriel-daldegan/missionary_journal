@@ -8,13 +8,23 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\File;
+use Illuminate\Validation\ValidationException;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Throwable;
 
 class MemoryRecordService
 {
+    /**
+     * @var array<int, string>
+     */
+    private const DEFAULT_PHOTO_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
+
     /**
      * @param  array<string, mixed>  $data
      */
@@ -45,11 +55,13 @@ class MemoryRecordService
 
             $record->tags()->sync($this->resolveTagIds($tenant, $validated['tags'] ?? []));
             $this->createHighlights($record, $validated['highlights'] ?? []);
+            $this->attachPhotos($record, $tenant, $validated['photos'] ?? []);
 
             return $record->refresh()->load([
                 'author',
                 'highlights',
                 'lastEditor',
+                'media',
                 'tags',
                 'tenant',
             ]);
@@ -89,11 +101,13 @@ class MemoryRecordService
 
             $record->tags()->sync($this->resolveTagIds($tenant, $validated['tags'] ?? []));
             $this->createHighlights($record, $validated['highlights'] ?? []);
+            $this->attachPhotos($record, $tenant, $validated['photos'] ?? []);
 
             return $record->refresh()->load([
                 'author',
                 'highlights',
                 'lastEditor',
+                'media',
                 'tags',
                 'tenant',
             ]);
@@ -130,6 +144,7 @@ class MemoryRecordService
                 'author',
                 'highlights',
                 'lastEditor',
+                'media',
                 'tags',
                 'tenant',
             ]);
@@ -138,7 +153,7 @@ class MemoryRecordService
 
     /**
      * @param  array<string, mixed>  $data
-     * @return array{body: string, experience_date: string, location_name?: string|null, tags?: array<int, string|null>, highlights?: array<int, string|null>}
+     * @return array{body: string, experience_date: string, location_name?: string|null, tags?: array<int, string|null>, highlights?: array<int, string|null>, photos?: array<int, UploadedFile>}
      */
     private function validateDiaryRecordData(array $data): array
     {
@@ -148,9 +163,10 @@ class MemoryRecordService
             'location_name' => $data['location_name'] ?? null,
             'tags' => $data['tags'] ?? [],
             'highlights' => $this->normalizeHighlightInput($data['highlights'] ?? []),
+            'photos' => $this->normalizePhotoInput($data['photos'] ?? []),
         ];
 
-        /** @var array{body: string, experience_date: string, location_name?: string|null, tags?: array<int, string|null>, highlights?: array<int, string|null>} $validated */
+        /** @var array{body: string, experience_date: string, location_name?: string|null, tags?: array<int, string|null>, highlights?: array<int, string|null>, photos?: array<int, UploadedFile>} $validated */
         $validated = Validator::make($payload, [
             'body' => ['required', 'string', 'max:20000'],
             'experience_date' => ['required', 'date'],
@@ -159,6 +175,8 @@ class MemoryRecordService
             'tags.*' => ['nullable', 'string', 'max:80'],
             'highlights' => ['array', 'max:20'],
             'highlights.*' => ['nullable', 'string', 'max:500'],
+            'photos' => ['array', 'max:'.$this->maxPhotosPerRecord()],
+            'photos.*' => ['file', File::image()->types($this->allowedPhotoExtensions())->max($this->maxImageSizeKilobytes())],
         ])->validate();
 
         return $validated;
@@ -166,7 +184,7 @@ class MemoryRecordService
 
     /**
      * @param  array<string, mixed>  $data
-     * @return array{title: string, period_start_date: string, period_end_date: string, location_name?: string|null, notes?: string|null, people?: array<int, string>, tags?: array<int, string|null>, highlights?: array<int, string|null>}
+     * @return array{title: string, period_start_date: string, period_end_date: string, location_name?: string|null, notes?: string|null, people?: array<int, string>, tags?: array<int, string|null>, highlights?: array<int, string|null>, photos?: array<int, UploadedFile>}
      */
     private function validatePeriodRecordData(array $data): array
     {
@@ -179,9 +197,10 @@ class MemoryRecordService
             'people' => $this->normalizeStringList($data['people'] ?? []),
             'tags' => $data['tags'] ?? [],
             'highlights' => $this->normalizeHighlightInput($data['highlights'] ?? []),
+            'photos' => $this->normalizePhotoInput($data['photos'] ?? []),
         ];
 
-        /** @var array{title: string, period_start_date: string, period_end_date: string, location_name?: string|null, notes?: string|null, people?: array<int, string>, tags?: array<int, string|null>, highlights?: array<int, string|null>} $validated */
+        /** @var array{title: string, period_start_date: string, period_end_date: string, location_name?: string|null, notes?: string|null, people?: array<int, string>, tags?: array<int, string|null>, highlights?: array<int, string|null>, photos?: array<int, UploadedFile>} $validated */
         $validated = Validator::make($payload, [
             'title' => ['required', 'string', 'max:255'],
             'period_start_date' => ['required', 'date'],
@@ -194,6 +213,8 @@ class MemoryRecordService
             'tags.*' => ['nullable', 'string', 'max:80'],
             'highlights' => ['array', 'max:20'],
             'highlights.*' => ['nullable', 'string', 'max:500'],
+            'photos' => ['array', 'max:'.$this->maxPhotosPerRecord()],
+            'photos.*' => ['file', File::image()->types($this->allowedPhotoExtensions())->max($this->maxImageSizeKilobytes())],
         ])->validate();
 
         return $validated;
@@ -272,6 +293,119 @@ class MemoryRecordService
                     'sort_order' => $index,
                 ]);
             });
+    }
+
+    /**
+     * @param  array<int, UploadedFile>  $photos
+     */
+    private function attachPhotos(MemoryRecord $record, Tenant $tenant, array $photos): void
+    {
+        if ($photos === []) {
+            return;
+        }
+
+        $this->ensurePhotoLimits($tenant, $photos);
+
+        /** @var array<int, Media> $attachedMedia */
+        $attachedMedia = [];
+
+        try {
+            foreach ($photos as $photo) {
+                $attachedMedia[] = $record
+                    ->addMedia($photo)
+                    ->usingFileName($photo->hashName())
+                    ->toMediaCollection($record->mediaCollectionName(), $record->mediaDiskName());
+            }
+        } catch (Throwable $exception) {
+            foreach ($attachedMedia as $media) {
+                $media->delete();
+            }
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param  array<int, UploadedFile>  $photos
+     */
+    private function ensurePhotoLimits(Tenant $tenant, array $photos): void
+    {
+        $uploadBytes = collect($photos)
+            ->sum(fn (UploadedFile $photo): int => (int) $photo->getSize());
+
+        if ($this->tenantMemoryMediaBytes($tenant) + $uploadBytes > $this->workspaceStorageCapBytes()) {
+            throw ValidationException::withMessages([
+                'photos' => __('memory.record_editor.photos_workspace_limit'),
+            ]);
+        }
+    }
+
+    private function tenantMemoryMediaBytes(Tenant $tenant): int
+    {
+        return (int) Media::query()
+            ->where('model_type', (new MemoryRecord)->getMorphClass())
+            ->where('collection_name', (new MemoryRecord)->mediaCollectionName())
+            ->whereIn('model_id', MemoryRecord::query()
+                ->select('id')
+                ->whereBelongsTo($tenant))
+            ->sum('size');
+    }
+
+    /**
+     * @return array<int, UploadedFile>
+     */
+    private function normalizePhotoInput(mixed $photos): array
+    {
+        if ($photos instanceof UploadedFile) {
+            return [$photos];
+        }
+
+        if (! is_array($photos)) {
+            return [];
+        }
+
+        return collect($photos)
+            ->filter(fn (mixed $photo): bool => $photo instanceof UploadedFile)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function allowedPhotoExtensions(): array
+    {
+        $extensions = config('memory.media.allowed_extensions', self::DEFAULT_PHOTO_EXTENSIONS);
+
+        if (! is_array($extensions)) {
+            return self::DEFAULT_PHOTO_EXTENSIONS;
+        }
+
+        $extensions = array_values(array_filter(
+            $extensions,
+            fn (mixed $extension): bool => is_string($extension) && $extension !== '',
+        ));
+
+        if ($extensions === []) {
+            return self::DEFAULT_PHOTO_EXTENSIONS;
+        }
+
+        return $extensions;
+    }
+
+    private function maxImageSizeKilobytes(): int
+    {
+        return max(1, (int) config('memory.media.max_image_size_kilobytes', 10 * 1024));
+    }
+
+    private function maxPhotosPerRecord(): int
+    {
+        return max(1, (int) config('memory.media.max_photos_per_record', 25));
+    }
+
+    private function workspaceStorageCapBytes(): int
+    {
+        return (int) config('memory.media.workspace_storage_cap_bytes', 2 * 1024 * 1024 * 1024);
     }
 
     /**

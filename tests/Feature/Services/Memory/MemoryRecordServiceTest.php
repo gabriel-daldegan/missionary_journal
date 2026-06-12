@@ -6,6 +6,8 @@ use App\Models\MemoryRecord;
 use App\Models\MemoryTag;
 use App\Services\MemoryRecordService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\Feature\FeatureTest;
 
@@ -33,6 +35,31 @@ class MemoryRecordServiceTest extends FeatureTest
         $this->assertSame('2026-06-06', $record->experience_date->toDateString());
         $this->assertSame('Sao Paulo', $record->location_name);
         $this->assertSame('uuid', $record->getRouteKeyName());
+    }
+
+    public function test_authorized_tenant_member_can_attach_private_photos_to_diary_record(): void
+    {
+        Storage::fake('local');
+
+        $tenant = $this->createTenant();
+        $author = $this->createUser($tenant);
+
+        $record = $this->service()->createDiaryRecord($tenant, $author, [
+            'body' => 'We attached photos to this private memory.',
+            'experience_date' => '2026-06-06',
+            'photos' => [
+                UploadedFile::fake()->image('family.jpg')->size(512),
+            ],
+        ]);
+
+        $media = $record->getFirstMedia($record->mediaCollectionName());
+
+        $this->assertNotNull($media);
+        $this->assertSame('local', $media->disk);
+        $this->assertSame('photos', $media->collection_name);
+        $this->assertStringStartsWith('memory-records/', $media->getPathRelativeToRoot());
+        $this->assertSame(1, $record->timelinePhotoCount());
+        $this->assertStringNotContainsString('public', $media->disk);
     }
 
     public function test_authorized_tenant_member_can_create_period_record(): void
@@ -69,6 +96,30 @@ class MemoryRecordServiceTest extends FeatureTest
             'Shared Sunday lunch.',
         ], $record->highlights->pluck('text')->all());
         $this->assertSame([0, 1], $record->highlights->pluck('sort_order')->all());
+    }
+
+    public function test_workspace_photo_storage_cap_is_enforced_before_attachment(): void
+    {
+        Storage::fake('local');
+        config()->set('memory.media.workspace_storage_cap_bytes', 1);
+
+        $tenant = $this->createTenant();
+        $author = $this->createUser($tenant);
+
+        try {
+            $this->service()->createDiaryRecord($tenant, $author, [
+                'body' => 'This photo should exceed the configured workspace cap.',
+                'experience_date' => '2026-06-06',
+                'photos' => [
+                    UploadedFile::fake()->image('family.jpg')->size(10),
+                ],
+            ]);
+
+            $this->fail('The workspace photo storage cap was not enforced.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('photos', $exception->errors());
+            $this->assertSame(0, MemoryRecord::query()->whereBelongsTo($tenant)->count());
+        }
     }
 
     public function test_tags_are_created_once_and_reused_inside_the_same_tenant(): void

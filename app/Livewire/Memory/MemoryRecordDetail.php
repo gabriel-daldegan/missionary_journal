@@ -28,6 +28,7 @@ class MemoryRecordDetail extends Component
             'author',
             'highlights',
             'lastEditor',
+            'media',
             'tags',
         ]);
     }

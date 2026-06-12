@@ -1,0 +1,83 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-11T18:13:41-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "create-next-story"
+
+  execution_context:
+    source_handoff: ".aiox/handoffs/20260611T175444-0300-devops-to-sm-story-1-8-ready-to-draft.yaml"
+    branch: "feature/story-1-8-private-photo-attachments-media-delivery"
+    base: "origin/main"
+    note: "SM drafted Story 1.8 locally from the DevOps handoff, PRD, architecture, UI architecture, framework docs, Story 1.7, current memory implementation, and Laravel Boost documentation search. No implementation code was changed."
+    observed_status_mismatch: "docs/stories/1.7.trip-period-record-creation.story.md still says Ready for Review, but the DevOps handoff reports PR #13 merged, release workflow PASS, and tag v1.8.0."
+
+  created_story:
+    story_id: "1.8"
+    title: "Private Photo Attachments and Authorized Media Delivery"
+    path: "docs/stories/1.8.private-photo-attachments-and-authorized-media-delivery.story.md"
+    status: "Draft"
+
+  handoff_analysis:
+    summary: "Story 1.8 should add private photo attachment and authorized media delivery to the existing diary and period memory record flows without creating a public album/gallery subsystem."
+    source_truth:
+      - "PRD Story 1.8 defines diary/period photo attachment, parent-record connection, upload limits, private storage, authorized delivery, and future S3-compatible storage."
+      - "Architecture private-media guidance recommends private local storage for MVP, a MemoryRecord photos collection, image-only validation, web renditions, EXIF/GPS stripping, and authorized delivery."
+      - "Current code has shared diary/period MemoryRecord create flows, but MemoryRecord does not yet implement Media Library and routes/web.php does not yet expose memories.media.show."
+    scope_exclusions:
+      - "No Story 1.9 timeline filters."
+      - "No public storage, raw storage paths, public blog media helpers, or public blog UI assumptions."
+      - "No public sharing, visibility toggles, masonry, maps, complex animation, reporting dashboards, or album-generation language."
+      - "No account, billing, dashboard, invitation, or workspace-management flow changes unless required for regression fixes."
+
+  source_artifacts:
+    - "docs/prd.md#story-1.8-private-photo-attachments-and-authorized-media-delivery"
+    - ".aiox/handoffs/20260611T175444-0300-devops-to-sm-story-1-8-ready-to-draft.yaml"
+    - "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+    - "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+    - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+    - "docs/stories/1.5.diary-record-editing-and-detail-view.story.md"
+    - "docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+    - "docs/stories/1.7.trip-period-record-creation.story.md"
+    - "docs/qa/gates/1.7-trip-period-record-creation.yml"
+    - "docs/architecture.md"
+    - "docs/ui-architecture.md"
+    - "docs/framework/coding-standards.md"
+    - "docs/framework/source-tree.md"
+    - "docs/framework/tech-stack.md"
+    - "routes/web.php"
+    - "app/Models/MemoryRecord.php"
+    - "app/Livewire/Memory/MemoryRecordEditor.php"
+    - "app/Services/MemoryRecordService.php"
+    - "app/Policies/MemoryRecordPolicy.php"
+    - "resources/views/livewire/memory/memory-record-editor.blade.php"
+    - "resources/views/livewire/memory/memory-record-detail.blade.php"
+    - "resources/views/livewire/memory/memory-timeline.blade.php"
+    - "Laravel Boost search_docs: livewire/livewire uploads"
+    - "Laravel Boost search_docs: laravel/framework validation files"
+
+  review_status:
+    story_draft_checklist: "READY"
+    quality_notes: "Draft is scoped to private photo attachment, parent MemoryRecord persistence, private storage config, authorized media route/policy, upload limits, tenant-boundary tests, and diary/period regression safety. It explicitly excludes filters, public sharing, visibility toggles, public media URLs, blog media assumptions, admin/reporting UI, maps, masonry, and album language."
+    key_guidance:
+      - "Implement MemoryRecord private photos before using any public image display helper."
+      - "Add memories.media.show and re-scope media through the route tenant and parent record before authorization."
+      - "Use Livewire WithFileUploads and fake disks in tests."
+      - "Derive timeline photo count from real media once attachments exist instead of source_metadata placeholders."
+
+  validation_summary:
+    checklist: ".aiox-core/product/checklists/story-draft-checklist.md"
+    result: "READY"
+    decision: "approve for PO validation"
+    blocker_count: 0
+    notes:
+      - "ClickUp/Jira task creation was not performed from this local SM draft because no external project-management MCP tool is configured for this session."
+      - "Laravel Boost documentation search was used for Livewire 4 uploads, Laravel file validation, temporary preview URLs, and fake-disk upload testing."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.8.private-photo-attachments-and-authorized-media-delivery.story.md"
+    reason: "PO must validate the Draft story before development starts."
+
+  next_action: "Switch to PO, validate Story 1.8, and, if approved, send handoff for Dev with the implementation-ready story."

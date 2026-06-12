@@ -10,8 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class MemoryRecord extends Model
+class MemoryRecord extends Model implements HasMedia
 {
     public const TYPE_DIARY = 'diary';
 
@@ -32,7 +35,7 @@ class MemoryRecord extends Model
     ];
 
     /** @use HasFactory<MemoryRecordFactory> */
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'type',
@@ -101,13 +104,53 @@ class MemoryRecord extends Model
 
     public function timelinePhotoCount(): int
     {
-        $sourceMetadata = $this->source_metadata;
-
-        if (! is_array($sourceMetadata)) {
-            return 0;
+        if ($this->relationLoaded('media')) {
+            return $this->getMedia($this->mediaCollectionName())->count();
         }
 
-        return (int) ($sourceMetadata['photo_count'] ?? 0);
+        return $this->media()
+            ->where('collection_name', $this->mediaCollectionName())
+            ->count();
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection($this->mediaCollectionName())
+            ->useDisk($this->mediaDiskName())
+            ->acceptsMimeTypes($this->allowedPhotoMimeTypes());
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function allowedPhotoMimeTypes(): array
+    {
+        /** @var array<int, string> $mimeTypes */
+        $mimeTypes = config('memory.media.allowed_mime_types', [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+        ]);
+
+        return $mimeTypes;
+    }
+
+    public function mediaCollectionName(): string
+    {
+        return (string) config('memory.media.collection', 'photos');
+    }
+
+    public function mediaDiskName(): string
+    {
+        return (string) config('memory.media.disk', 'local');
+    }
+
+    public function mediaRoute(Media $media): string
+    {
+        return route('memories.media.show', [
+            'tenant' => $this->tenant,
+            'media' => $media->uuid,
+        ]);
     }
 
     public function getRouteKeyName(): string

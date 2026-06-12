@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\MemoryRecord;
+use App\Services\MemoryRecordMediaPathGenerator;
 use App\Services\PaymentProviders\Creem\CreemProvider;
 use App\Services\PaymentProviders\LemonSqueezy\LemonSqueezyProvider;
 use App\Services\PaymentProviders\Offline\OfflineProvider;
@@ -14,6 +16,7 @@ use App\Services\VerificationProviders\TwilioProvider;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\ServiceProvider;
+use Spatie\MediaLibrary\Support\PathGenerator\PathGeneratorFactory;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -56,6 +59,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        PathGeneratorFactory::setCustomPathGenerators(
+            MemoryRecord::class,
+            MemoryRecordMediaPathGenerator::class,
+        );
+
         FilamentAsset::register([
             Js::make('components-script', __DIR__.'/../../resources/js/components.js'),
         ]);
