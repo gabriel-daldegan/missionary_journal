@@ -30,7 +30,7 @@ class MemoryTimelineService
         $records = MemoryRecord::query()
             ->whereBelongsTo($tenant)
             ->whereIn('type', self::ALLOWED_TYPES)
-            ->with(['highlights', 'tags'])
+            ->with(['highlights', 'media', 'tags'])
             ->get();
 
         return $records

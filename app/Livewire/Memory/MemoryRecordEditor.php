@@ -8,11 +8,20 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Services\MemoryRecordService;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\File;
 use Illuminate\View\View;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class MemoryRecordEditor extends Component
 {
+    use WithFileUploads;
+
+    /**
+     * @var array<int, string>
+     */
+    private const DEFAULT_PHOTO_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
+
     public Tenant $tenant;
 
     public ?MemoryRecord $record = null;
@@ -38,6 +47,11 @@ class MemoryRecordEditor extends Component
     public string $peopleInput = '';
 
     public string $tagInput = '';
+
+    /**
+     * @var array<int, mixed>
+     */
+    public array $photos = [];
 
     /**
      * @var array<int, array{uid: string, text: string}>
@@ -158,6 +172,7 @@ class MemoryRecordEditor extends Component
                 'people' => $this->peopleNames(),
                 'tags' => $this->tagNames(),
                 'highlights' => $this->highlightPayload($validated['highlights'] ?? []),
+                'photos' => $validated['photos'] ?? [],
             ]);
         } else {
             $memoryRecordService->createDiaryRecord($this->tenant, $user, [
@@ -166,6 +181,7 @@ class MemoryRecordEditor extends Component
                 'location_name' => $validated['locationName'] ?? null,
                 'tags' => $this->tagNames(),
                 'highlights' => $this->highlightPayload($validated['highlights'] ?? []),
+                'photos' => $validated['photos'] ?? [],
             ]);
         }
 
@@ -200,6 +216,13 @@ class MemoryRecordEditor extends Component
             'highlights.*.text' => ['nullable', 'string', 'max:500'],
         ];
 
+        if (! $this->isEditing) {
+            $sharedRules += [
+                'photos' => ['array', 'max:'.$this->maxPhotosPerRecord()],
+                'photos.*' => ['file', File::image()->types($this->allowedPhotoExtensions())->max($this->maxImageSizeKilobytes())],
+            ];
+        }
+
         if ($this->type === MemoryRecord::TYPE_PERIOD && ! $this->isEditing) {
             return $sharedRules + [
                 'title' => ['required', 'string', 'max:255'],
@@ -232,7 +255,19 @@ class MemoryRecordEditor extends Component
             'peopleInput' => __('memory.record_editor.people'),
             'tagInput' => __('memory.record_editor.tags'),
             'highlights.*.text' => __('memory.record_editor.highlight_text'),
+            'photos' => __('memory.record_editor.photos'),
+            'photos.*' => __('memory.record_editor.photo'),
         ];
+    }
+
+    public function removePhoto(int $index): void
+    {
+        if (! array_key_exists($index, $this->photos)) {
+            return;
+        }
+
+        unset($this->photos[$index]);
+        $this->photos = array_values($this->photos);
     }
 
     /**
@@ -357,5 +392,38 @@ class MemoryRecordEditor extends Component
         }
 
         return __('memory.record_editor.title');
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function allowedPhotoExtensions(): array
+    {
+        $extensions = config('memory.media.allowed_extensions', self::DEFAULT_PHOTO_EXTENSIONS);
+
+        if (! is_array($extensions)) {
+            return self::DEFAULT_PHOTO_EXTENSIONS;
+        }
+
+        $extensions = array_values(array_filter(
+            $extensions,
+            fn (mixed $extension): bool => is_string($extension) && $extension !== '',
+        ));
+
+        if ($extensions === []) {
+            return self::DEFAULT_PHOTO_EXTENSIONS;
+        }
+
+        return $extensions;
+    }
+
+    private function maxImageSizeKilobytes(): int
+    {
+        return (int) config('memory.media.max_image_size_kilobytes', 10 * 1024);
+    }
+
+    private function maxPhotosPerRecord(): int
+    {
+        return max(1, (int) config('memory.media.max_photos_per_record', 25));
     }
 }

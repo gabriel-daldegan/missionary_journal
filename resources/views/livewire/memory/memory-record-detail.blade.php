@@ -80,6 +80,26 @@
                         @endforeach
                     </div>
                 @endif
+
+                @if ($record->getMedia($record->mediaCollectionName())->isNotEmpty())
+                    <section class="grid gap-3 border-t border-slate-200 pt-5" aria-label="{{ __('memory.record_detail.photos') }}">
+                        <h2 class="text-base font-semibold tracking-normal text-slate-950">{{ __('memory.record_detail.photos') }}</h2>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            @foreach ($record->getMedia($record->mediaCollectionName()) as $media)
+                                <figure wire:key="record-photo-{{ $media->uuid }}" class="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2">
+                                    <img
+                                        src="{{ $record->mediaRoute($media) }}"
+                                        alt="{{ __('memory.record_detail.photo_alt', ['number' => $loop->iteration]) }}"
+                                        class="aspect-video w-full rounded-md object-cover"
+                                    >
+                                    <figcaption class="text-xs text-slate-500">
+                                        {{ __('memory.record_detail.photo_private_state') }}
+                                    </figcaption>
+                                </figure>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
             </div>
         </article>
 

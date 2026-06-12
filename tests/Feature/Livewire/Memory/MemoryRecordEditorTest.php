@@ -7,6 +7,8 @@ use App\Models\MemoryProfile;
 use App\Models\MemoryRecord;
 use App\Models\Tenant;
 use App\Services\MemoryRecordService;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Feature\FeatureTest;
@@ -192,6 +194,39 @@ class MemoryRecordEditorTest extends FeatureTest
         $this->assertSame([0, 1], $record->highlights->pluck('sort_order')->all());
     }
 
+    public function test_successful_diary_creation_persists_private_photos(): void
+    {
+        Storage::fake('local');
+
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $this->actingAs($user);
+
+        Livewire::test(MemoryRecordEditor::class, [
+            'tenant' => $tenant,
+            'type' => MemoryRecord::TYPE_DIARY,
+        ])
+            ->set('body', 'A memory with protected photo attachments.')
+            ->set('experienceDate', '2026-06-08')
+            ->set('photos', [
+                UploadedFile::fake()->image('first.jpg')->size(512),
+                UploadedFile::fake()->image('second.webp')->size(512),
+            ])
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('memories.timeline', [
+                'tenant' => $tenant,
+            ]));
+
+        /** @var MemoryRecord $record */
+        $record = MemoryRecord::query()->whereBelongsTo($tenant)->firstOrFail();
+
+        $this->assertSame(2, $record->timelinePhotoCount());
+        $this->assertSame(['local'], $record->getMedia($record->mediaCollectionName())->pluck('disk')->unique()->values()->all());
+        $this->assertSame(['photos'], $record->getMedia($record->mediaCollectionName())->pluck('collection_name')->unique()->values()->all());
+    }
+
     public function test_successful_period_creation_persists_record_people_tags_and_highlights_then_redirects(): void
     {
         $tenant = $this->createTenant();
@@ -241,6 +276,141 @@ class MemoryRecordEditorTest extends FeatureTest
             'Shared Sunday lunch.',
         ], $record->highlights->pluck('text')->all());
         $this->assertSame([0, 1], $record->highlights->pluck('sort_order')->all());
+    }
+
+    public function test_successful_period_creation_persists_private_photos(): void
+    {
+        Storage::fake('local');
+
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $this->actingAs($user);
+
+        Livewire::test(MemoryRecordEditor::class, [
+            'tenant' => $tenant,
+            'type' => MemoryRecord::TYPE_PERIOD,
+        ])
+            ->set('title', 'July family visit')
+            ->set('periodStartDate', '2026-07-10')
+            ->set('periodEndDate', '2026-07-14')
+            ->set('photos', [
+                UploadedFile::fake()->image('period.png')->size(512),
+            ])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        /** @var MemoryRecord $record */
+        $record = MemoryRecord::query()->whereBelongsTo($tenant)->firstOrFail();
+
+        $this->assertSame(MemoryRecord::TYPE_PERIOD, $record->type);
+        $this->assertSame(1, $record->timelinePhotoCount());
+    }
+
+    public function test_photo_upload_rejects_unsupported_file_type(): void
+    {
+        Storage::fake('local');
+
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $this->actingAs($user);
+
+        Livewire::test(MemoryRecordEditor::class, [
+            'tenant' => $tenant,
+            'type' => MemoryRecord::TYPE_DIARY,
+        ])
+            ->set('body', 'A memory with an invalid attachment.')
+            ->set('experienceDate', '2026-06-08')
+            ->set('photos', [
+                UploadedFile::fake()->create('document.pdf', 100, 'application/pdf'),
+            ])
+            ->call('save')
+            ->assertHasErrors([
+                'photos.0',
+            ]);
+    }
+
+    public function test_photo_upload_rejects_images_over_configured_size(): void
+    {
+        Storage::fake('local');
+
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $this->actingAs($user);
+
+        Livewire::test(MemoryRecordEditor::class, [
+            'tenant' => $tenant,
+            'type' => MemoryRecord::TYPE_DIARY,
+        ])
+            ->set('body', 'A memory with a large photo.')
+            ->set('experienceDate', '2026-06-08')
+            ->set('photos', [
+                UploadedFile::fake()->image('large.jpg')->size(10 * 1024 + 1),
+            ])
+            ->call('save')
+            ->assertHasErrors([
+                'photos.0',
+            ]);
+    }
+
+    public function test_photo_upload_rejects_more_than_twenty_five_photos(): void
+    {
+        Storage::fake('local');
+
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $this->actingAs($user);
+
+        $photos = collect(range(1, 26))
+            ->map(fn (int $index): UploadedFile => UploadedFile::fake()->image("photo-{$index}.jpg")->size(10))
+            ->all();
+
+        Livewire::test(MemoryRecordEditor::class, [
+            'tenant' => $tenant,
+            'type' => MemoryRecord::TYPE_DIARY,
+        ])
+            ->set('body', 'A memory with too many photos.')
+            ->set('experienceDate', '2026-06-08')
+            ->set('photos', $photos)
+            ->call('save')
+            ->assertHasErrors([
+                'photos' => 'max',
+            ]);
+    }
+
+    public function test_photo_upload_falls_back_when_configured_limits_are_invalid(): void
+    {
+        Storage::fake('local');
+        config([
+            'memory.media.allowed_extensions' => [],
+            'memory.media.max_photos_per_record' => 0,
+        ]);
+
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $this->actingAs($user);
+
+        Livewire::test(MemoryRecordEditor::class, [
+            'tenant' => $tenant,
+            'type' => MemoryRecord::TYPE_DIARY,
+        ])
+            ->set('body', 'A memory with defensive photo validation.')
+            ->set('experienceDate', '2026-06-08')
+            ->set('photos', [
+                UploadedFile::fake()->image('fallback.jpg')->size(10),
+            ])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $record = MemoryRecord::query()
+            ->where('body', 'A memory with defensive photo validation.')
+            ->firstOrFail();
+
+        $this->assertCount(1, $record->getMedia($record->mediaCollectionName()));
     }
 
     public function test_period_title_and_date_order_are_required(): void

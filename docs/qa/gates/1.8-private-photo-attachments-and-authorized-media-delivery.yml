@@ -1,0 +1,70 @@
+schema: 1
+story: '1.8'
+story_title: 'Private Photo Attachments and Authorized Media Delivery'
+gate: PASS
+status_reason: 'Story 1.8 satisfies private photo attachment, tenant-scoped authorized delivery, upload limit enforcement, no public media exposure, and S3-compatible storage boundaries. Architect review fixed the memory media path generator registration, reconciled QA story documentation, removed redundant upload error rendering, and reran focused and full quality gates.'
+reviewer: 'Aria (Architect)'
+updated: '2026-06-12T11:25:18-03:00'
+quality_score: 99
+expires: '2026-06-26T11:25:18-03:00'
+
+top_issues: []
+
+waiver:
+  active: false
+
+evidence:
+  tests_reviewed: 485
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+    integration_covered: [1, 2, 3]
+    integration_gaps: []
+  commands:
+    - command: 'Laravel Boost search_docs'
+      result: 'confirmed current Livewire upload, Laravel file validation, private filesystem response, and route binding/scoping guidance before review fixes'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryRecordServiceTest.php'
+      result: 'passed after architect path-generator fix; 15 tests, 73 assertions'
+    - command: 'vendor/bin/sail artisan route:list --name=memories'
+      result: 'passed; 7 memory routes listed including memories.media.show'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php'
+      result: 'passed; 9 tests, 38 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryRecordDetailTest.php'
+      result: 'passed after test assertion hardening; 6 tests, 39 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php tests/Feature/Livewire/Memory/MemoryRecordDetailTest.php tests/Feature/Livewire/Memory/MemoryTimelineTest.php tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php tests/Feature/Services/Memory/MemoryRecordServiceTest.php tests/Feature/Services/Memory/MemoryTimelineServiceTest.php'
+      result: 'passed after local Livewire temporary-directory ownership repair; 68 tests, 349 assertions'
+    - command: 'npm run lint'
+      result: 'passed; Pint dirty check passed'
+    - command: 'npm run typecheck'
+      result: 'passed; PHPStan analysed 490 files with no errors'
+    - command: 'npm test'
+      result: 'passed during DevOps publication; 485 tests, 1357 assertions'
+    - command: 'npm run build'
+      result: 'passed during DevOps publication with existing Vite chunk-size warning'
+    - command: 'coderabbit review --agent --type uncommitted'
+      result: 'final DevOps rerun passed; review_completed with 0 findings after minor config-validation fallback finding was addressed'
+    - command: 'npm run validate:structure'
+      result: 'passed; Errors: 0, Warnings: 0'
+    - command: 'git diff --check'
+      result: 'passed'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Memory photos are stored on the configured private disk and now under the configured private memory path. Media delivery re-scopes Spatie media through route tenant and parent MemoryRecord before policy authorization and streaming, including morph-map alias support. Cross-tenant and non-member direct URL denial tests assert no private body, filename, path, or metadata leakage.'
+  performance:
+    status: PASS
+    notes: 'Timeline reads eager-load displayed media and derive photo counts from loaded media when available. Media responses use private cache headers and no broad unscoped media lookup path is exposed.'
+  reliability:
+    status: PASS
+    notes: 'Focused Livewire, service, route, profile-gate, detail, and timeline tests cover diary and period attachments, unsupported types, size/count/workspace limits, authorized delivery, denial behavior, and regressions. Full suite passed.'
+  maintainability:
+    status: PASS
+    notes: 'Implementation extends existing MemoryRecord, MemoryRecordService, MemoryRecordPolicy, Livewire editor/detail/timeline surfaces, translations, and PHPUnit tests. The media path generator is registered specifically for MemoryRecord to avoid global blog-media behavior changes.'
+
+recommendations:
+  immediate: []
+  future:
+    - 'Consider generated renditions and EXIF-stripping conversions in a later story once Hostinger/S3 media processing constraints are validated.'
+    - 'Review the recurring local Livewire temporary-directory ownership issue outside the story scope if isolated upload test reruns continue to require chown.'

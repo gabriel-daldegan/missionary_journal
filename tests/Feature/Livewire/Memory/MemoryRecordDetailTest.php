@@ -7,6 +7,8 @@ use App\Models\MemoryProfile;
 use App\Models\MemoryRecord;
 use App\Models\Tenant;
 use App\Services\MemoryRecordService;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Feature\FeatureTest;
@@ -97,6 +99,35 @@ class MemoryRecordDetailTest extends FeatureTest
             'tenant' => $tenant,
             'record' => $record,
         ]), false);
+    }
+
+    public function test_authorized_member_sees_private_photo_route_on_record_detail(): void
+    {
+        Storage::fake('local');
+
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $record = $this->service()->createDiaryRecord($tenant, $user, [
+            'body' => 'A memory with detail photos.',
+            'experience_date' => '2026-06-07',
+            'photos' => [
+                UploadedFile::fake()->image('detail.jpg')->size(128),
+            ],
+        ]);
+        $media = $record->getFirstMedia($record->mediaCollectionName());
+        $this->assertNotNull($media, 'Expected media to be attached to the record.');
+
+        $response = $this->actingAs($user)->get($this->showRoute($tenant, $record));
+
+        $response->assertOk();
+        $response->assertSee(__('memory.record_detail.photos'));
+        $response->assertSee(route('memories.media.show', [
+            'tenant' => $tenant,
+            'media' => $media->uuid,
+        ]), false);
+        $response->assertDontSee($media->file_name);
+        $response->assertDontSee($media->getPath());
     }
 
     public function test_non_member_direct_detail_url_receives_generic_not_found(): void
