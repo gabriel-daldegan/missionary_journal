@@ -28,28 +28,109 @@
 
     <section class="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
         <div class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            @if ($timelineGroups->isEmpty())
-                <div class="flex flex-col gap-3">
-                    <p class="text-xs font-semibold uppercase text-primary-700">{{ __('memory.layout.timeline') }}</p>
-                    <h2 class="text-lg font-semibold tracking-normal text-slate-950">{{ __('memory.timeline.ready_heading') }}</h2>
-                    <p class="text-sm leading-6 text-slate-600">
-                        {{ __('memory.timeline.ready_body') }}
-                    </p>
+            <div class="mb-6 flex flex-col gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    <label class="flex min-w-0 flex-col gap-1 text-sm font-medium text-slate-700">
+                        <span>{{ __('memory.timeline.filters.date_from') }}</span>
+                        <input
+                            type="date"
+                            wire:model.live="dateFrom"
+                            class="h-10 min-w-0 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                        >
+                    </label>
+
+                    <label class="flex min-w-0 flex-col gap-1 text-sm font-medium text-slate-700">
+                        <span>{{ __('memory.timeline.filters.date_to') }}</span>
+                        <input
+                            type="date"
+                            wire:model.live="dateTo"
+                            class="h-10 min-w-0 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                        >
+                    </label>
+
+                    <label class="flex min-w-0 flex-col gap-1 text-sm font-medium text-slate-700">
+                        <span>{{ __('memory.timeline.filters.tag') }}</span>
+                        <select
+                            wire:model.live="selectedTag"
+                            class="h-10 min-w-0 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                        >
+                            <option value="">{{ __('memory.timeline.filters.all_tags') }}</option>
+                            @foreach ($tagOptions as $tag)
+                                <option wire:key="timeline-filter-tag-{{ $tag->id }}" value="{{ $tag->slug }}">{{ $tag->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <label class="flex min-w-0 flex-col gap-1 text-sm font-medium text-slate-700">
+                        <span>{{ __('memory.timeline.filters.location') }}</span>
+                        <input
+                            type="search"
+                            wire:model.live.debounce.400ms="location"
+                            class="h-10 min-w-0 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                        >
+                    </label>
+                </div>
+
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div class="flex flex-wrap gap-2">
-                        <a
-                            href="{{ route('memories.records.create', ['tenant' => $tenant, 'type' => \App\Models\MemoryRecord::TYPE_DIARY]) }}"
+                        @foreach ($activeFilterLabels as $activeFilterLabel)
+                            <span wire:key="timeline-active-filter-{{ $activeFilterLabel['key'] }}" class="inline-flex max-w-full items-center rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700 ring-1 ring-slate-200">
+                                {{ $activeFilterLabel['label'] }}
+                            </span>
+                        @endforeach
+                    </div>
+
+                    @if ($hasActiveFilters)
+                        <button
+                            type="button"
+                            wire:click="clearFilters"
+                            class="inline-flex h-9 w-fit items-center justify-center rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:border-primary-400 hover:text-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                        >
+                            {{ __('memory.timeline.filters.clear') }}
+                        </button>
+                    @endif
+                </div>
+            </div>
+
+            @if ($timelineGroups->isEmpty())
+                @if ($hasActiveFilters)
+                    <div class="flex flex-col gap-3">
+                        <p class="text-xs font-semibold uppercase text-primary-700">{{ __('memory.layout.timeline') }}</p>
+                        <h2 class="text-lg font-semibold tracking-normal text-slate-950">{{ __('memory.timeline.filters.no_results_heading') }}</h2>
+                        <p class="text-sm leading-6 text-slate-600">
+                            {{ __('memory.timeline.filters.no_results_body') }}
+                        </p>
+                        <button
+                            type="button"
+                            wire:click="clearFilters"
                             class="inline-flex h-10 w-fit items-center justify-center rounded-lg bg-primary-600 px-4 text-sm font-semibold text-white transition hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
                         >
-                            {{ __('memory.record_editor.new_diary') }}
-                        </a>
-                        <a
-                            href="{{ route('memories.records.create', ['tenant' => $tenant, 'type' => \App\Models\MemoryRecord::TYPE_PERIOD]) }}"
-                            class="inline-flex h-10 w-fit items-center justify-center rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:border-primary-400 hover:text-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
-                        >
-                            {{ __('memory.record_editor.new_period') }}
-                        </a>
+                            {{ __('memory.timeline.filters.clear') }}
+                        </button>
                     </div>
-                </div>
+                @else
+                    <div class="flex flex-col gap-3">
+                        <p class="text-xs font-semibold uppercase text-primary-700">{{ __('memory.layout.timeline') }}</p>
+                        <h2 class="text-lg font-semibold tracking-normal text-slate-950">{{ __('memory.timeline.ready_heading') }}</h2>
+                        <p class="text-sm leading-6 text-slate-600">
+                            {{ __('memory.timeline.ready_body') }}
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <a
+                                href="{{ route('memories.records.create', ['tenant' => $tenant, 'type' => \App\Models\MemoryRecord::TYPE_DIARY]) }}"
+                                class="inline-flex h-10 w-fit items-center justify-center rounded-lg bg-primary-600 px-4 text-sm font-semibold text-white transition hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                            >
+                                {{ __('memory.record_editor.new_diary') }}
+                            </a>
+                            <a
+                                href="{{ route('memories.records.create', ['tenant' => $tenant, 'type' => \App\Models\MemoryRecord::TYPE_PERIOD]) }}"
+                                class="inline-flex h-10 w-fit items-center justify-center rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:border-primary-400 hover:text-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                            >
+                                {{ __('memory.record_editor.new_period') }}
+                            </a>
+                        </div>
+                    </div>
+                @endif
             @else
                 <div class="flex flex-col gap-6">
                     @foreach ($timelineGroups as $group)

@@ -6,6 +6,7 @@ use App\Models\MemoryRecord;
 use App\Models\MemoryTag;
 use App\Services\MemoryRecordService;
 use App\Services\MemoryTimelineService;
+use Illuminate\Support\Collection;
 use Tests\Feature\FeatureTest;
 
 class MemoryTimelineServiceTest extends FeatureTest
@@ -155,6 +156,166 @@ class MemoryTimelineServiceTest extends FeatureTest
             $periodRecord->id,
             $diaryRecord->id,
         ], $grouped[0]['records']->pluck('id')->all());
+    }
+
+    public function test_timeline_filters_by_date_range_and_single_date_using_record_timeline_dates(): void
+    {
+        $tenant = $this->createTenant();
+
+        $juneDiary = MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'June diary.',
+            'experience_date' => '2026-06-10',
+        ]);
+        $junePeriod = MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_PERIOD,
+            'title' => 'June period.',
+            'experience_date' => null,
+            'period_start_date' => '2026-06-15',
+            'period_end_date' => '2026-06-18',
+        ]);
+        MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'July diary.',
+            'experience_date' => '2026-07-01',
+        ]);
+
+        $rangeGroups = $this->timelineService()->getMonthlyTimelineGroups($tenant, [
+            'date_from' => '2026-06-01',
+            'date_to' => '2026-06-30',
+        ]);
+        $singleDateGroups = $this->timelineService()->getMonthlyTimelineGroups($tenant, [
+            'date_from' => '2026-06-15',
+            'date_to' => '2026-06-15',
+        ]);
+
+        $this->assertSame([$junePeriod->id, $juneDiary->id], $this->recordIds($rangeGroups));
+        $this->assertSame([$junePeriod->id], $this->recordIds($singleDateGroups));
+    }
+
+    public function test_timeline_filters_by_tenant_scoped_tag_and_rejects_foreign_tag_slug(): void
+    {
+        $tenant = $this->createTenant();
+        $foreignTenant = $this->createTenant();
+
+        $tag = MemoryTag::factory()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Family',
+            'slug' => 'family',
+        ]);
+        MemoryTag::factory()->create([
+            'tenant_id' => $foreignTenant->id,
+            'name' => 'Foreign Family',
+            'slug' => 'foreign-family',
+        ]);
+
+        $matchingRecord = MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Tagged family memory.',
+            'experience_date' => '2026-06-10',
+        ]);
+        $matchingRecord->tags()->attach($tag);
+
+        MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Untagged memory.',
+            'experience_date' => '2026-06-11',
+        ]);
+        MemoryRecord::factory()->create([
+            'tenant_id' => $foreignTenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Foreign tagged memory.',
+            'experience_date' => '2026-06-12',
+        ]);
+
+        $tenantGroups = $this->timelineService()->getMonthlyTimelineGroups($tenant, [
+            'tag' => 'family',
+        ]);
+        $foreignSlugGroups = $this->timelineService()->getMonthlyTimelineGroups($tenant, [
+            'tag' => 'foreign-family',
+        ]);
+
+        $this->assertSame([$matchingRecord->id], $this->recordIds($tenantGroups));
+        $this->assertSame([], $this->recordIds($foreignSlugGroups));
+    }
+
+    public function test_timeline_filters_by_location_without_private_body_search(): void
+    {
+        $tenant = $this->createTenant();
+
+        $matchingRecord = MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Body does not control location filters.',
+            'experience_date' => '2026-06-10',
+            'location_name' => 'Curitiba',
+        ]);
+        MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Curitiba appears only in private body text.',
+            'experience_date' => '2026-06-11',
+            'location_name' => 'Recife',
+        ]);
+
+        $grouped = $this->timelineService()->getMonthlyTimelineGroups($tenant, [
+            'location' => 'curit',
+        ]);
+
+        $this->assertSame([$matchingRecord->id], $this->recordIds($grouped));
+    }
+
+    public function test_clear_filter_payload_matches_full_tenant_timeline_and_preserves_eager_loading(): void
+    {
+        $tenant = $this->createTenant();
+
+        $record = MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Full timeline memory.',
+            'experience_date' => '2026-06-10',
+        ]);
+        $tag = MemoryTag::factory()->create([
+            'tenant_id' => $tenant->id,
+            'slug' => 'family',
+        ]);
+        $record->tags()->attach($tag);
+        $record->highlights()->create([
+            'text' => 'A visible highlight.',
+            'sort_order' => 0,
+        ]);
+
+        $fullGroups = $this->timelineService()->getMonthlyTimelineGroups($tenant);
+        $clearedGroups = $this->timelineService()->getMonthlyTimelineGroups($tenant, [
+            'date_from' => null,
+            'date_to' => '',
+            'tag' => null,
+            'location' => '',
+        ]);
+        /** @var MemoryRecord $groupRecord */
+        $groupRecord = $clearedGroups[0]['records']->first();
+
+        $this->assertSame($this->recordIds($fullGroups), $this->recordIds($clearedGroups));
+        $this->assertTrue($groupRecord->relationLoaded('tags'));
+        $this->assertTrue($groupRecord->relationLoaded('highlights'));
+        $this->assertTrue($groupRecord->relationLoaded('media'));
+    }
+
+    /**
+     * @param  Collection<int, array{month_key: string, month_label: string, records: Collection<int, MemoryRecord>}>  $groups
+     * @return array<int, int>
+     */
+    private function recordIds(Collection $groups): array
+    {
+        return $groups
+            ->flatMap(fn (array $group): array => $group['records']->pluck('id')->all())
+            ->values()
+            ->all();
     }
 
     private function timelineService(): MemoryTimelineService

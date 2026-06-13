@@ -1,20 +1,20 @@
 status:
-  branch: feature/story-1-6-vertical-month-grouped-timeline-home
+  branch: feature/story-1-9-timeline-filters-date-tag-location
   modifiedFiles:
     - >-
-      .aiox/handoffs/20260609T022244-0300-devops-to-sm-story-1-6-ready-to-draft.yaml
+      .aiox/handoffs/20260612T172658-0300-devops-to-sm-story-1-9-ready-to-draft.yaml
     - .aiox/project-status.yaml
-    - app/Livewire/Memory/MemoryTimeline.php
-    - resources/lang/en/memory.php
-    - resources/lang/es/memory.php
-  modifiedFilesTotalCount: 5
+    - >-
+      .aiox/handoffs/20260612T173506-0300-sm-to-po-story-1-9-ready-for-review.yaml
+    - docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md
+  modifiedFilesTotalCount: 4
   recentCommits:
-    - 'chore(jira): sync story issue metadata'
-    - 'chore(memory): prepare story 1.6 branch handoff'
+    - 'chore(memory): prepare story 1.9 branch handoff'
+    - 'feat(memory): add private photo attachments'
   currentEpic: null
   currentStory: null
-  lastUpdate: '2026-06-11T02:04:44.268Z'
+  lastUpdate: '2026-06-12T20:41:09.218Z'
   isGitRepo: true
-timestamp: 1781143484276
+timestamp: 1781296869222
 ttl: 60
 gitFingerprint: null

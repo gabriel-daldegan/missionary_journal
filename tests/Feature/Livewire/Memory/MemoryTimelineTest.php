@@ -2,12 +2,14 @@
 
 namespace Tests\Feature\Livewire\Memory;
 
+use App\Livewire\Memory\MemoryTimeline;
 use App\Models\MemoryProfile;
 use App\Models\MemoryRecord;
 use App\Models\MemoryTag;
 use App\Models\Tenant;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 use Tests\Feature\FeatureTest;
 
 class MemoryTimelineTest extends FeatureTest
@@ -160,6 +162,135 @@ class MemoryTimelineTest extends FeatureTest
         $response->assertOk();
         $response->assertSee($visibleOpening);
         $response->assertDontSee($hiddenTail);
+    }
+
+    public function test_timeline_renders_filter_controls_and_applies_url_backed_date_and_tag_filters(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+
+        $tag = MemoryTag::factory()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Family',
+            'slug' => 'family',
+        ]);
+        $foreignTag = MemoryTag::factory()->create([
+            'tenant_id' => $this->createTenant()->id,
+            'name' => 'Foreign Family',
+            'slug' => 'foreign-family',
+        ]);
+
+        $matchingRecord = MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Filtered family memory.',
+            'experience_date' => '2026-06-10',
+            'location_name' => 'Recife',
+        ]);
+        $matchingRecord->tags()->attach($tag);
+
+        MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Different tenant tag should not match.',
+            'experience_date' => '2026-06-10',
+            'location_name' => 'Recife',
+        ])->tags()->attach($foreignTag);
+        MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Unfiltered July memory.',
+            'experience_date' => '2026-07-10',
+            'location_name' => 'Curitiba',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('memories.timeline', [
+            'tenant' => $tenant,
+            'from' => '2026-06-01',
+            'to' => '2026-06-30',
+            'tag' => 'family',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee(__('memory.timeline.filters.date_from'));
+        $response->assertSee(__('memory.timeline.filters.date_to'));
+        $response->assertSee(__('memory.timeline.filters.tag'));
+        $response->assertSee(__('memory.timeline.filters.location'));
+        $response->assertSee('Filtered family memory.');
+        $response->assertDontSee('Different tenant tag should not match.');
+        $response->assertDontSee('Unfiltered July memory.');
+        $response->assertSee(__('memory.timeline.filters.active.date_range', [
+            'from' => '2026-06-01',
+            'to' => '2026-06-30',
+        ]));
+        $response->assertSee(__('memory.timeline.filters.active.tag', [
+            'tag' => 'Family',
+        ]));
+    }
+
+    public function test_location_query_parameter_is_not_url_backed_by_default(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+
+        MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Recife memory.',
+            'experience_date' => '2026-06-10',
+            'location_name' => 'Recife',
+        ]);
+        MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Curitiba memory.',
+            'experience_date' => '2026-06-11',
+            'location_name' => 'Curitiba',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('memories.timeline', [
+            'tenant' => $tenant,
+            'location' => 'Recife',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Recife memory.');
+        $response->assertSee('Curitiba memory.');
+        $response->assertDontSee(__('memory.timeline.filters.active.location', [
+            'location' => 'Recife',
+        ]));
+    }
+
+    public function test_timeline_filters_show_no_results_state_and_clear_filters_restores_full_timeline(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create();
+        $this->actingAs($user);
+
+        MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'Visible after filters clear.',
+            'experience_date' => '2026-06-10',
+            'location_name' => 'Recife',
+        ]);
+
+        Livewire::test(MemoryTimeline::class, [
+            'tenant' => $tenant,
+        ])
+            ->set('location', 'Curitiba')
+            ->assertSee(__('memory.timeline.filters.no_results_heading'))
+            ->assertDontSee('Visible after filters clear.')
+            ->call('clearFilters')
+            ->assertSet('dateFrom', '')
+            ->assertSet('dateTo', '')
+            ->assertSet('selectedTag', '')
+            ->assertSet('location', '')
+            ->assertSee('Visible after filters clear.')
+            ->assertDontSee(__('memory.timeline.filters.no_results_heading'));
     }
 
     private function createRoute(Tenant $tenant): string

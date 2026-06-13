@@ -1,0 +1,67 @@
+schema: 1
+story: '1.9'
+story_title: 'Timeline Filters by Date, Tag, and Location'
+gate: PASS
+status_reason: 'Story 1.9 satisfies tenant-scoped timeline filtering by date/date range, tag, and location while preserving vertical month grouping, privacy-safe URL state, eager-loaded card dependencies, and route/profile/media regressions. Architect review found no blocking issues and reran focused plus full quality gates.'
+reviewer: 'Aria (Architect)'
+updated: '2026-06-12T19:04:49-03:00'
+quality_score: 99
+expires: '2026-06-26T19:04:49-03:00'
+
+top_issues: []
+
+waiver:
+  active: false
+
+evidence:
+  tests_reviewed: 492
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+    integration_covered: [1, 2, 3]
+    integration_gaps: []
+  commands:
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryTimelineServiceTest.php'
+      result: 'passed; 8 tests, 27 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryTimelineTest.php'
+      result: 'passed; 7 tests, 45 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php'
+      result: 'passed; 16 tests, 60 assertions'
+    - command: 'vendor/bin/sail artisan route:list --name=memories'
+      result: 'passed; 7 memory routes listed'
+    - command: 'vendor/bin/sail bin pint --dirty --format agent'
+      result: 'passed'
+    - command: 'npm run lint'
+      result: 'passed; Pint dirty check passed'
+    - command: 'npm run typecheck'
+      result: 'passed; PHPStan analysed 490 files with no errors'
+    - command: 'npm test'
+      result: 'passed; 492 tests, 1388 assertions'
+    - command: 'npm run build'
+      result: 'passed; Vite build completed with existing chunk-size warning'
+    - command: 'npm run validate:structure'
+      result: 'passed; Errors: 0, Warnings: 0'
+    - command: 'git diff --check'
+      result: 'passed'
+    - command: 'coderabbit review --agent --type uncommitted'
+      result: 'passed; review_completed with 0 findings'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Filter queries start from `whereBelongsTo($tenant)`, tag filtering is constrained to tenant-owned `MemoryTag` slugs, cross-tenant tag slugs return no tenant records, and location remains transient instead of URL-backed.'
+  performance:
+    status: PASS
+    notes: 'Timeline reads continue to eager-load `highlights`, `media`, and `tags`; Blade renders loaded card data and does not query private records, tags, media, or highlights.'
+  reliability:
+    status: PASS
+    notes: 'Focused service, Livewire, route, and profile-gate tests cover date range, single-date, tag, location, clearing, no-results state, tenant scoping, URL privacy, ordering, eager loading, and regressions. Full suite passed.'
+  maintainability:
+    status: PASS
+    notes: 'Implementation extends the existing `MemoryTimeline` Livewire component, `MemoryTimelineService`, Blade timeline view, translations, and PHPUnit coverage without introducing a parallel search/reporting surface.'
+
+recommendations:
+  immediate: []
+  future:
+    - 'If validation tenants build large timelines, consider pagination or incremental loading in a later story without changing the month-grouped product model.'

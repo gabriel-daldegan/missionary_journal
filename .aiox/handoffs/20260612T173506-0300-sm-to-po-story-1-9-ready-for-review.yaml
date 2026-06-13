@@ -1,0 +1,78 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-12T17:35:06-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "create-next-story"
+
+  execution_context:
+    source_handoff: ".aiox/handoffs/20260612T172658-0300-devops-to-sm-story-1-9-ready-to-draft.yaml"
+    branch: "feature/story-1-9-timeline-filters-date-tag-location"
+    base: "origin/main"
+    note: "SM drafted Story 1.9 locally from the DevOps handoff, PRD, architecture, UI architecture, framework docs, Story 1.8, and current memory implementation. No implementation code was changed."
+    observed_status_mismatch: "docs/stories/1.8.private-photo-attachments-and-authorized-media-delivery.story.md still says Ready for Merge, but the DevOps handoff reports PR #14 merged, release workflow PASS, and tag v1.9.0."
+
+  created_story:
+    story_id: "1.9"
+    title: "Timeline Filters by Date, Tag, and Location"
+    path: "docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md"
+    status: "Draft"
+
+  handoff_analysis:
+    summary: "Story 1.9 should add focused date/date-range, tag, and location filters to the existing private, month-grouped memory timeline without changing it into a table, admin list, map, masonry layout, report, or advanced search surface."
+    source_truth:
+      - "PRD Story 1.9 defines timeline filters by date/date range, tag, and location, clear/reset behavior, no table/admin conversion, and EN/PT/ES-safe labels."
+      - "Architecture assigns timeline filter query logic to MemoryTimelineService and requires tenant-scoped records, tags, media, and highlights."
+      - "UI architecture allows URL state for date/tag filters where useful, but keeps location/free-text filters transient by default."
+      - "Current code has MemoryTimeline, MemoryTimelineService, tenant-scoped month grouping, timeline card rendering, tag display, location display, and Story 1.8 private media counts."
+    scope_exclusions:
+      - "No table or admin-list timeline conversion."
+      - "No maps, masonry, advanced search, reporting dashboards, public sharing, visibility toggles, or album-generation language."
+      - "No URL serialization of location search, private record body, people, highlights, media filenames, media paths, or sensitive text."
+      - "No account, billing, dashboard, invitation, workspace-management, or private media delivery changes unless required for regression fixes."
+
+  source_artifacts:
+    - "docs/prd.md#story-1.9-timeline-filters-by-date-tag-and-location"
+    - ".aiox/handoffs/20260612T172658-0300-devops-to-sm-story-1-9-ready-to-draft.yaml"
+    - "docs/stories/1.8.private-photo-attachments-and-authorized-media-delivery.story.md"
+    - "docs/qa/gates/1.8-private-photo-attachments-and-authorized-media-delivery.yml"
+    - "docs/architecture.md"
+    - "docs/ui-architecture.md"
+    - "docs/framework/coding-standards.md"
+    - "docs/framework/source-tree.md"
+    - "docs/framework/tech-stack.md"
+    - "app/Livewire/Memory/MemoryTimeline.php"
+    - "app/Services/MemoryTimelineService.php"
+    - "resources/views/livewire/memory/memory-timeline.blade.php"
+    - "resources/lang/en/memory.php"
+    - "resources/lang/pt/memory.php"
+    - "resources/lang/es/memory.php"
+    - "tests/Feature/Livewire/Memory/MemoryTimelineTest.php"
+    - "tests/Feature/Services/Memory/MemoryTimelineServiceTest.php"
+
+  review_status:
+    story_draft_checklist: "READY"
+    quality_notes: "Draft is scoped to timeline filters, tenant-scoped service queries, Livewire filter state, clear/reset behavior, no-results state, EN/PT/ES-safe labels, and focused tests. It explicitly excludes admin/table framing, maps, masonry, public sharing, visibility controls, advanced search, reports, album language, and private media behavior changes."
+    key_guidance:
+      - "Keep query logic in MemoryTimelineService and preserve the existing month-group return shape."
+      - "Use diary experience_date and period_start_date consistently for filtering and ordering."
+      - "Keep location search transient by default; date and tag may use URL state where useful."
+      - "Assert cross-tenant exclusion for records and tags."
+      - "Keep timeline card dependencies eager-loaded to avoid avoidable N+1 behavior."
+
+  validation_summary:
+    checklist: ".aiox-core/product/checklists/story-draft-checklist.md"
+    result: "READY"
+    decision: "approve for PO validation"
+    blocker_count: 0
+    notes:
+      - "Jira task creation was not performed from this local SM draft because no external project-management MCP tool is configured for this session."
+      - "The draft used live Git branch state, newest DevOps handoff, current story files, architecture/UI docs, framework docs, and current implementation files as source of truth."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md"
+    reason: "PO must validate the Draft story before development starts."
+
+  next_action: "Switch to PO, validate Story 1.9, and, if approved, send handoff for Dev with the implementation-ready story."

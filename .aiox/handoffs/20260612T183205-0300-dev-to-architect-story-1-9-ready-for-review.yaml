@@ -1,0 +1,83 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-12T18:32:05-03:00"
+  from_agent: "dev"
+  to_agent: "architect"
+  consumed: true
+  last_command: "*develop-yolo docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md"
+
+  story_context:
+    story_id: "1.9"
+    story_path: "docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md"
+    status: "Ready for Review"
+    title: "Timeline Filters by Date, Tag, and Location"
+    branch: "feature/story-1-9-timeline-filters-date-tag-location"
+    parent_epic: "MIS-1"
+
+  implementation_summary:
+    - "Added Livewire filter state to `MemoryTimeline` with URL-backed date/tag filters and transient location state."
+    - "Extended `MemoryTimelineService` to apply tenant-scoped date range, single-date, tag, and location filters while preserving the existing month-group return shape."
+    - "Kept timeline date semantics aligned with existing ordering: diary records use `experience_date`; period records use `period_start_date`."
+    - "Filtered tags through tenant-owned `MemoryTag` records by slug so URLs do not expose internal tag IDs and foreign tag slugs do not return tenant records."
+    - "Added compact timeline filter controls, active text labels, clear actions, and a no-results state without changing the vertical month-grouped timeline into a table/admin list."
+    - "Added EN/PT/ES translation keys for filter labels, active states, clear action, and no-results copy while leaving user-generated tag/location values untranslated."
+    - "Expanded service and Livewire coverage for date, tag, location, clearing, no-results, URL privacy, cross-tenant isolation, ordering, eager loading, and route/profile regressions."
+
+  validation:
+    focused_tests:
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryTimelineServiceTest.php"
+        result: "PASS"
+        evidence: "8 tests, 27 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryTimelineTest.php"
+        result: "PASS"
+        evidence: "7 tests, 45 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php"
+        result: "PASS"
+        evidence: "16 tests, 60 assertions"
+      - command: "vendor/bin/sail artisan route:list --name=memories"
+        result: "PASS"
+        evidence: "7 memory routes listed"
+      - command: "vendor/bin/sail bin pint --dirty --format agent"
+        result: "PASS"
+      - command: "npm run lint"
+        result: "PASS"
+      - command: "npm run typecheck"
+        result: "PASS"
+        evidence: "PHPStan completed with no errors"
+      - command: "npm test"
+        result: "PASS"
+        evidence: "492 tests, 1388 assertions"
+      - command: "npm run validate:structure"
+        result: "PASS"
+        evidence: "Errors: 0, Warnings: 0"
+      - command: "git diff --check"
+        result: "PASS"
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "PASS"
+        evidence: "review_completed, findings: 0"
+
+  known_notes:
+    - "The first focused service and Livewire test commands were initially run in parallel and conflicted through shared `migrate:fresh`; both were rerun sequentially and passed."
+    - "No frontend build was run because this story changes Blade/Tailwind markup and PHP tests/gates, not compiled asset entrypoints."
+
+  files_changed:
+    - "app/Livewire/Memory/MemoryTimeline.php"
+    - "app/Services/MemoryTimelineService.php"
+    - "docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md"
+    - "resources/lang/en/memory.php"
+    - "resources/lang/es/memory.php"
+    - "resources/lang/pt/memory.php"
+    - "resources/views/livewire/memory/memory-timeline.blade.php"
+    - "tests/Feature/Livewire/Memory/MemoryTimelineTest.php"
+    - "tests/Feature/Services/Memory/MemoryTimelineServiceTest.php"
+
+  review_focus:
+    - "Confirm tenant-scoped filter query boundaries in `MemoryTimelineService`, especially tag filtering by tenant-owned slug and cross-tenant denial."
+    - "Confirm date filters use diary `experience_date` and period `period_start_date`, including single-date behavior."
+    - "Confirm `location` remains transient Livewire state and private/free-text values are not URL-backed."
+    - "Confirm timeline card dependencies remain eager loaded and no Blade queries private records, tags, media, or highlights."
+    - "Confirm no-results state is distinct from first-empty state and the UI remains vertical/month-grouped rather than table/admin/list/map/masonry."
+    - "Confirm EN/PT/ES filter labels and active chips can wrap safely on mobile."
+    - "Confirm `memories.timeline`, `memories.records.show`, `memories.media.show`, tenant member, and profile gate regressions remain intact."
+
+  next_action: "Switch to Architect and run the Story 1.9 quality gate review."
