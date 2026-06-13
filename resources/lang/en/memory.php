@@ -117,5 +117,22 @@ return [
         'open_record' => 'Open full record',
         'period_range_separator' => 'to',
         'photo_count' => '{0}No photos|{1}:count photo|[2,*]:count photos',
+        'filters' => [
+            'active' => [
+                'date_from' => 'From :date',
+                'date_range' => ':from to :to',
+                'date_to' => 'Until :date',
+                'location' => 'Location: :location',
+                'tag' => 'Tag: :tag',
+            ],
+            'all_tags' => 'All tags',
+            'clear' => 'Clear filters',
+            'date_from' => 'From date',
+            'date_to' => 'To date',
+            'location' => 'Location',
+            'no_results_body' => 'Clear or adjust the filters to return to the full timeline.',
+            'no_results_heading' => 'No memories match these filters',
+            'tag' => 'Tag',
+        ],
     ],
 ];

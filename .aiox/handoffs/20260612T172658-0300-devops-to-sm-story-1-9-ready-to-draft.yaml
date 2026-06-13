@@ -1,0 +1,96 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-12T17:26:58-03:00"
+  from_agent: "devops"
+  to_agent: "sm"
+  consumed: true
+  last_command: "prepare-next-story-after-story-1-8-publication"
+
+  publication_context:
+    summary: "Story 1.8 was published and merged through PR #14; the next Story 1.9 branch is prepared from the merged mainline."
+    repository:
+      origin: "https://github.com/gabriel-daldegan/missionary_journal.git"
+      current_checkout:
+        path: "/home/jose/projects/missionary_journal"
+        branch: "feature/story-1-9-timeline-filters-date-tag-location"
+        base: "origin/main"
+        head: "4dec856"
+        tag: "v1.9.0"
+      merged_pr:
+        number: 14
+        title: "Story 1.8: Private Photo Attachments and Authorized Media Delivery"
+        state: "MERGED"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/14"
+        merged_at: "2026-06-12T20:23:03Z"
+        merge_commit: "4dec856845974ddcc4ea29145bf2e3e6b27d1db2"
+      release_check:
+        workflow: "release"
+        result: "PASS"
+        tag: "v1.9.0"
+
+  next_story:
+    story_id: "1.9"
+    title: "Timeline Filters by Date, Tag, and Location"
+    target_path: "docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md"
+    source_artifacts:
+      primary:
+        - "docs/prd.md#story-1.9-timeline-filters-by-date-tag-and-location"
+        - "docs/architecture.md#application-layer-and-services"
+        - "docs/ui-architecture.md#component-state-guidance"
+        - "docs/ui-architecture.md#testing-guidance"
+        - "docs/framework/coding-standards.md"
+        - "docs/framework/source-tree.md"
+        - "docs/framework/tech-stack.md"
+      implementation_context:
+        - "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+        - "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+        - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+        - "docs/stories/1.5.diary-record-editing-and-detail-view.story.md"
+        - "docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+        - "docs/stories/1.7.trip-period-record-creation.story.md"
+        - "docs/stories/1.8.private-photo-attachments-and-authorized-media-delivery.story.md"
+        - "docs/qa/gates/1.8-private-photo-attachments-and-authorized-media-delivery.yml"
+        - ".aiox/handoffs/20260612T112518-0300-architect-to-devops-story-1-8-approved-for-publication.yaml"
+
+  user_story:
+    as_a: "user"
+    i_want: "to filter the memory timeline"
+    so_that: "I can find records without scrolling through every memory"
+
+  acceptance_criteria:
+    - "Users can filter records by date or date range."
+    - "Users can filter records by tag."
+    - "Users can filter records by location."
+    - "Filters can be cleared to restore the full tenant-scoped timeline."
+    - "Filters do not turn the timeline into a table or admin list."
+    - "Filter labels and states are safe for English, Portuguese, and Spanish strings."
+
+  integration_verification:
+    - "Filters never return records outside the current tenant."
+    - "Filter queries eager load needed record relationships to avoid avoidable N+1 behavior."
+    - "Tests verify filtered results, clearing filters, and tenant scoping."
+
+  scope_limitations:
+    - "Use the merged Story 1.8 timeline, diary/period records, tags, location fields, media counts, and private media behavior as the starting point."
+    - "Keep Story 1.9 focused on timeline filtering by date/date range, tag, and location plus clear/reset behavior."
+    - "Do not convert the timeline into a table, admin list, report, map, masonry layout, or advanced search surface."
+    - "Do not add public sharing, per-record visibility toggles, album-generation language, analytics dashboards, or validation reporting."
+    - "Do not expose location search in the URL by default; UI architecture says location/free-text filters should remain transient."
+    - "Date and tag filters may use URL state where useful, but private record body, media filenames, people, highlights, and sensitive text must not be serialized into query strings."
+    - "Do not change private media delivery beyond what is required to preserve existing Story 1.8 behavior."
+    - "Do not change account, billing, dashboard, invitation, or workspace-management flows unless required for regression fixes."
+
+  drafting_guidance:
+    - "Draft the story from PRD Story 1.9, architecture MemoryTimelineService guidance, UI architecture filter state guidance, and the merged Story 1.8 implementation."
+    - "Route the implementation through MemoryTimeline and MemoryTimelineService instead of placing tenant-scoped query logic in Blade."
+    - "Preserve vertical month-grouped timeline behavior and current card/detail navigation while adding filter controls and no-results state."
+    - "Use Livewire public state for filter controls; keep location search transient by default and consider URL state only for shareable date/tag filters."
+    - "Define focused PHPUnit/Livewire tests for date range filtering, tag filtering, location filtering, clearing filters, no-results state, cross-tenant exclusion, and eager-loaded relationship behavior."
+    - "Require EN/PT/ES-safe labels and active filter states without turning localization itself into the main scope; Story 1.10 remains the broader localization story."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*create-next-story"
+    reason: "Story 1.9 needs an implementation-ready draft grounded in the merged Story 1.8 private-media timeline baseline plus PRD and UI architecture filter constraints."
+
+  next_action: "Switch to SM and draft Story 1.9 with a narrow timeline filter scope."

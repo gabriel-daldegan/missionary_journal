@@ -117,5 +117,22 @@ return [
         'open_record' => 'Abrir registro',
         'period_range_separator' => 'a',
         'photo_count' => '{0}Sin fotos|{1}:count foto|[2,*]:count fotos',
+        'filters' => [
+            'active' => [
+                'date_from' => 'Desde :date',
+                'date_range' => ':from a :to',
+                'date_to' => 'Hasta :date',
+                'location' => 'Lugar: :location',
+                'tag' => 'Etiqueta: :tag',
+            ],
+            'all_tags' => 'Todas las etiquetas',
+            'clear' => 'Limpiar filtros',
+            'date_from' => 'Fecha inicial',
+            'date_to' => 'Fecha final',
+            'location' => 'Lugar',
+            'no_results_body' => 'Limpia o ajusta los filtros para volver a la línea de tiempo completa.',
+            'no_results_heading' => 'Ninguna memoria coincide con estos filtros',
+            'tag' => 'Etiqueta',
+        ],
     ],
 ];
