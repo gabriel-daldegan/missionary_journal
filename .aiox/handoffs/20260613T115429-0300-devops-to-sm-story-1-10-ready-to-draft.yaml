@@ -1,0 +1,101 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-13T11:54:29-03:00"
+  from_agent: "devops"
+  to_agent: "sm"
+  consumed: false
+  last_command: "prepare-next-story-after-story-1-9-publication"
+
+  publication_context:
+    summary: "Story 1.9 was published and merged through PR #15; the next Story 1.10 branch is prepared from the merged mainline."
+    repository:
+      origin: "https://github.com/gabriel-daldegan/missionary_journal.git"
+      current_checkout:
+        path: "/home/jose/projects/missionary_journal"
+        branch: "feature/story-1-10-ui-localization"
+        base: "origin/main"
+        head: "707d6b6"
+        tag: "v1.10.0"
+      merged_pr:
+        number: 15
+        title: "Story 1.9: Timeline filters by date, tag, and location"
+        state: "MERGED"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/15"
+        merged_at: "2026-06-13T14:46:59Z"
+        merge_commit: "707d6b68f79ab78bab5918e87eeba180f2fc4795"
+      release_check:
+        workflow: "release"
+        result: "PASS"
+        tag: "v1.10.0"
+
+  next_story:
+    story_id: "1.10"
+    title: "English, Portuguese, and Spanish UI Localization"
+    target_path: "docs/stories/1.10.english-portuguese-and-spanish-ui-localization.story.md"
+    source_artifacts:
+      primary:
+        - "docs/prd.md#story-1.10-english-portuguese-and-spanish-ui-localization"
+        - "docs/architecture.md#localization-architecture"
+        - "docs/ui-architecture.md#localization"
+        - "docs/front-end-spec.md#localization-tolerance"
+        - "docs/framework/coding-standards.md"
+        - "docs/framework/source-tree.md"
+        - "docs/framework/tech-stack.md"
+      implementation_context:
+        - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+        - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+        - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+        - "docs/stories/1.5.diary-record-editing-and-detail-view.story.md"
+        - "docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+        - "docs/stories/1.7.trip-period-record-creation.story.md"
+        - "docs/stories/1.8.private-photo-attachments-and-authorized-media-delivery.story.md"
+        - "docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md"
+        - "docs/qa/gates/1.9-timeline-filters-by-date-tag-and-location.yml"
+        - ".aiox/handoffs/20260612T190449-0300-architect-to-devops-story-1-9-approved-for-publication.yaml"
+
+  user_story:
+    as_a: "user"
+    i_want: "to use the memory product in my preferred supported language"
+    so_that: "profile setup, capture, and timeline browsing are understandable"
+
+  acceptance_criteria:
+    - "Memory product UI strings are available in English, Portuguese, and Spanish."
+    - "English is the default interface language."
+    - "Users can select their preferred language during memory profile setup and change it later from profile-related controls."
+    - "User-generated content remains in the language entered by the user."
+    - "Core forms, buttons, filters, cards, navigation, empty states, and access-denied states fit supported languages."
+    - "Localization does not introduce content translation behavior."
+
+  integration_verification:
+    - "Existing Laravel localization conventions are used."
+    - "Existing account/dashboard localization behavior is not broken by memory-specific locale handling."
+    - "Tests cover locale preference affecting memory UI strings without translating record content."
+
+  scope_limitations:
+    - "Use the merged Story 1.9 timeline, filters, private media, diary/period records, profile gate, and memory layout as the starting point."
+    - "Keep Story 1.10 focused on customer-facing memory-product localization and preferred locale behavior."
+    - "Do not translate user-generated record body, title, notes, tags, locations, people, highlights, filenames, or media metadata."
+    - "Do not add automated content translation, AI translation, per-record language detection, public sharing, album-generation copy, analytics dashboards, or validation reporting."
+    - "Do not redesign the memory product layout beyond language fit and label safety required by the story."
+    - "Do not change account, billing, dashboard, invitation, tenant membership, private media delivery, or record authorization behavior except for regression-safe locale integration."
+    - "Admin-only screens may remain English unless they are tester-facing in the memory validation flow."
+
+  drafting_guidance:
+    - "Draft the story from PRD Story 1.10, architecture localization guidance, UI architecture locale state guidance, and the merged Story 1.9 implementation."
+    - "Inventory existing `resources/lang/en/memory.php`, `resources/lang/pt/memory.php`, and `resources/lang/es/memory.php` before adding strings; preserve existing translation key structure."
+    - "Verify `memory_profiles.preferred_locale` and profile setup behavior before deciding whether Story 1.10 needs middleware, a profile control, or only completion of existing locale wiring."
+    - "Use Laravel localization conventions and `__()` translation keys for customer-facing memory UI strings."
+    - "Keep English as default/fallback and supported locales constrained to `en`, `pt`, and `es` unless current config already defines a narrower helper."
+    - "Define tests for profile locale preference affecting memory UI strings, default English behavior, locale changes from profile-related controls, account/dashboard regression, and non-translation of user-generated content."
+    - "Include mobile/long-label review expectations for forms, buttons, filters, cards, navigation, empty states, and access-denied states."
+
+  known_status_notes:
+    - "Story 1.9 is merged and tagged through PR #15/v1.10.0, but `docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md` on main still says `Ready for Merge`; prefer the PR/release evidence in this handoff as workflow truth."
+    - "`gh` may resolve the default repository as `joseferrao/saasykit-tenancy`; use `--repo gabriel-daldegan/missionary_journal` for PR operations in this checkout."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*create-next-story"
+    reason: "Story 1.10 needs an implementation-ready draft grounded in the merged Story 1.9 memory UI baseline plus PRD, architecture, and UI localization constraints."
+
+  next_action: "Switch to SM and draft Story 1.10 with a narrow memory-product localization scope."

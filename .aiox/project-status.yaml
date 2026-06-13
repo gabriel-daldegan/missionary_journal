@@ -1,36 +1,17 @@
 status:
-  branch: feature/story-1-9-timeline-filters-date-tag-location
+  branch: feature/story-1-10-ui-localization
   modifiedFiles:
-    - .ai/story-1-9-validation-20260612T174748-0300.json
     - >-
-      .aiox/handoffs/20260612T172658-0300-devops-to-sm-story-1-9-ready-to-draft.yaml
-    - >-
-      .aiox/handoffs/20260612T173506-0300-sm-to-po-story-1-9-ready-for-review.yaml
-    - >-
-      .aiox/handoffs/20260612T174748-0300-po-to-dev-story-1-9-approved-for-review.yaml
-    - >-
-      .aiox/handoffs/20260612T183205-0300-dev-to-architect-story-1-9-ready-for-review.yaml
-    - >-
-      .aiox/handoffs/20260612T190449-0300-architect-to-devops-story-1-9-approved-for-publication.yaml
+      .aiox/handoffs/20260613T115429-0300-devops-to-sm-story-1-10-ready-to-draft.yaml
     - .aiox/project-status.yaml
-    - app/Livewire/Memory/MemoryTimeline.php
-    - app/Services/MemoryTimelineService.php
-    - docs/qa/gates/1.9-timeline-filters-by-date-tag-and-location.yml
-    - docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md
-    - resources/lang/en/memory.php
-    - resources/lang/es/memory.php
-    - resources/lang/pt/memory.php
-    - resources/views/livewire/memory/memory-timeline.blade.php
-    - tests/Feature/Livewire/Memory/MemoryTimelineTest.php
-    - tests/Feature/Services/Memory/MemoryTimelineServiceTest.php
-  modifiedFilesTotalCount: 17
+  modifiedFilesTotalCount: 2
   recentCommits:
     - 'feat(memory): add timeline filters'
-    - 'chore(memory): prepare story 1.9 branch handoff'
+    - 'chore(aiox): update story 1.9 project status'
   currentEpic: null
-  currentStory: null
-  lastUpdate: '2026-06-13T13:53:39.908Z'
+  currentStory: "1.10"
+  lastUpdate: '2026-06-13T14:54:29.000Z'
   isGitRepo: true
-timestamp: 1781358819909
+timestamp: 1781362469000
 ttl: 60
 gitFingerprint: null
