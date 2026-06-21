@@ -87,8 +87,8 @@ class MemoryRecordDetailTest extends FeatureTest
         $response->assertSee('Santos Family Workspace');
         $response->assertSee('Trip or period');
         $response->assertSee('July family visit');
-        $response->assertSee('Jul 10, 2026');
-        $response->assertSee('Jul 14, 2026');
+        $response->assertSee($this->localizedMemoryDate($record->period_start_date));
+        $response->assertSee($this->localizedMemoryDate($record->period_end_date));
         $response->assertSee('Curitiba');
         $response->assertSee('Ana');
         $response->assertSee('Pedro');
@@ -128,6 +128,35 @@ class MemoryRecordDetailTest extends FeatureTest
         ]), false);
         $response->assertDontSee($media->file_name);
         $response->assertDontSee($media->getPath());
+    }
+
+    public function test_detail_route_uses_spanish_profile_locale_without_translating_record_content(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant, attributes: [
+            'name' => 'Ana Santos',
+        ]);
+        MemoryProfile::factory()->for($user)->create([
+            'preferred_locale' => 'es',
+        ]);
+        $record = $this->service()->createDiaryRecord($tenant, $user, [
+            'body' => 'User entered English detail body.',
+            'experience_date' => '2026-06-07',
+            'location_name' => 'Curitiba',
+            'tags' => ['Family'],
+            'highlights' => ['Original English highlight.'],
+        ]);
+
+        $response = $this->actingAs($user)->get($this->showRoute($tenant, $record));
+
+        $response->assertOk();
+        $response->assertSee('Recuerdo de diario');
+        $response->assertSee('Escrito por Ana Santos');
+        $response->assertDontSee('Diary memory');
+        $response->assertSee('User entered English detail body.');
+        $response->assertSee('Curitiba');
+        $response->assertSee('Family');
+        $response->assertSee('Original English highlight.');
     }
 
     public function test_non_member_direct_detail_url_receives_generic_not_found(): void
@@ -201,5 +230,10 @@ class MemoryRecordDetailTest extends FeatureTest
     private function service(): MemoryRecordService
     {
         return app(MemoryRecordService::class);
+    }
+
+    private function localizedMemoryDate(mixed $date): ?string
+    {
+        return $date?->copy()->locale(app()->getLocale())->translatedFormat('M j, Y');
     }
 }

@@ -1,0 +1,59 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-16T14:16:47-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "create-next-story"
+
+  story:
+    story_id: "1.10"
+    title: "English, Portuguese, and Spanish UI Localization"
+    status: "Draft"
+    path: "docs/stories/1.10.english-portuguese-and-spanish-ui-localization.story.md"
+    epic: "Epic 1: Tenant-Scoped Memory Timeline MVP"
+
+  source_handoff:
+    path: ".aiox/handoffs/20260613T115429-0300-devops-to-sm-story-1-10-ready-to-draft.yaml"
+    consumed: true
+    summary: "Story 1.9 was published and merged through PR #15; Story 1.10 branch was prepared from merged mainline."
+
+  draft_basis:
+    primary_sources:
+      - "docs/prd.md#story-1.10-english-portuguese-and-spanish-ui-localization"
+      - "docs/architecture.md#memory_profiles"
+      - "docs/architecture.md#localization-architecture"
+      - "docs/ui-architecture.md#state-management"
+      - "docs/ui-architecture.md#locale-configuration"
+      - "docs/framework/coding-standards.md#memory-product-rules"
+      - "docs/framework/tech-stack.md"
+    implementation_context:
+      - "app/Services/MemoryProfileService.php"
+      - "app/Livewire/Memory/MemoryProfileSetup.php"
+      - "app/Http/Middleware/EnsureMemoryProfileComplete.php"
+      - "resources/lang/en/memory.php"
+      - "resources/lang/pt/memory.php"
+      - "resources/lang/es/memory.php"
+      - "resources/views/components/layouts/memory.blade.php"
+      - "docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md"
+
+  acceptance_criteria:
+    - "Memory product UI strings are available in English, Portuguese, and Spanish."
+    - "English is the default interface language."
+    - "Users can select their preferred language during memory profile setup and change it later from profile-related controls."
+    - "User-generated content remains in the language entered by the user."
+    - "Core forms, buttons, filters, cards, navigation, empty states, and access-denied states fit supported languages."
+    - "Localization does not introduce content translation behavior."
+
+  validation_focus:
+    - "Confirm the story stays focused on memory-product UI localization and preferred locale behavior."
+    - "Confirm it does not require automatic content translation, browser-locale negotiation, admin localization, or layout redesign."
+    - "Confirm the task list is implementation-ready and preserves existing profile gate, timeline filter, private media, account/dashboard, and tenant authorization behavior."
+    - "Confirm the story correctly treats existing `resources/lang/{locale}/memory.php`, `MemoryProfileService::SUPPORTED_LOCALES`, and `EnsureMemoryProfileComplete` as current implementation context."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.10.english-portuguese-and-spanish-ui-localization.story.md"
+    reason: "PO should validate Story 1.10 draft before Dev implementation."
+
+  next_action: "Switch to PO and validate the Story 1.10 draft."

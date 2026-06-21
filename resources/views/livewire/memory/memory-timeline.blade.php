@@ -1,3 +1,7 @@
+@php
+    $formatMemoryDate = fn ($date): ?string => $date?->copy()->locale(app()->getLocale())->translatedFormat('M j, Y');
+@endphp
+
 <div class="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
     <div class="flex flex-col gap-2 border-b border-slate-200 pb-5">
         <p class="text-sm font-medium text-primary-700">{{ $tenant->name }}</p>
@@ -151,10 +155,10 @@
                                         <div class="flex flex-wrap items-center gap-2 text-xs font-medium uppercase text-slate-500">
                                             @if ($timelineDate)
                                                 <time datetime="{{ $timelineDate->toDateString() }}">
-                                                    {{ $timelineDate->toFormattedDateString() }}
+                                                    {{ $formatMemoryDate($timelineDate) }}
                                                     @if ($record->period_start_date !== null && $record->period_end_date !== null)
                                                         {{ __('memory.timeline.period_range_separator') }}
-                                                        {{ $record->period_end_date->toFormattedDateString() }}
+                                                        {{ $formatMemoryDate($record->period_end_date) }}
                                                     @endif
                                                 </time>
                                             @endif

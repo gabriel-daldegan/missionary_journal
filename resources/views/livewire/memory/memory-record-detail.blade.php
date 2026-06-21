@@ -1,3 +1,7 @@
+@php
+    $formatMemoryDate = fn ($date): ?string => $date?->copy()->locale(app()->getLocale())->translatedFormat('M j, Y');
+@endphp
+
 <div class="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
     <div class="flex flex-col gap-3 border-b border-slate-200 pb-5">
         <p class="text-sm font-medium text-primary-700">{{ $tenant->name }}</p>
@@ -33,17 +37,17 @@
                 <div class="flex flex-wrap items-center gap-2 text-sm text-slate-600">
                     @if ($record->type === \App\Models\MemoryRecord::TYPE_PERIOD)
                         <time datetime="{{ $record->period_start_date?->toDateString() }}">
-                            {{ $record->period_start_date?->toFormattedDateString() }}
+                            {{ $formatMemoryDate($record->period_start_date) }}
                         </time>
                         @if ($record->period_end_date)
                             <span>{{ __('memory.timeline.period_range_separator') }}</span>
                             <time datetime="{{ $record->period_end_date->toDateString() }}">
-                                {{ $record->period_end_date->toFormattedDateString() }}
+                                {{ $formatMemoryDate($record->period_end_date) }}
                             </time>
                         @endif
                     @else
                         <time datetime="{{ $record->experience_date?->toDateString() }}">
-                            {{ $record->experience_date?->toFormattedDateString() }}
+                            {{ $formatMemoryDate($record->experience_date) }}
                         </time>
                     @endif
 

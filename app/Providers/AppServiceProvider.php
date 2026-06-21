@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\EnsureMemoryProfileComplete;
 use App\Models\MemoryRecord;
 use App\Services\MemoryRecordMediaPathGenerator;
 use App\Services\PaymentProviders\Creem\CreemProvider;
@@ -16,6 +17,7 @@ use App\Services\VerificationProviders\TwilioProvider;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 use Spatie\MediaLibrary\Support\PathGenerator\PathGeneratorFactory;
 
 class AppServiceProvider extends ServiceProvider
@@ -66,6 +68,10 @@ class AppServiceProvider extends ServiceProvider
 
         FilamentAsset::register([
             Js::make('components-script', __DIR__.'/../../resources/js/components.js'),
+        ]);
+
+        Livewire::addPersistentMiddleware([
+            EnsureMemoryProfileComplete::class,
         ]);
     }
 }

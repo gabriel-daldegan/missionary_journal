@@ -33,6 +33,27 @@ class MemoryRecordEditorTest extends FeatureTest
         $response->assertSee('Santos Family Workspace');
     }
 
+    public function test_editor_route_uses_spanish_profile_locale_without_translating_workspace_name(): void
+    {
+        $tenant = $this->createTenant();
+        $tenant->update([
+            'name' => 'Santos Family Workspace',
+        ]);
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create([
+            'preferred_locale' => 'es',
+        ]);
+
+        $response = $this->actingAs($user)->get($this->createRoute($tenant));
+
+        $response->assertOk();
+        $response->assertSee('Nueva entrada de diario');
+        $response->assertSee('Texto del recuerdo');
+        $response->assertSee('Santos Family Workspace');
+        $response->assertDontSee('New diary entry');
+        $response->assertDontSee('Memory text');
+    }
+
     public function test_member_with_completed_profile_can_access_period_create_route(): void
     {
         $tenant = $this->createTenant();

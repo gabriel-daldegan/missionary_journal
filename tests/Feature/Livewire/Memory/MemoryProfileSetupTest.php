@@ -9,6 +9,23 @@ use Tests\Feature\FeatureTest;
 
 class MemoryProfileSetupTest extends FeatureTest
 {
+    public function test_profile_setup_defaults_to_english_when_profile_is_missing(): void
+    {
+        app()->setLocale('pt');
+
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        $this->actingAs($user);
+
+        Livewire::test(MemoryProfileSetup::class, [
+            'tenant' => $tenant,
+        ])
+            ->assertSet('preferredLocale', 'en')
+            ->assertSee('Set up your memory profile')
+            ->assertSee('English')
+            ->assertDontSee('Configure seu perfil de memórias');
+    }
+
     public function test_profile_setup_requires_display_name_and_supported_locale(): void
     {
         $tenant = $this->createTenant();
@@ -98,5 +115,49 @@ class MemoryProfileSetupTest extends FeatureTest
             ->assertSet('displayName', 'Maria Santos')
             ->assertSet('preferredLocale', 'pt')
             ->assertSet('missionContext', 'Portugal mission');
+    }
+
+    public function test_existing_profile_locale_can_be_changed_and_updates_next_memory_page(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create([
+            'display_name' => 'Maria Santos',
+            'preferred_locale' => 'pt',
+            'mission_context' => 'Portugal mission',
+        ]);
+        $this->actingAs($user);
+
+        $this->get(route('memories.profile.setup', [
+            'tenant' => $tenant,
+        ]))
+            ->assertOk()
+            ->assertSee('Configure seu perfil de memórias')
+            ->assertDontSee('Set up your memory profile');
+
+        Livewire::test(MemoryProfileSetup::class, [
+            'tenant' => $tenant,
+        ])
+            ->assertSet('preferredLocale', 'pt')
+            ->set('preferredLocale', 'es')
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('memories.timeline', [
+                'tenant' => $tenant,
+            ]));
+
+        $this->assertDatabaseHas('memory_profiles', [
+            'user_id' => $user->id,
+            'display_name' => 'Maria Santos',
+            'preferred_locale' => 'es',
+            'mission_context' => 'Portugal mission',
+        ]);
+
+        $this->get(route('memories.timeline', [
+            'tenant' => $tenant,
+        ]))
+            ->assertOk()
+            ->assertSee('Línea de tiempo de memorias')
+            ->assertDontSee('Linha do tempo de memórias');
     }
 }

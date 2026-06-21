@@ -45,6 +45,46 @@ class MemoryRouteAccessTest extends FeatureTest
         $response->assertSee('Dashboard');
     }
 
+    public function test_memory_shell_uses_profile_locale_for_navigation_only(): void
+    {
+        $tenant = $this->createTenant();
+        $tenant->update([
+            'name' => 'Santos Family Workspace',
+        ]);
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create([
+            'preferred_locale' => 'pt',
+        ]);
+
+        $response = $this->actingAs($user)->get($this->memoryRoute($tenant));
+
+        $response->assertOk();
+        $response->assertSee('Linha do tempo de memórias');
+        $response->assertSee('Perfil de memórias');
+        $response->assertSee('Conta');
+        $response->assertSee('Painel');
+        $response->assertSee('Santos Family Workspace');
+        $response->assertDontSee('Memory Timeline');
+        $response->assertDontSee('Memory profile');
+    }
+
+    public function test_completed_profile_with_unsupported_locale_falls_back_to_english(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create([
+            'preferred_locale' => 'fr',
+        ]);
+
+        $response = $this->actingAs($user)->get($this->memoryRoute($tenant));
+
+        $response->assertOk();
+        $response->assertSee('Memory Timeline');
+        $response->assertSee('Memory profile');
+        $response->assertDontSee('Linha do tempo de memórias');
+        $response->assertDontSee('Línea de tiempo de memorias');
+    }
+
     public function test_authenticated_non_member_receives_generic_not_found(): void
     {
         $this->withExceptionHandling();
