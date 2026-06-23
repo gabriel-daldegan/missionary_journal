@@ -1,0 +1,109 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-23T08:46:50-03:00"
+  from_agent: "devops"
+  to_agent: "sm"
+  consumed: false
+  last_command: "post-story-1-10-merge-closeout"
+
+  publication_context:
+    summary: "Story 1.10 was published, merged through PR #16, released on main, and the next Story 1.11 branch is prepared from the merged mainline."
+    repository:
+      origin: "https://github.com/gabriel-daldegan/missionary_journal.git"
+      current_checkout:
+        path: "/home/jose/projects/missionary_journal"
+        branch: "feature/story-1-11-admin-validation-reporting-runbook"
+        base: "origin/main"
+        head: "f274ff2"
+        tag: "v1.11.0"
+      merged_pr:
+        number: 16
+        title: "Story 1.10: English, Portuguese, and Spanish UI Localization"
+        state: "MERGED"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/16"
+        merged_at: "2026-06-23T11:37:58Z"
+        merged_by: "joseferrao"
+        merge_commit: "f274ff2fe5c3978117ad5cc12468f79d0a045c35"
+      release_check:
+        workflow: "Release"
+        event: "push"
+        run_id: 28023397697
+        result: "PASS"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/actions/runs/28023397697"
+        tag: "v1.11.0"
+
+  next_story:
+    story_id: "1.11"
+    title: "Admin-Only Validation Reporting and MVP Runbook"
+    target_path: "docs/stories/1.11.admin-only-validation-reporting-and-mvp-runbook.story.md"
+    source_artifacts:
+      primary:
+        - "docs/prd.md#story-1.11-admin-only-validation-reporting-and-mvp-runbook"
+        - "docs/architecture.md#validation-reporting-architecture"
+        - "docs/ui-architecture.md#validation-reporting"
+        - "docs/framework/coding-standards.md"
+        - "docs/framework/source-tree.md"
+        - "docs/framework/tech-stack.md"
+      implementation_context:
+        - "docs/stories/1.1.tenant-safe-memory-route-and-layout-shell.story.md"
+        - "docs/stories/1.2.memory-profile-setup-gate.story.md"
+        - "docs/stories/1.3.workspace-settings-and-shared-editing-policy-foundation.story.md"
+        - "docs/stories/1.4a.diary-record-schema-foundation.story.md"
+        - "docs/stories/1.4b.diary-record-service-and-authorization.story.md"
+        - "docs/stories/1.4c.diary-record-creation-ui.story.md"
+        - "docs/stories/1.5.diary-record-editing-and-detail-view.story.md"
+        - "docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+        - "docs/stories/1.7.trip-period-record-creation.story.md"
+        - "docs/stories/1.8.private-photo-attachments-and-authorized-media-delivery.story.md"
+        - "docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md"
+        - "docs/stories/1.10.english-portuguese-and-spanish-ui-localization.story.md"
+        - "docs/qa/gates/1.10-english-portuguese-and-spanish-ui-localization.yml"
+        - ".aiox/handoffs/20260616T154246-0300-architect-to-devops-story-1-10-approved-for-publication.yaml"
+
+  user_story:
+    as_a: "product team"
+    i_want: "lightweight validation reporting and a runbook"
+    so_that: "MVP decisions are based on real usage without exposing private memory content"
+
+  acceptance_criteria:
+    - "Admin-only reporting can identify profile completion, first record creation, and active validation tenants."
+    - "Reporting can identify tenant activity across more than two weeks."
+    - "Reporting can support family/collaborator engagement validation."
+    - "Optional email-source behavior can be measured if the non-blocking marker is included."
+    - "Reporting does not expose private record body content to workspace users."
+    - "The MVP runbook covers registration, profile setup, language selection, diary creation, trip/period creation, photo attachment, timeline browsing, filters, tenant access, family workspace access, and shared editing."
+    - "The runbook separates MVP validation from post-MVP feature requests."
+
+  integration_verification:
+    - "Validation reporting is available only to admins or internal operators."
+    - "Workspace users cannot access validation dashboards, metrics, or behavior summaries."
+    - "Tests or documented checks verify admin-only access and absence of private record body content in validation events."
+
+  scope_limitations:
+    - "Keep reporting lightweight, admin-only, and query-driven unless the story draft proves a small event table/service is required."
+    - "Do not expose private memory record body content, media metadata, tenant-private notes, or user-generated record text to workspace users through reports."
+    - "Do not build public analytics, customer-facing dashboards, product-wide BI, AI analysis, automated email ingestion, or post-MVP feature tracking."
+    - "Use existing SaaSykit/Filament admin or internal command/report conventions for operator-only access."
+    - "Keep the MVP runbook documentation focused on validation workflows and separate post-MVP requests explicitly."
+    - "Preserve tenant/workspace privacy, route authorization, media privacy, localization, timeline filters, profile gates, and shared editing behavior from Stories 1.1 through 1.10."
+
+  drafting_guidance:
+    - "Draft from PRD Story 1.11 plus the validation reporting architecture section, not from backlog.md; backlog currently only contains unrelated technical debt."
+    - "Identify the smallest report surface that satisfies AC1-AC5: Filament Admin page, internal Artisan command, or a report service with tests."
+    - "If adding persistence for validation events, store event names and safe metadata only; never store record body content."
+    - "Use existing memory models and services to derive profile completion, first record creation, active tenants, multi-week activity, collaborator engagement, media usage, and optional email-source markers where possible."
+    - "Include tests or documented checks for admin-only access, workspace-user denial, and absence of private record body content in reporting outputs/events."
+    - "Define the runbook artifact path in the story draft and ensure it covers registration, profile setup, language selection, diary creation, trip/period creation, photo attachment, timeline browsing, filters, tenant access, family workspace access, and shared editing."
+    - "Keep post-MVP feature requests out of validation success criteria; the runbook should capture them separately."
+
+  known_status_notes:
+    - "Story 1.10 PR #16 is merged into main and tag v1.11.0 points to merge commit f274ff2."
+    - "The current checkout still has unrelated local drift in AIOX-core, package files, compose, Vite config, project-status, backup, and story-cycle state; this handoff does not include those changes."
+    - "`gh` may resolve the default repository as `joseferrao/saasykit-tenancy`; use `--repo gabriel-daldegan/missionary_journal` for PR operations in this checkout."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*create-next-story"
+    reason: "Story 1.11 needs an implementation-ready draft grounded in the merged Story 1.10 baseline plus PRD and architecture validation-reporting constraints."
+
+  next_action: "Switch to SM and draft Story 1.11 with a narrow admin-only validation reporting and MVP runbook scope."
