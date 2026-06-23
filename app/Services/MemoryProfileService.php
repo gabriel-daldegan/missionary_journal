@@ -49,8 +49,7 @@ class MemoryProfileService
         }
 
         return $profile->completed_at !== null
-            && filled($profile->display_name)
-            && $this->isSupportedLocale($profile->preferred_locale);
+            && filled($profile->display_name);
     }
 
     public function preferredLocale(User $user): string

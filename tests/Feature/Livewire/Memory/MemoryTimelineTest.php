@@ -80,9 +80,9 @@ class MemoryTimelineTest extends FeatureTest
         $response->assertSee($this->recordRoute($tenant, $periodRecord), false);
         $response->assertSee('Recife');
         $response->assertSeeInOrder([
-            $periodRecord->period_start_date?->toFormattedDateString(),
+            $this->localizedMemoryDate($periodRecord->period_start_date),
             __('memory.timeline.period_range_separator'),
-            $periodRecord->period_end_date?->toFormattedDateString(),
+            $this->localizedMemoryDate($periodRecord->period_end_date),
         ]);
         $response->assertSee($tag->name);
         $response->assertSee(trans_choice('memory.timeline.photo_count', 2, ['count' => 2]));
@@ -293,6 +293,43 @@ class MemoryTimelineTest extends FeatureTest
             ->assertDontSee(__('memory.timeline.filters.no_results_heading'));
     }
 
+    public function test_timeline_uses_profile_locale_without_translating_record_content(): void
+    {
+        $tenant = $this->createTenant();
+        $user = $this->createUser($tenant);
+        MemoryProfile::factory()->for($user)->create([
+            'preferred_locale' => 'pt',
+        ]);
+        $tag = MemoryTag::factory()->create([
+            'tenant_id' => $tenant->id,
+            'name' => 'Family',
+            'slug' => 'family',
+        ]);
+
+        $record = MemoryRecord::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => MemoryRecord::TYPE_DIARY,
+            'body' => 'User entered English sentence.',
+            'experience_date' => '2026-06-10',
+            'location_name' => 'Recife',
+        ]);
+        $record->tags()->attach($tag);
+
+        $response = $this->actingAs($user)->get(route('memories.timeline', [
+            'tenant' => $tenant,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('Linha do tempo de memórias');
+        $response->assertSee('Nova entrada de diário');
+        $response->assertSee('Todas as tags');
+        $response->assertSee('Abrir registro');
+        $response->assertDontSee('Memory Timeline');
+        $response->assertSee('User entered English sentence.');
+        $response->assertSee('Family');
+        $response->assertSee('Recife');
+    }
+
     private function createRoute(Tenant $tenant): string
     {
         return route('memories.records.create', [
@@ -307,5 +344,10 @@ class MemoryTimelineTest extends FeatureTest
             'tenant' => $tenant,
             'record' => $record,
         ]);
+    }
+
+    private function localizedMemoryDate(mixed $date): ?string
+    {
+        return $date?->copy()->locale(app()->getLocale())->translatedFormat('M j, Y');
     }
 }

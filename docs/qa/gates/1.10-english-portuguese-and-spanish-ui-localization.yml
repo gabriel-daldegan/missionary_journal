@@ -1,0 +1,66 @@
+schema: 1
+story: '1.10'
+story_title: 'English, Portuguese, and Spanish UI Localization'
+gate: PASS
+status_reason: 'Story 1.10 applies profile-backed localization to memory timeline, setup, editor, and detail surfaces with deterministic English fallback for missing/invalid profiles, preserves user-generated content, and passes focused + full regression gates.'
+reviewer: 'Aria (Architect)'
+updated: '2026-06-16T15:42:46-03:00'
+quality_score: 98
+expires: '2026-06-26T15:42:46-03:00'
+
+top_issues: []
+
+waiver:
+  active: false
+
+evidence:
+  tests_reviewed: 64
+  risks_identified: 0
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6]
+    ac_gaps: []
+    integration_covered: [1, 2, 3]
+    integration_gaps: []
+  commands:
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryProfileSetupTest.php'
+      result: 'passed; 6 tests, 32 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryTimelineTest.php'
+      result: 'passed; 8 tests, 54 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php tests/Feature/Livewire/Memory/MemoryRecordDetailTest.php'
+      result: 'passed; 32 tests, 192 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php'
+      result: 'passed; 18 tests, 73 assertions'
+    - command: 'vendor/bin/sail artisan route:list --name=memories'
+      result: 'passed; 7 memory routes listed'
+    - command: 'vendor/bin/sail bin pint --dirty --format agent'
+      result: 'passed'
+    - command: 'npm run lint'
+      result: 'passed'
+    - command: 'npm run typecheck'
+      result: 'passed; PHPStan no errors'
+    - command: 'npm test'
+      result: 'passed; 499 tests, 1439 assertions'
+    - command: 'npm run validate:structure'
+      result: 'passed; errors 0, warnings 0'
+    - command: 'git diff --check'
+      result: 'passed'
+    - command: 'coderabbit review --agent --type uncommitted'
+      result: 'passed; final review completed with one invalid minor command-style finding'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Memory UI locale selection remains tenant-authenticated and does not expose cross-tenant profile data; account/dashboard routes outside memory are unchanged.'
+  performance:
+    status: PASS
+    notes: 'Date rendering and locale lookup are view-level operations with no additional data fetches.'
+  reliability:
+    status: PASS
+    notes: 'Focused tests confirm locale fallback, profile updates, route access, missing/unsupported locale behavior, and route availability. Full suite was green at handoff.'
+  maintainability:
+    status: PASS
+    notes: 'Localization is centralized in `MemoryProfileService` and translation files while preserving existing memory UI component boundaries.'
+
+recommendations:
+  immediate: []
+  future: []

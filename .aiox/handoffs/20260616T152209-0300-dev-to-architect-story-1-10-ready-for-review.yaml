@@ -1,0 +1,76 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-16T15:22:09-03:00"
+  from_agent: "dev"
+  to_agent: "architect"
+  consumed: true
+  consumed_at: "2026-06-16T15:42:46-03:00"
+  last_command: "develop-yolo"
+
+  story:
+    story_id: "1.10"
+    title: "English, Portuguese, and Spanish UI Localization"
+    status: "Ready for Review"
+    path: "docs/stories/1.10.english-portuguese-and-spanish-ui-localization.story.md"
+    source_handoff: ".aiox/handoffs/20260616T142229-0300-po-to-dev-story-1-10-approved-for-review.yaml"
+
+  implementation_summary:
+    - "Registered `EnsureMemoryProfileComplete` as Livewire persistent middleware so memory Livewire updates preserve profile-locale handling."
+    - "Kept profile setup submitted locale validation strict while allowing completed profiles with stale unsupported locale values to fall back to English through `MemoryProfileService::preferredLocale()`."
+    - "Localized memory timeline/detail date labels from the active app locale."
+    - "Confirmed existing EN/PT/ES memory translation key structures match and kept user-generated tenant, record, tag, location, person, highlight, and mission-context values untranslated."
+    - "Added focused coverage for default English setup, PT/ES memory UI rendering, profile locale updates, unsupported-locale fallback, unchanged user content, and account/dashboard route behavior."
+
+  files_changed:
+    - "app/Providers/AppServiceProvider.php"
+    - "app/Services/MemoryProfileService.php"
+    - "resources/views/livewire/memory/memory-record-detail.blade.php"
+    - "resources/views/livewire/memory/memory-timeline.blade.php"
+    - "tests/Feature/Livewire/Memory/MemoryProfileSetupTest.php"
+    - "tests/Feature/Livewire/Memory/MemoryTimelineTest.php"
+    - "tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php"
+    - "tests/Feature/Livewire/Memory/MemoryRecordDetailTest.php"
+    - "tests/Feature/Memory/MemoryRouteAccessTest.php"
+    - "docs/stories/1.10.english-portuguese-and-spanish-ui-localization.story.md"
+    - ".aiox/story-development-cycle-20260613T125502-0300-state.yaml"
+    - ".aiox/handoffs/20260616T142229-0300-po-to-dev-story-1-10-approved-for-review.yaml"
+
+  validation:
+    focused:
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryProfileSetupTest.php"
+        result: "PASS - 6 passed, 32 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryTimelineTest.php"
+        result: "PASS - 8 passed, 54 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryRecordEditorTest.php tests/Feature/Livewire/Memory/MemoryRecordDetailTest.php"
+        result: "PASS - 32 passed, 192 assertions"
+      - command: "vendor/bin/sail artisan test --compact tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php"
+        result: "PASS - 18 passed, 73 assertions"
+    gates:
+      - command: "vendor/bin/sail artisan route:list --name=memories"
+        result: "PASS - 7 routes listed"
+      - command: "vendor/bin/sail bin pint --dirty --format agent"
+        result: "PASS"
+      - command: "npm run lint"
+        result: "PASS"
+      - command: "npm run typecheck"
+        result: "PASS - PHPStan no errors"
+      - command: "npm test"
+        result: "PASS - 499 passed, 1439 assertions"
+      - command: "npm run validate:structure"
+        result: "PASS - errors 0, warnings 0"
+      - command: "git diff --check"
+        result: "PASS"
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "PASS - final review completed; 1 minor command-style finding verified invalid because Sail explicitly supports the `bin` vendor-binary proxy and `vendor/bin/sail bin pint --version` passes"
+
+  environment_notes:
+    - "During validation, the Docker environment was restarted and a stale test storage directory had root ownership; ownership was corrected with `docker exec ... chown -R sail:sail /var/www/html/storage/framework/testing`, then the affected timeline tests passed with the standard Sail command."
+    - "One final CodeRabbit minor finding suggested replacing `vendor/bin/sail bin pint --dirty --format agent` with `vendor/bin/sail pint --dirty --format agent`; this was skipped as invalid after verifying Sail's `bin` proxy branch and both Pint command forms."
+    - "The worktree still contains pre-existing unrelated AIOX-core/package drift outside Story 1.10 scope; these files were not modified for this implementation."
+
+  recommended_command:
+    agent: "/agent aiox-architect"
+    command: "*review docs/stories/1.10.english-portuguese-and-spanish-ui-localization.story.md"
+    reason: "Story 1.10 implementation is complete, validations passed, and the story is Ready for Review."
+
+  next_action: "Architect quality gate review for Story 1.10."
