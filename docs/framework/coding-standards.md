@@ -22,7 +22,9 @@ decision record.
 - Use `config()` outside configuration files. Do not call `env()` directly in
   application code.
 - Queue long-running work with jobs that implement `ShouldQueue`.
-- Run `vendor/bin/pint --dirty --format agent` after changing PHP files.
+- Run `npm run lint` as the repository-level formatting gate after PHP
+  changes. If direct focused Pint execution is required, use
+  `vendor/bin/sail pint --dirty --format=agent`.
 
 ## Memory Product Rules
 
