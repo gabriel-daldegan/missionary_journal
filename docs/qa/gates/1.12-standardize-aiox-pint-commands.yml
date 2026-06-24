@@ -1,0 +1,55 @@
+schema: 1
+story: '1.12'
+story_title: 'Standardize AIOX Pint Commands'
+gate: PASS
+status_reason: 'Story 1.12 standardizes reusable Pint command guidance without changing Laravel application behavior. Architect review corrected decision-log metadata, verified historical evidence remains intentionally preserved, and reran the focused workflow gates plus CodeRabbit successfully.'
+reviewer: 'Aria (Architect)'
+updated: '2026-06-24T18:32:34-03:00'
+quality_score: 98
+expires: '2026-07-08T18:32:34-03:00'
+
+top_issues: []
+
+waiver:
+  active: false
+
+evidence:
+  tests_reviewed: 5
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7]
+    ac_gaps: []
+    integration_covered: [1, 2, 3, 4]
+    integration_gaps: []
+  commands:
+    - command: 'npm run lint'
+      result: 'passed; Pint returned {"tool":"pint","result":"passed"}'
+    - command: 'npm run validate:structure'
+      result: 'passed; Errors: 0, Warnings: 0'
+    - command: 'rg -n "vendor/bin/sail bin pint|vendor/bin/sail bin/pint|vendor/bin/pint" AGENTS.md docs/framework .aiox-core/product .aiox-core/development'
+      result: 'passed; only remaining occurrence is the intentional negative annotation in AGENTS.md'
+    - command: 'rg -n "unknown|\\.\\./decision-log-1\\.11\\.md" .ai/decision-log-1.12.md .ai/decision-logs-index.md'
+      result: 'passed; no stale rollback or broken decision-log index metadata remains'
+    - command: 'git diff --check'
+      result: 'passed'
+    - command: 'coderabbit review --agent --type uncommitted'
+      result: 'passed; review_completed with findings 0'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'No runtime application, route, authorization, database, media, or tenant data access behavior changed.'
+  performance:
+    status: PASS
+    notes: 'No executable product path changed; workflow guidance edits have no runtime performance impact.'
+  reliability:
+    status: PASS
+    notes: 'The canonical repo-level lint path was executed successfully through the maintained package script, and AIOX structure validation passed after story/handoff/gate updates.'
+  maintainability:
+    status: PASS
+    notes: 'Future reusable guidance now converges on npm run lint for repo-level formatting and a single focused Sail/Pint command when direct formatter execution is required.'
+
+recommendations:
+  immediate: []
+  future:
+    - 'If the decision-log generator continues emitting unknown rollback hashes or incorrect relative links, create a separate workflow tooling story instead of expanding this Story 1.12 publication scope.'

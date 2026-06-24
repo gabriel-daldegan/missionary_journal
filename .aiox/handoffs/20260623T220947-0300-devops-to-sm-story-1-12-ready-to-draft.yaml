@@ -1,0 +1,102 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-23T22:09:48-03:00"
+  from_agent: "devops"
+  to_agent: "sm"
+  consumed: true
+  last_command: "post-story-1-11-and-technical-sync-closeout"
+
+  publication_context:
+    summary: "Story 1.11 was published through PR #17, merged into main, released as v1.12.0, and the requested technical AIOX/package drift was isolated into PR #18. The next available backlog item is the Pint command standardization debt."
+    repository:
+      origin: "https://github.com/gabriel-daldegan/missionary_journal.git"
+      current_checkout:
+        path: "/home/jose/projects/missionary_journal"
+        branch: "feature/story-1-12-standardize-aiox-pint-commands"
+        base: "chore/aiox-core-package-sync"
+        head: "b3f72dd"
+        note: "This branch is based on the technical sync commit from PR #18. After PR #18 is merged, this branch can continue as the next story branch from the same commit lineage."
+      merged_story_pr:
+        number: 17
+        title: "Story 1.11: Admin-only validation reporting and MVP runbook"
+        state: "MERGED"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/17"
+        merged_at: "2026-06-24T00:18:13Z"
+        merge_commit: "36373f35c88d241a7ff2365b8cc68a341f1cf582"
+        tag: "v1.12.0"
+      technical_sync_pr:
+        number: 18
+        title: "chore(aiox): sync core tooling package state"
+        state: "OPEN"
+        url: "https://github.com/gabriel-daldegan/missionary_journal/pull/18"
+        head_commit: "b3f72dd"
+        mergeable: "MERGEABLE"
+        release_check: "PASS"
+
+  next_story:
+    story_id: "1.12"
+    title: "Standardize Pint Commands in AIOX Handoffs"
+    target_path: "docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+    source_backlog_item:
+      id: "1781200916741"
+      type: "Technical Debt"
+      title: "Padronizar comandos Pint em handoffs AIOX"
+      related_story: "1.7.trip-period-record-creation.story"
+      priority: "Low"
+      effort: "XS"
+      tags:
+        - "story-1-7"
+        - "coderabbit"
+        - "handoff"
+        - "pint"
+        - "area:workflow"
+    source_artifacts:
+      primary:
+        - "docs/stories/backlog.json"
+        - "docs/stories/backlog.md"
+        - ".aiox/handoffs/20260623T172117-0300-architect-to-devops-story-1-11-approved-for-publication.yaml"
+        - ".aiox/handoffs/20260623T084650-0300-devops-to-sm-story-1-11-ready-to-draft.yaml"
+        - "package.json"
+        - "AGENTS.md"
+      validation_context:
+        - "CodeRabbit flagged `vendor/bin/sail bin pint --dirty --format agent` as a minor issue during Story 1.11 publication, but the command is valid in this repo's Sail setup."
+        - "The top-level `npm run lint` script currently invokes `vendor/bin/sail pint --dirty --format=agent` and is the preferred repo-level quality gate."
+        - "Laravel Boost instructions in AGENTS.md also mention `vendor/bin/sail bin pint --dirty --format agent`, so the story should reconcile command wording instead of treating one working command as broken by default."
+
+  user_story:
+    as_a: "workflow maintainer"
+    i_want: "AIOX handoffs, checklists, and story guidance to use a canonical Pint command convention"
+    so_that: "CodeRabbit and agents stop producing recurring false-positive review churn around Sail Pint syntax"
+
+  acceptance_criteria_seed:
+    - "Story draft identifies the canonical Pint invocation for this repository's AIOX workflows."
+    - "Story draft distinguishes repo-level quality gates such as `npm run lint` from direct Sail/Pint commands."
+    - "Story draft scopes updates to handoff/checklist/template guidance only; it must not change application behavior."
+    - "Story draft requires validation with `npm run validate:structure` and the affected lint command."
+    - "Story draft includes explicit CodeRabbit focus so future reviews do not re-open the same false-positive command issue."
+
+  scope_limitations:
+    - "Do not modify memory product behavior, Laravel application code, routes, database schema, or user-facing UI."
+    - "Do not broaden this into a full AIOX framework upgrade story; PR #18 already carries the requested technical sync."
+    - "Do not remove valid Sail command forms without first proving the replacement works in this repo."
+    - "Keep the story XS and focused on documentation/template/handoff command consistency."
+
+  drafting_guidance:
+    - "Use the backlog item as the source of truth; the PRD Epic 1 sequence is complete after Story 1.11."
+    - "Draft Story 1.12 as technical debt, not a Memory MVP product feature."
+    - "Inspect existing handoffs, story checklists, package scripts, and AGENTS.md before choosing the canonical wording."
+    - "Prefer `npm run lint` as the high-level quality gate where possible, because it already wraps Sail for this repo."
+    - "If direct Pint commands remain in templates, document why the selected form is canonical and add validation evidence."
+    - "Record PR #18 dependency in the story notes if it is still open when drafting begins."
+
+  known_status_notes:
+    - "PR #17 is merged and tag v1.12.0 exists on origin/main."
+    - "PR #18 is open, mergeable, and its release check passed; this branch is based on PR #18's head commit b3f72dd."
+    - "`gh` may resolve the default repository as `joseferrao/saasykit-tenancy`; use `--repo gabriel-daldegan/missionary_journal` for PR operations in this checkout."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*draft"
+    reason: "The next work item is a backlog-driven technical debt story that needs an implementation-ready SM draft before PO validation."
+
+  next_action: "Switch to SM and draft Story 1.12 from backlog item 1781200916741."

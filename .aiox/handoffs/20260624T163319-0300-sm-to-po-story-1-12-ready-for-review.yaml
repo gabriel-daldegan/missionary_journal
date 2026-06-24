@@ -1,0 +1,67 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-24T16:33:19-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  consumed_at: "2026-06-24T16:42:38-03:00"
+  last_command: "create-next-story"
+
+  story:
+    story_id: "1.12"
+    title: "Standardize AIOX Pint Commands"
+    status: "Draft"
+    path: "docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+    epic: "Epic 1: Tenant-Scoped Memory Timeline MVP"
+    story_type: "Technical Debt"
+
+  source_handoff:
+    path: ".aiox/handoffs/20260623T220947-0300-devops-to-sm-story-1-12-ready-to-draft.yaml"
+    consumed: true
+    summary: "Story 1.11 was published through PR #17, released as v1.12.0, PR #18 carries separate AIOX/package sync drift, and the next backlog item is Pint command standardization."
+
+  draft_basis:
+    primary_sources:
+      - "docs/stories/backlog.json#1781200916741"
+      - "docs/stories/backlog.md#technical-debt"
+      - ".aiox/handoffs/20260623T220947-0300-devops-to-sm-story-1-12-ready-to-draft.yaml"
+      - "package.json#scripts"
+      - "AGENTS.md#pint-core-rules"
+      - "docs/framework/coding-standards.md#laravel-and-php"
+      - "docs/framework/tech-stack.md#quality-gates"
+      - ".aiox-core/product/checklists/pre-push-checklist.md#code-quality"
+      - ".aiox-core/development/workflows/development-cycle.yaml#5_publication"
+      - "docs/stories/1.7.trip-period-record-creation.story.md#qa-results"
+    implementation_context:
+      - "Current branch: feature/story-1-12-standardize-aiox-pint-commands"
+      - "Canonical repo-level gate selected in draft: npm run lint"
+      - "Preferred direct Pint command selected in draft: vendor/bin/sail pint --dirty --format=agent"
+      - "Historical command evidence should not be mass rewritten."
+
+  acceptance_criteria:
+    - "Repository-level formatting gate is documented as npm run lint."
+    - "Direct Pint invocation is documented as focused formatter use only, preferably vendor/bin/sail pint --dirty --format=agent."
+    - "Historical consumed stories/handoffs may remain unchanged, but current reusable guidance stops recommending non-canonical direct Pint forms."
+    - "AGENTS.md, docs/framework/coding-standards.md, and any reusable AIOX checklist/template/workflow artifact found during inventory are consistent."
+    - "No Laravel application behavior, routes, schema, dependencies, or user-facing UI changes."
+    - "npm run lint and npm run validate:structure pass."
+    - "Targeted search classifies or eliminates remaining non-canonical reusable guidance."
+
+  validation_focus:
+    - "Confirm PO agrees with the canonical command policy: npm run lint for repo-level gate, vendor/bin/sail pint --dirty --format=agent for focused direct Pint."
+    - "Confirm historical evidence should remain audit history rather than be mass-rewritten."
+    - "Confirm Story 1.12 stays XS and workflow/documentation-only."
+    - "Confirm the validation stack is sufficient for a docs/workflow technical debt story."
+    - "Confirm PR #18 dependency note is clear enough for DevOps later."
+
+  known_status_notes:
+    - ".aiox/project-status.yaml appears stale relative to live git state; live branch and handoff artifacts were used as source of truth."
+    - "The source handoff says PR #18 is still open and this branch is based on PR #18 head commit lineage."
+    - "`gh` may resolve the default repository as `joseferrao/saasykit-tenancy`; use `--repo gabriel-daldegan/missionary_journal` for PR operations in this checkout."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+    reason: "PO should validate Story 1.12 draft before Dev implementation."
+
+  next_action: "Switch to PO and validate the Story 1.12 draft."

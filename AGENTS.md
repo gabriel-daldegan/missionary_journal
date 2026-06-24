@@ -54,7 +54,7 @@ SaaSykit Tenancy is built with the TALL stack (Tailwind CSS, Alpine.js, Laravel,
 - `vendor/bin/phpunit` - Run PHPUnit tests
 - `vendor/bin/phpunit --filter=TestName` - Run specific test
 - `vendor/bin/phpstan analyse` - Run static analysis (level 3)
-- `vendor/bin/pint` - Run Laravel Pint code formatter
+- `npm run lint` - Run the canonical Laravel Pint formatting gate through Sail
 
 ### Deployment
 - `php dep deploy` - Deploy using Deployer (configured in deploy.php)
@@ -398,8 +398,9 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 # Laravel Pint Code Formatter
 
-- If you have modified any PHP files, you must run `vendor/bin/sail bin pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
-- Do not run `vendor/bin/sail bin pint --test --format agent`, simply run `vendor/bin/sail bin pint --format agent` to fix any formatting issues.
+- Use `npm run lint` as the repository-level formatting gate; it wraps Sail and Pint for this project.
+- If direct focused Pint execution is required, use `vendor/bin/sail pint --dirty --format=agent`.
+- Do not use `vendor/bin/sail bin pint`, `vendor/bin/sail bin/pint`, or host-level `vendor/bin/pint` as reusable guidance unless documenting historical evidence.
 
 === phpunit/core rules ===
 

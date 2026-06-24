@@ -1,0 +1,65 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-24T17:02:24-03:00"
+  from_agent: "dev"
+  to_agent: "architect"
+  consumed: true
+  last_command: "develop-yolo"
+
+  story:
+    story_id: "1.12"
+    title: "Standardize AIOX Pint Commands"
+    status: "Ready for Review"
+    path: "docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+    source_handoff: ".aiox/handoffs/20260624T164238-0300-po-to-dev-story-1-12-approved-for-review.yaml"
+    story_type: "Technical Debt"
+
+  implementation_summary:
+    - "Standardized reusable project guidance so `npm run lint` is the repository-level Pint formatting gate."
+    - "Documented `vendor/bin/sail pint --dirty --format=agent` as the preferred direct focused Pint command when direct formatter execution is required."
+    - "Updated `AGENTS.md` and `docs/framework/coding-standards.md`; no reusable AIOX checklist, template, or workflow source under `.aiox-core/product` or `.aiox-core/development` required command changes."
+    - "Preserved historical consumed stories and handoffs as audit evidence instead of mass-rewriting old validation records."
+    - "Did not change Laravel application behavior, Memory product behavior, routes, database schema, package dependencies, tests, or user-facing UI."
+
+  files_changed:
+    - "AGENTS.md"
+    - "docs/framework/coding-standards.md"
+    - "docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+    - ".ai/story-1-12-validation-20260624T164238-0300.json"
+    - ".aiox/handoffs/20260623T220947-0300-devops-to-sm-story-1-12-ready-to-draft.yaml"
+    - ".aiox/handoffs/20260624T163319-0300-sm-to-po-story-1-12-ready-for-review.yaml"
+    - ".aiox/handoffs/20260624T164238-0300-po-to-dev-story-1-12-approved-for-review.yaml"
+    - ".aiox/handoffs/20260624T170224-0300-dev-to-architect-story-1-12-ready-for-review.yaml"
+    - ".ai/decision-log-1.12.md"
+    - ".ai/decision-logs-index.md"
+
+  validation:
+    focused:
+      - command: "rg -n \"vendor/bin/pint|vendor/bin/sail pint|vendor/bin/sail bin pint|vendor/bin/sail bin/pint|npm run lint|--format agent|--format=agent\" AGENTS.md docs/framework .aiox-core/product .aiox-core/development docs/stories .aiox/handoffs"
+        result: "PASS - inventory completed; reusable non-canonical guidance was limited to AGENTS.md and docs/framework/coding-standards.md before edits, while old story/handoff hits are historical evidence."
+      - command: "rg -n \"vendor/bin/sail bin pint|vendor/bin/sail bin/pint|vendor/bin/pint\" AGENTS.md docs/framework .aiox-core/product .aiox-core/development"
+        result: "PASS - only remaining hit is an intentional negative annotation in AGENTS.md that says not to use those forms as reusable guidance."
+    gates:
+      - command: "npm run lint"
+        result: "PASS - Pint returned {\"tool\":\"pint\",\"result\":\"passed\"}"
+      - command: "npm run validate:structure"
+        result: "PASS - Errors 0, Warnings 0"
+      - command: "git diff --check"
+        result: "PASS"
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "PASS - final rerun completed with findings 0"
+
+  coderabbit_notes:
+    - "First CodeRabbit pass raised 2 minor inventory-breadth findings; after story bookkeeping and handoff evidence were completed, the final rerun returned findings 0."
+
+  environment_notes:
+    - "The Story 1.12 branch is based on PR #18 technical-sync lineage per the source DevOps handoff."
+    - "Product PHPUnit, PHPStan, and Vite build gates were not run because this story only changes workflow/documentation guidance and does not touch executable application behavior."
+    - "Historical story and handoff occurrences of old Pint command forms remain intentionally unchanged as audit evidence."
+
+  recommended_command:
+    agent: "/agent aiox-architect"
+    command: "*review docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+    reason: "Story 1.12 implementation is complete, required validations passed, and the story is Ready for Review."
+
+  next_action: "Architect quality gate review for Story 1.12."
