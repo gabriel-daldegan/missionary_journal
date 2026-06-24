@@ -1,17 +1,14 @@
 status:
-  branch: feature/story-1-10-ui-localization
-  modifiedFiles:
-    - >-
-      .aiox/handoffs/20260613T115429-0300-devops-to-sm-story-1-10-ready-to-draft.yaml
-    - .aiox/project-status.yaml
-  modifiedFilesTotalCount: 2
+  branch: chore/aiox-core-package-sync
+  modifiedFiles: []
+  modifiedFilesTotalCount: 0
   recentCommits:
-    - 'feat(memory): add timeline filters'
-    - 'chore(aiox): update story 1.9 project status'
+    - 'chore(aiox): sync core tooling package state'
+    - 'feat(memory): add admin validation reporting'
   currentEpic: null
-  currentStory: "1.10"
-  lastUpdate: '2026-06-13T14:54:29.000Z'
+  currentStory: null
+  lastUpdate: '2026-06-24T00:48:04.013Z'
   isGitRepo: true
-timestamp: 1781362469000
+timestamp: 1782262083976
 ttl: 60
 gitFingerprint: null
