@@ -1,0 +1,67 @@
+schema: 1
+story: '1.11'
+story_title: 'Admin-Only Validation Reporting and MVP Runbook'
+gate: PASS
+status_reason: 'Story 1.11 satisfies admin-only aggregate validation reporting and the MVP runbook while preserving memory privacy boundaries. Architect review hardened the Filament page to abort before resolving report metrics for unauthorized users, then reran focused and full quality gates successfully.'
+reviewer: 'Aria (Architect)'
+updated: '2026-06-23T17:21:17-03:00'
+quality_score: 98
+expires: '2026-07-07T17:21:17-03:00'
+
+top_issues: []
+
+waiver:
+  active: false
+
+evidence:
+  tests_reviewed: 503
+  risks_identified: 1
+  trace:
+    ac_covered: [1, 2, 3, 4, 5, 6, 7]
+    ac_gaps: []
+    integration_covered: [1, 2, 3]
+    integration_gaps: []
+  commands:
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Filament/Admin/Page/MemoryValidationReportTest.php'
+      result: 'passed; 3 tests, 13 assertions'
+    - command: 'vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryValidationReportServiceTest.php tests/Feature/Filament/Admin/Page/MemoryValidationReportTest.php tests/Feature/Memory/MemoryRouteAccessTest.php tests/Feature/Memory/MemoryProfileSetupGateTest.php'
+      result: 'passed; 22 tests, 121 assertions'
+    - command: 'vendor/bin/sail artisan route:list --path=admin'
+      result: 'passed; includes admin/memory-validation-report among 78 admin routes'
+    - command: 'vendor/bin/sail artisan route:list --path=memories'
+      result: 'passed; 7 memory routes listed'
+    - command: 'vendor/bin/sail bin pint --dirty --format agent'
+      result: 'passed'
+    - command: 'npm run lint'
+      result: 'passed'
+    - command: 'npm run typecheck'
+      result: 'passed; PHPStan analysed 492 files with no errors'
+    - command: 'npm test'
+      result: 'passed; 503 tests, 1487 assertions'
+    - command: 'npm run build'
+      result: 'passed; Vite build completed with existing chunk-size warning'
+    - command: 'npm run validate:structure'
+      result: 'passed; Errors: 0, Warnings: 0'
+    - command: 'git diff --check'
+      result: 'passed'
+    - command: 'coderabbit review --agent --type uncommitted'
+      result: 'passed; review_completed with 0 findings'
+
+nfr_validation:
+  security:
+    status: PASS
+    notes: 'Report access is constrained to Filament Admin users through panel access plus page canAccess(), and mount now aborts before report metrics resolve for unauthorized users. Report output excludes private record body, notes, highlights, location free text, source metadata, filenames, media paths, mission context, and foreign tenant content.'
+  performance:
+    status: PASS
+    notes: 'The report is operator-only and chunked by tenant; queries select aggregate-safe fields only. No customer-facing memory route, public API, or dashboard query path was added.'
+  reliability:
+    status: PASS
+    notes: 'Focused service, page, route, and profile-gate tests cover aggregate metrics, admin access, workspace denial, privacy omissions, route registration, and existing memory access regressions. Full suite passed.'
+  maintainability:
+    status: PASS
+    notes: 'Validation reporting is isolated in MemoryValidationReportService and a single Filament Admin page, with the MVP runbook stored in docs/validation/mvp-runbook.md. No parallel customer-facing analytics surface or unnecessary event table was introduced.'
+
+recommendations:
+  immediate: []
+  future:
+    - 'If validation tenants scale materially, revisit report pagination or precomputed safe activity events in a later story while preserving aggregate-only output.'

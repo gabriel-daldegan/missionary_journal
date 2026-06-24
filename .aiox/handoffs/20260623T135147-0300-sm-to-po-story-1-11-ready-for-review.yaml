@@ -1,0 +1,70 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-23T13:51:47-03:00"
+  from_agent: "sm"
+  to_agent: "po"
+  consumed: true
+  last_command: "create-next-story"
+
+  story:
+    story_id: "1.11"
+    title: "Admin-Only Validation Reporting and MVP Runbook"
+    status: "Draft"
+    path: "docs/stories/1.11.admin-only-validation-reporting-and-mvp-runbook.story.md"
+    epic: "Epic 1: Tenant-Scoped Memory Timeline MVP"
+
+  source_handoff:
+    path: ".aiox/handoffs/20260623T084650-0300-devops-to-sm-story-1-11-ready-to-draft.yaml"
+    consumed: true
+    summary: "Story 1.10 was published, merged through PR #16, released on main, and Story 1.11 branch was prepared from merged mainline."
+
+  draft_basis:
+    primary_sources:
+      - "docs/prd.md#story-1.11-admin-only-validation-reporting-and-mvp-runbook"
+      - "docs/architecture.md#validation-reporting-architecture"
+      - "docs/architecture.md#testing-strategy"
+      - "docs/framework/coding-standards.md#memory-product-rules"
+      - "docs/framework/source-tree.md#file-placement-rules"
+      - "docs/framework/tech-stack.md#runtime"
+      - "Laravel Boost docs: Filament custom page authorization, Filament custom functionality security testing, Laravel console command testing"
+    implementation_context:
+      - "app/Models/User.php"
+      - "app/Models/MemoryProfile.php"
+      - "app/Models/MemoryRecord.php"
+      - "app/Models/Tenant.php"
+      - "app/Services/MemoryRecordService.php"
+      - "app/Services/MemoryTimelineService.php"
+      - "app/Services/MemoryWorkspaceSettingsService.php"
+      - "app/Providers/Filament/AdminPanelProvider.php"
+      - "app/Filament/Admin/Pages/Dashboard.php"
+      - "tests/Feature/FeatureTest.php"
+      - "docs/stories/1.10.english-portuguese-and-spanish-ui-localization.story.md"
+
+  acceptance_criteria:
+    - "Admin-only reporting can identify profile completion, first record creation, and active validation tenants."
+    - "Reporting can identify tenant activity across more than two weeks."
+    - "Reporting can support family/collaborator engagement validation."
+    - "Optional email-source behavior can be measured if the non-blocking marker is included."
+    - "Reporting does not expose private record body content to workspace users."
+    - "The MVP runbook covers registration, profile setup, language selection, diary creation, trip/period creation, photo attachment, timeline browsing, filters, tenant access, family workspace access, and shared editing."
+    - "The runbook separates MVP validation from post-MVP feature requests."
+
+  validation_focus:
+    - "Confirm the story stays narrow: lightweight admin-only validation reporting plus the MVP runbook."
+    - "Confirm the selected implementation guidance prefers derived metrics and only allows `memory_activity_events` when existing models cannot provide a required signal."
+    - "Confirm privacy exclusions are strong enough: no record body, notes, highlight text, private media paths, filenames, or tenant-private free text in report output or event metadata."
+    - "Confirm operator access guidance is acceptable for either a small Filament Admin page or internal Artisan command/report."
+    - "Confirm the proposed runbook path `docs/validation/mvp-runbook.md` is acceptable, or redirect it to an approved docs path before Dev implementation."
+    - "Confirm task/test guidance covers admin-only access, workspace-user denial, aggregate-only output, and runbook completion."
+
+  known_status_notes:
+    - "The worktree already had unrelated local drift in AIOX-core, package files, compose, Vite config, project-status, backup, and story-cycle state before SM draft work."
+    - "SM did not update `.aiox/project-status.yaml` because it was already stale and modified before this workflow; live branch/handoff/story files are the operational source of truth."
+    - "`gh` may resolve the default repository as `joseferrao/saasykit-tenancy`; use `--repo gabriel-daldegan/missionary_journal` for PR operations in this checkout."
+
+  recommended_command:
+    agent: "/agent aiox-po"
+    command: "*validate-story-draft docs/stories/1.11.admin-only-validation-reporting-and-mvp-runbook.story.md"
+    reason: "PO should validate Story 1.11 draft before Dev implementation."
+
+  next_action: "Switch to PO and validate the Story 1.11 draft."
