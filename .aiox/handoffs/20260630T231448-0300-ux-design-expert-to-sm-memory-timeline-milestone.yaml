@@ -1,0 +1,102 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-30T23:14:48-03:00"
+  from_agent: "ux-design-expert"
+  to_agent: "sm"
+  consumed: false
+  last_command: "*handoff para sm"
+
+  story_context:
+    story_id: ""
+    story_path: ""
+    story_status: "No active implementation story for this UX refinement"
+    current_task: "Draft a future story for the memory timeline milestone UI refinement"
+    branch: "feature/story-1-12-standardize-aiox-pint-commands"
+
+  source_artifacts:
+    primary:
+      - "docs/front-end-spec-memory-timeline-milestone.md"
+      - "resources/views/livewire/memory/memory-timeline.blade.php"
+      - "docs/front-end-spec.md"
+      - "docs/architecture.md"
+      - "docs/prd.md"
+    supporting:
+      - "docs/stories/1.6.vertical-month-grouped-timeline-home.story.md"
+      - "docs/stories/1.9.timeline-filters-by-date-tag-and-location.story.md"
+      - "app/Livewire/Memory/MemoryTimeline.php"
+      - "app/Services/MemoryTimelineService.php"
+      - "app/Models/MemoryRecord.php"
+
+  ux_status:
+    readiness: "Ready for SM story drafting"
+    summary: "A focused UI specification now defines how to adapt Cruip's milestone timeline pattern to the populated Memories timeline while preserving the existing tenant-scoped service boundary, month grouping, filters, localization, private media behavior, and explicit record-open action."
+
+  product_context:
+    product_name: "Life Memory Timeline for Missionaries"
+    route_surface: "/memories/{tenant:uuid}"
+    target_view: "resources/views/livewire/memory/memory-timeline.blade.php"
+    current_model: "Vertical month-grouped tenant-scoped timeline"
+    refinement_goal: "Make populated timeline records feel visually connected to a continuous chronological rail, using date pills and markers instead of isolated card blocks."
+
+  ux_decisions:
+    - "Treat docs/front-end-spec-memory-timeline-milestone.md as the implementation design source for this refinement."
+    - "Do not update docs/prd.md for this change unless PO/PM later decide to promote the visual refinement into a product-level requirement."
+    - "The PRD already requires a vertical month-grouped timeline; this handoff concerns a more specific UX implementation treatment."
+    - "Keep MemoryTimelineService as the tenant-scoped query and grouping boundary."
+    - "Keep the existing grouped-by-month return shape handed to Livewire."
+    - "Keep timeline filters above the populated timeline and preserve active filter labels, clear action, first-empty state, and no-results state."
+    - "Render populated records as connected milestone items with a vertical rail, marker, semantic date pill, record label/title or excerpt lead, excerpt, metadata, and Open record action."
+    - "Use existing project typography and Tailwind tokens such as primary-* and slate-*; do not import the Caveat font or introduce indigo-specific styling from the reference."
+    - "Do not introduce Filament tables, admin list framing, public marketing hero treatment, blog-card feeds, maps, masonry layouts, alternating left/right timeline layouts, or complex animation."
+    - "Keep record body exposure bounded through MemoryRecord::timelineExcerpt(); do not render full private record bodies in timeline HTML."
+
+  story_seed:
+    suggested_story_title: "Refine Memory Timeline into Milestone Layout"
+    suggested_story_type: "Frontend"
+    user_story:
+      as_a: "user with a completed memory profile"
+      i_want: "the populated memory timeline to show records as connected milestone moments"
+      so_that: "I can scan my memories chronologically and open the right record with less visual effort"
+    acceptance_criteria_seed:
+      - "Populated timeline records render as connected milestone items under each existing month section."
+      - "The vertical line and marker treatment does not appear after the final record in a month."
+      - "Date or period range remains visible and semantic for records with timeline dates."
+      - "Location, tags, photo count, excerpt, and Open record behavior remain functionally unchanged."
+      - "The existing filter controls, active filter labels, clear action, first-empty state, and no-results state remain intact."
+      - "The timeline remains responsive on mobile, tablet, and desktop without text overlap."
+      - "No Filament table, admin list, marketing hero, blog-card feed, map, masonry, alternating timeline, or complex animation treatment is introduced."
+
+  implementation_boundaries:
+    in_scope:
+      - "Blade/Tailwind refinement of populated timeline records in resources/views/livewire/memory/memory-timeline.blade.php."
+      - "Focused test adjustments only if existing timeline assertions need to account for changed markup while preserving behavior."
+      - "Accessibility checks for semantic time, explicit Open record link, keyboard focus, and readable contrast."
+    out_of_scope:
+      - "PRD rewrite."
+      - "Timeline query changes."
+      - "New filters or filter persistence changes."
+      - "New database schema, routes, models, services, or dependencies."
+      - "Private media delivery changes."
+      - "Record editor or record detail redesign."
+      - "Story 1.12 Pint command standardization scope."
+
+  validation_focus:
+    - "vendor/bin/sail artisan test --compact tests/Feature/Livewire/Memory/MemoryTimelineTest.php"
+    - "vendor/bin/sail artisan test --compact tests/Feature/Services/Memory/MemoryTimelineServiceTest.php"
+    - "npm run lint"
+    - "npm run validate:structure"
+    - "git diff --check"
+
+  branch_and_scope_notes:
+    - "This handoff was created while the checkout was on feature/story-1-12-standardize-aiox-pint-commands."
+    - "The new UX spec and this handoff are future-story input and should not be mixed into the Story 1.12 publication scope unless explicitly approved."
+    - ".aiox/project-status.yaml was already modified before this handoff; do not treat that existing drift as part of this UX work without re-checking."
+
+  recommended_command:
+    agent: "/agent aiox-sm"
+    command: "*draft"
+    reason: "SM should draft an implementation-ready story from the focused UX specification and this handoff."
+
+  sm_prompt: "Draft a new frontend story for refining the populated memory timeline into a milestone layout. Use docs/front-end-spec-memory-timeline-milestone.md as the primary source and preserve the existing MemoryTimelineService boundary, month grouping, filter behavior, tenant scope, localization, private media behavior, and explicit Open record action. Keep the story scoped to Blade/Tailwind timeline rendering and focused tests. Do not update the PRD, alter Story 1.12 scope, add dependencies, change schema/routes/services, or introduce Filament/admin/table/marketing/map/masonry/complex-animation framing."
+
+  next_action: "Switch to SM and run *draft to create the future story from this UX refinement handoff."
