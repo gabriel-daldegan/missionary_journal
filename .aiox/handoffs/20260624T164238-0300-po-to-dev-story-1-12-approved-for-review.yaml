@@ -1,0 +1,54 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-24T16:42:38-03:00"
+  from_agent: "po"
+  to_agent: "dev"
+  consumed: true
+  last_command: "validate-story-draft"
+
+  story:
+    story_id: "1.12"
+    title: "Standardize AIOX Pint Commands"
+    status: "Approved"
+    path: "docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+    validation_report: ".ai/story-1-12-validation-20260624T164238-0300.json"
+    story_type: "Technical Debt"
+
+  validation:
+    decision: "GO"
+    readiness_score: 9
+    confidence: "High"
+    summary: "Story 1.12 is implementation-ready. It is an XS workflow/documentation cleanup that standardizes reusable Pint command guidance without changing Laravel application behavior."
+    critical_issues: []
+    should_fix_issues: []
+
+  implementation_focus:
+    - "Keep `npm run lint` as the canonical repository-level formatting/quality gate."
+    - "Use `vendor/bin/sail pint --dirty --format=agent` only for focused direct Pint execution when direct formatting is required."
+    - "Treat `vendor/bin/sail bin pint --dirty --format agent` as historically verified but not preferred reusable guidance going forward."
+    - "Inventory AGENTS.md, docs/framework, .aiox-core/product, .aiox-core/development, docs/stories, and .aiox/handoffs for Pint command wording."
+    - "Update reusable guidance such as AGENTS.md, docs/framework/coding-standards.md, and any reusable AIOX checklist/template/workflow artifact found during inventory."
+    - "Do not mass-rewrite historical consumed stories, handoffs, QA gates, debug logs, or audit evidence just because they contain older command strings."
+    - "Do not change Laravel application behavior, Memory product behavior, routes, database schema, package dependencies, user-facing UI, or unrelated PR #18 technical sync drift."
+
+  required_validation:
+    - "npm run lint"
+    - "npm run validate:structure"
+    - "rg -n \"vendor/bin/sail bin pint|vendor/bin/sail bin/pint|vendor/bin/pint\" AGENTS.md docs/framework .aiox-core/product .aiox-core/development"
+    - "git diff --check"
+    - "coderabbit review --agent --type uncommitted"
+
+  optional_validation:
+    - "Run targeted focused checks only if implementation unexpectedly touches executable scripts or application behavior; that should be avoided for this story."
+
+  known_status_notes:
+    - ".aiox/project-status.yaml is stale and still points at chore/aiox-core-package-sync; live git state and handoff artifacts were used as source of truth."
+    - "The source DevOps handoff says PR #18 is open and this branch is based on PR #18 head commit b3f72dd; keep that dependency note visible for DevOps later."
+    - "`gh` may resolve the default repository as `joseferrao/saasykit-tenancy`; use `--repo gabriel-daldegan/missionary_journal` for PR operations in this checkout."
+
+  recommended_command:
+    agent: "/agent aiox-dev"
+    command: "*develop-yolo docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+    reason: "Story 1.12 is approved and ready for the focused workflow/documentation implementation."
+
+  next_action: "Switch to Dev and implement the approved Story 1.12 Pint command standardization slice."

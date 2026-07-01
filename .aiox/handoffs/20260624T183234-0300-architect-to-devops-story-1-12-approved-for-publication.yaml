@@ -1,0 +1,74 @@
+handoff:
+  version: "1.0"
+  timestamp: "2026-06-24T18:32:34-03:00"
+  from_agent: "architect"
+  to_agent: "devops"
+  consumed: true
+  consumed_at: "2026-06-24T18:40:14-03:00"
+  last_command: "*review docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+
+  story_context:
+    story_id: "1.12"
+    story_path: "docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+    status: "Ready for Merge"
+    title: "Standardize AIOX Pint Commands"
+    branch: "feature/story-1-12-standardize-aiox-pint-commands"
+    parent_epic: "MIS-1"
+    gate_file: "docs/qa/gates/1.12-standardize-aiox-pint-commands.yml"
+
+  gate:
+    artifact: "docs/qa/gates/1.12-standardize-aiox-pint-commands.yml"
+    decision: "PASS"
+    reviewer: "Aria (Architect)"
+    quality_score: 98
+    status_reason: "Story 1.12 standardizes reusable Pint command guidance, preserves historical command evidence, and does not change Laravel application behavior. Architect review corrected decision-log metadata and reran the focused workflow gates successfully."
+
+  architect_review_summary:
+    - "Reviewed the Story 1.12 story, SM/PO/Dev handoffs, validation record, decision logs, and final diff against all seven acceptance criteria."
+    - "Confirmed `AGENTS.md` and `docs/framework/coding-standards.md` now use `npm run lint` as the repository-level Pint gate."
+    - "Confirmed direct focused Pint guidance now uses `vendor/bin/sail pint --dirty --format=agent`."
+    - "Confirmed reusable AIOX checklist/template/workflow guidance under `.aiox-core/product` and `.aiox-core/development` already uses `npm run lint`; historical consumed stories and handoffs were preserved as audit evidence."
+    - "Confirmed no Laravel application code, migrations, routes, Livewire, Filament, Blade UI, package dependencies, product tests, or user-facing behavior changed."
+    - "Corrected `.ai/decision-logs-index.md` link metadata and `.ai/decision-log-1.12.md` rollback hash before final validation."
+    - "Updated Story 1.12 status, QA Results, and gate artifact to reflect the completed Architect PASS."
+
+  validation:
+    focused:
+      - command: "npm run lint"
+        result: "PASS - Pint returned {\"tool\":\"pint\",\"result\":\"passed\"}"
+      - command: "npm run validate:structure"
+        result: "PASS - Errors: 0, Warnings: 0"
+      - command: "rg -n \"vendor/bin/sail bin pint|vendor/bin/sail bin/pint|vendor/bin/pint\" AGENTS.md docs/framework .aiox-core/product .aiox-core/development"
+        result: "PASS - only remaining occurrence is the intentional negative annotation in AGENTS.md"
+      - command: "rg -n \"unknown|\\.\\./decision-log-1\\.11\\.md\" .ai/decision-log-1.12.md .ai/decision-logs-index.md"
+        result: "PASS - no stale metadata remains"
+      - command: "git diff --check"
+        result: "PASS"
+      - command: "coderabbit review --agent --type uncommitted"
+        result: "PASS - review_completed with findings 0"
+
+  files_ready_for_publication:
+    - ".ai/decision-log-1.12.md"
+    - ".ai/decision-logs-index.md"
+    - ".ai/story-1-12-validation-20260624T164238-0300.json"
+    - ".aiox/handoffs/20260623T220947-0300-devops-to-sm-story-1-12-ready-to-draft.yaml"
+    - ".aiox/handoffs/20260624T163319-0300-sm-to-po-story-1-12-ready-for-review.yaml"
+    - ".aiox/handoffs/20260624T164238-0300-po-to-dev-story-1-12-approved-for-review.yaml"
+    - ".aiox/handoffs/20260624T170224-0300-dev-to-architect-story-1-12-ready-for-review.yaml"
+    - ".aiox/handoffs/20260624T183234-0300-architect-to-devops-story-1-12-approved-for-publication.yaml"
+    - "AGENTS.md"
+    - "docs/framework/coding-standards.md"
+    - "docs/qa/gates/1.12-standardize-aiox-pint-commands.yml"
+    - "docs/stories/1.12.standardize-aiox-pint-commands.story.md"
+
+  notes:
+    - "Product PHPUnit, PHPStan, and Vite build were not run because this story changes only workflow/documentation guidance and story/handoff artifacts."
+    - "The branch is based on PR #18 technical-sync lineage per the source DevOps handoff; DevOps should account for that dependency during publication."
+    - "Architect did not push or create a PR; DevOps owns publication."
+
+  recommended_command:
+    agent: "/agent aiox-devops"
+    command: "*push"
+    reason: "Architect review passed and publication artifacts are in place."
+
+  next_action: "Run the DevOps publication flow for Story 1.12."
